@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>ServiceClient Ext JS Demo</title>
+		<link rel="stylesheet" type="text/css" href="/libraries/extjs/resources/css/ext-all.css.gz" />
+		<link rel="stylesheet" type="text/css" href="css/default.css" />
+		<link rel="stylesheet" type="text/css" href="css/extjs.css" />
+	</head>
+	<body>
+		<p id="load-status"></p>
+		<h1>ServiceClient Ext JS Demo</h1>
+
+		<div id="test-container"></div>
+		<div id="menu-container"></div>
+		<div id="main-container">
+			<div id="tree-container" ></div>
+			<div id="tab-container"></div>
+		</div>
+		<div id="footer">
+			<p>Powered by the ServiceClient</p>
+		</div>
+
+		<ul id="validation">
+			<li>
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="/resources/images/validation/valid-xhtml10-blue.png" alt="Valid XHTML 1.0!" height="31" width="88" />
+				</a>
+			</li>
+
+			<li>
+				<a href="http://jigsaw.w3.org/css-validator/check/referer">
+					<img src="/resources/images/validation/valid-css-blue.png" alt="Valid CSS!" height="31" width="88" />
+				</a>
+			</li>
+		</ul>	
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading Ext JS Core API ...';
+	</script>
+	<script type="text/javascript" src="/libraries/extjs/adapter/ext/ext-base.js.gz"></script>
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading Ext JS UI Components ...';
+	</script>
+    <script type="text/javascript" src="/libraries/extjs/ext-all-debug.js.gz"></script>
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading ServiceClient Ext JS ...';
+	</script>
+    <script type="text/javascript" src="/services/serviceclient/dist/extjs-serviceclient.js"></script>		
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading Templates ...';
+	</script>
+    <script type="text/javascript" src="templates/TestTemplate.js"></script>		
+	<script type="text/javascript">
+		Ext.onReady(function(){
+			Ext.BLANK_IMAGE_URL = '/libraries/extjs/resources/images/default/s.gif';
+		});
+		var load_el = Ext.get('load-status');
+		load_el.dom.innerHTML = 'Loading Ext JS QuickTips Component ...';
+		Ext.QuickTips.init();
+		load_el.dom.innerHTML = 'Initializing ...';
+		load_el.fadeOut({ 
+			duration: 5,
+			easing: 'easeBoth'
+		});
+		
+		var sckernel = new ServiceClient.client.Kernel();
+		sckernel.addView('element', new ServiceClient.extjs.view.ElementView());
+		sckernel.addTemplate('test', new TestTemplate());
+		sckernel.addRenderer('tplrndr', new ServiceClient.extjs.renderer.TemplateRenderer());
+		
+		sckernel.start({
+			view : 'element',
+			elid : 'test-container',
+			template : 'test',
+			renderer : 'tplrndr',
+			trurl : 'data.json.php'
+		});
+		
+	</script>   
+	<!--<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading TabUI ...';
+	</script>
+    <script type="text/javascript" src="/libraries/js/TabUI.js"></script>	
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading CardUI ...';
+	</script>
+    <script type="text/javascript" src="/libraries/js/CardUI.js"></script>	
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading TemplateManager ...';
+	</script>
+    <script type="text/javascript" src="/libraries/js/TemplateManager.js"></script>	
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading ComponentManager ...';
+	</script>
+    <script type="text/javascript" src="/libraries/js/ComponentManager.js"></script>	
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading TreeUI ...';
+	</script>
+    <script type="text/javascript" src="/libraries/js/TreeUI.js"></script>	
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading LoginForm ...';
+	</script>
+    <script type="text/javascript" src="/libraries/js/LoginForm.js"></script>	
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading ResetForm ...';
+	</script>
+
+    <script type="text/javascript" src="/libraries/js/ResetForm.js"></script>	
+	<script type="text/javascript">
+		document.getElementById('load-status').innerHTML = 'Loading RegisterForm ...';
+	</script>
+    <script type="text/javascript" src="/libraries/js/RegisterForm.js"></script>    
+	
+
+		<script type="text/javascript" >
+				
+			Ext.onReady(function(){
+				//Ext.Msg.alert('Hello', 'World');
+				var tm = new TemplateManager();
+				
+				var cm = new ComponentManager();
+				cm.add('login', LoginForm);
+				cm.add('reset', ResetForm);
+				cm.add('register', RegisterForm);
+				
+				var tabui = new TabUI('tab-container');
+				var treeui = new TreeUI('tree-container', 'json/navigation.php', 'SwarmLead', 'icon-tabs', tabui, tm, cm);
+				
+				var tb = new Ext.Toolbar({
+					items: treeui.menuitems
+				}).render('menu-container');
+				
+			});
+		</script> -->
+		
+	</body>
+</html>
