@@ -25,13 +25,13 @@ ServiceClient.client.Kernel = function(){
 	}
 	
 	this.start = function(config){
-		if(config.view != false)
-			config.view = views[config.view].getView(config);
-		if(config.template != false)
-			config.template = templates[config.template].getTemplate(config);
-		//if(!config.loader)
-			//config.loader = loaders[config.loader].load(config);
-		if(config.renderer != false)
-			config.renderer = renderers[config.renderer].render(config);
+		if(config.scview !== false)
+			config.sccontainer = views[config.scview].getView(config);
+		if(config.sctemplate !== false)
+			config.sctpl = templates[config.sctemplate].getTemplate(config);
+		if(config.scloader !== false)
+			config.scdataloader = loaders[config.scloader].load(config);
+		if(config.screnderer !== false)
+			renderers[config.screnderer].render(config);
 	}
 }

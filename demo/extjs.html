@@ -6,6 +6,7 @@
 		<link rel="stylesheet" type="text/css" href="/libraries/extjs/resources/css/ext-all.css.gz" />
 		<link rel="stylesheet" type="text/css" href="css/default.css" />
 		<link rel="stylesheet" type="text/css" href="css/extjs.css" />
+		<link rel="stylesheet" type="text/css" href="css/demo.css" />
 	</head>
 	<body>
 		<p id="load-status"></p>
@@ -63,17 +64,54 @@
 			easing: 'easeBoth'
 		});
 		
+		var treerndr = new ServiceClient.extjs.renderer.TreeRenderer();
+		
 		var sckernel = new ServiceClient.client.Kernel();
 		sckernel.addView('element', new ServiceClient.extjs.view.ElementView());
+		sckernel.addView('tab', new ServiceClient.extjs.view.TabView({
+			container : 'tab-container',
+			border : true,
+			plain : true,
+			autoHeight : true
+		}));
 		sckernel.addTemplate('test', new TestTemplate());
+		sckernel.addLoader('treel', new ServiceClient.extjs.loader.TreeLoader());
 		sckernel.addRenderer('tplrndr', new ServiceClient.extjs.renderer.TemplateRenderer());
+		sckernel.addRenderer('treerndr', treerndr);
 		
 		sckernel.start({
-			view : 'element',
-			elid : 'test-container',
-			template : 'test',
-			renderer : 'tplrndr',
+			scview : 'tab',
+			tabtitle: 'ServiceClient',
+			isclosable : true,
+			autoload : false,
+			sctemplate : 'test',
+			scloader : false,
+			screnderer : 'tplrndr',
 			trurl : 'data.json.php'
+		});
+		
+		sckernel.start({
+			scview : 'tab',
+			tabtitle: 'ServiceClient',
+			isclosable : true,
+			autoload : false,
+			sctemplate : 'test',
+			scloader : false,
+			screnderer : 'tplrndr',
+			trurl : 'data.json.php'
+		});
+		
+		sckernel.start({
+			scview : 'element',
+			elid : 'tree-container',
+			sctemplate : false,
+			scloader : 'treel',
+			tloadurl : 'navigation.php',
+			screnderer : 'treerndr',
+			roottext : 'Demo',
+			rootid : '/',
+			trborder : false,
+			trusearrows : true
 		});
 		
 	</script>   

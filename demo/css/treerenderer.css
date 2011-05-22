@@ -1,0 +1,7 @@
+/* icon classes */
+.icon-expand-all {
+    background-image: url( /resources/images/treeui/expand-all.gif ) !important;
+}
+.icon-collapse-all {
+    background-image: url( /resources/images/treeui/collapse-all.gif ) !important;
+}
