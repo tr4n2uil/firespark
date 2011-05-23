@@ -7,7 +7,7 @@ ServiceClient.extjs.renderer.TreeRenderer = function(){
 			iconCls: config.rooticoncls
 		});
 		
-		var tree = new Ext.tree.TreePanel({ 
+		var tree = new Ext.tree.TreePanel({
 			renderTo: config.sccontainer,
 			border: config.trborder, 		//false
 			useArrows: config.trusearrows,		//true
