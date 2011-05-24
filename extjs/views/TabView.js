@@ -14,16 +14,16 @@ ServiceClient.extjs.view.TabView = function(config){
 		//plugins: new Ext.ux.TabCloseMenu(),
 	});
 
-	this.getView = function(config){
+	this.getView = function(params){
 		var tabconfig = {
-			title: config.tabtitle,
-			iconCls: config.tabcls,
-			closable: config.isclosable,
+			title: params.tabtitle,
+			iconCls: params.tabcls,
+			closable: params.isclosable,
 			autoScroll: true,
 		};
-		if(config.autoload){
+		if(params.autoload){
 				tabconfig.autoLoad = {
-					url: config.taburl
+					url: params.taburl
 				};
 		}
 		var newtab = tabpanel.add(tabconfig);

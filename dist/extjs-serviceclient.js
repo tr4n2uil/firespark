@@ -2,39 +2,90 @@ var ServiceClient = {};
 
 ServiceClient.client = {};
 
-ServiceClient.client.Kernel = function(){
+/*
+*	Kernel manages the following client tasks if required
+*		initializes the view into memory
+*		initializes the template into memory
+*		initializes the renderer
+*		calls render method of renderer which can access the view and/or template initialized in memory
+*/
+ServiceClient.client.Kernel = (function(){
+	/* 
+	*	views are factories/containers that generates the element where the output must be rendered 
+	*	interface ViewFactory {
+	*		function getView(object params);
+	*	}
+	*/
 	var views = new Array();
+	
+	/* 
+	*	templates are factories of compiled html that is fed with data from the server and rendered to the view 
+	*	interface TemplateFactory {
+	*		function getTemplate(object params);
+	*	}
+	*/
 	var templates = new Array();
-	var loaders = new Array();
+	
+	/* 
+	*	renderers are output generators that use the view, template and loader to display the content appropriately 
+	*	interface RendererFactory {
+	*		function getRenderer(object params);
+	*	}
+	*
+	*	render used by the kernel
+	*	interface Renderer {
+	*		function render(object memory);
+	*	}
+	*/
 	var renderers = new Array();
 	
-	this.addView = function(index, view){
-		views[index] = view;
-	}
-	
-	this.addTemplate = function(index, template){
-		templates[index] = template;
-	}
-	
-	this.addLoader = function(index, loader){
-		loaders[index] = loader;
-	}
-	
-	this.addRenderer = function(index, renderer){
-		renderers[index] = renderer;
-	}
-	
-	this.start = function(config){
-		if(config.scview !== false)
-			config.sccontainer = views[config.scview].getView(config);
-		if(config.sctemplate !== false)
-			config.sctpl = templates[config.sctemplate].getTemplate(config);
-		if(config.scloader !== false)
-			config.scdataloader = loaders[config.scloader].load(config);
-		if(config.screnderer !== false)
-			renderers[config.screnderer].render(config);
-	}
-}
+	return {
+		/*
+		*	add a viewfactory with index
+		*/
+		addView : function(index, view){
+			views[index] = view;
+		},
+		
+		/*
+		*	add a templatefactory with index
+		*/
+		addTemplate : function(index, template){
+			templates[index] = template;
+		},
+		
+		/*
+		*	add a rendererfactory with index
+		*/
+		addRenderer : function(index, renderer){
+			renderers[index] = renderer;
+		},
+		
+		/* 
+		*	starts the kernel to do the task defined by the config and returns the renderer initialized
+		*/
+		start : function(config){
+			var task = config.task;
+			var params = config.params;
+			var memory = {};
+			
+			if(task.view !== false){
+				memory.view = views[task.view].getView(params);
+			}
+				
+			if(task.template !== false){
+				memory.template = templates[task.template].getTemplate(params);
+			}
+			
+			if(task.renderer !== false){
+				var renderer = renderers[task.renderer].getRenderer(params);
+				renderer.render(memory);
+			}
+			
+			return renderer;
+		}
+	};
+})();
 ServiceClient.extjs = {};
 
 ServiceClient.extjs.view = {};
@@ -42,8 +93,8 @@ ServiceClient.extjs.loader = {};
 ServiceClient.extjs.renderer = {};
 ServiceClient.extjs.template = {};
 ServiceClient.extjs.view.ElementView = function(){
-	this.getView = function(config){
-		return Ext.get(config.elid);
+	this.getView = function(params){
+		return Ext.get(params.elementid);
 	}
 }
 ServiceClient.extjs.view.TabView = function(config){
@@ -62,16 +113,16 @@ ServiceClient.extjs.view.TabView = function(config){
 		//plugins: new Ext.ux.TabCloseMenu(),
 	});
 
-	this.getView = function(config){
+	this.getView = function(params){
 		var tabconfig = {
-			title: config.tabtitle,
-			iconCls: config.tabcls,
-			closable: config.isclosable,
+			title: params.tabtitle,
+			iconCls: params.tabcls,
+			closable: params.isclosable,
 			autoScroll: true,
 		};
-		if(config.autoload){
+		if(params.autoload){
 				tabconfig.autoLoad = {
-					url: config.taburl
+					url: params.taburl
 				};
 		}
 		var newtab = tabpanel.add(tabconfig);
@@ -79,100 +130,64 @@ ServiceClient.extjs.view.TabView = function(config){
 		return newtab.body;
 	}
 }
-ServiceClient.extjs.loader.TreeLoader = function(){
-	this.load = function(config){
-		var treeLoader = new Ext.tree.TreeLoader({
-			dataUrl: config.tloadurl
-		});
-		return treeLoader;
-	}
-}
 ServiceClient.extjs.renderer.TemplateRenderer = function(){
 
-	var CardUI = function(body, tpl, url){
-		this.tpl = tpl;
-		this.datastore = null;
-		this.url = url;
-		this.body = body;
-	
-		this.load = function() {
-			this.body.dom.innerHTML = "Loading ...";
-			this.datastore.load();
-		}
+	var CardUI = function(params){
+		this.loadurl = params.loadurl;
+		this.params = params.loadparams;
 		
-		this.init = function(){
-			this.datastore = new Ext.data.JsonStore({ 
-				url : this.url,
-				listeners: {
-					load: {
-						fn : function(store, records, options){
-							this.tpl.overwrite(this.body, this.datastore.getAt(0).data);
-							this.body.fadeIn({ 
-								duration: 1,
-								easing: 'easeBoth'
-							});
-						},
-						scope: this
-					}
+		this.render = function(memory){
+			Ext.Ajax.request({
+				url: this.loadurl,
+				params: this.loadparams,
+				success : function(response){
+					var data = Ext.decode(response.responseText);
+					memory.template.overwrite(memory.view, data);
+					memory.view.fadeIn({ 
+						duration: 1,
+						easing: 'easeBoth'
+					});
+				},
+				failure : function(response){
+				
 				}
 			});
-			this.load();
 		}
-		this.init();
 	}
-	
-	this.render = function(config){
-		var view = config.sccontainer;
-		var template = config.sctpl;
-		var turl = config.trurl;
-		
-		new CardUI(view, template, turl);
+
+	this.getRenderer = function(params){
+		return new CardUI(params);
 	}
 }
 ServiceClient.extjs.renderer.TreeRenderer = function(){
-
-	this.render = function(config){
-		var rootnode = new Ext.tree.AsyncTreeNode({
-			text: config.roottext,
-			id: config.rootid,
-			iconCls: config.rooticoncls
+	var TreeUI = function(params){
+		this.tree = null;
+		this.border = params.border;
+		this.useArrows = params.useArrows;
+		
+		this.rootnode = new Ext.tree.AsyncTreeNode({
+			text: params.roottext,
+			id: params.rootid,
+			iconCls: params.rooticoncls
 		});
 		
-		var tree = new Ext.tree.TreePanel({ 
-			renderTo: config.sccontainer,
-			border: config.trborder, 		//false
-			useArrows: config.trusearrows,		//true
-			autoScroll: true,
-			loader: config.scdataloader,
-			root: rootnode,
-			listeners: {
-				'render': function(tp){
-					tp.getSelectionModel().on('selectionchange', function(tree, node){
-						switch(node.attributes.type){
-							case 'service' :
-								sckernel.start(node.attributes.service);
-								break;
-							default : break;
-						}
-					});
-				}
-			}
+		this.treeLoader = new Ext.tree.TreeLoader({
+			dataUrl: params.loadurl
 		});
-		rootnode.expand();
 		
-		var filter = new Ext.tree.TreeFilter(this.tree,  {
+		this.filter = new Ext.tree.TreeFilter(this.tree,  {
             clearBlank: true,
 			autoClear: true
         });
 		
-		var filterTree = function(text){
-			tree.expandAll();
+		this.filterTree = function(text){
+			this.tree.expandAll();
 			if(!text){
-				filter.clear();
+				this.filter.clear();
 				return;
 			}
 			var re = new RegExp('^' + Ext.escapeRe(text), 'i');
-			filter.filterBy(function(n){
+			this.filter.filterBy(function(n){
 				return !n.attributes.leaf || re.test(n.text);
 			}, this);
 		}
@@ -193,17 +208,46 @@ ServiceClient.extjs.renderer.TreeRenderer = function(){
 			}),
 			{
 				iconCls: 'icon-expand-all',
-				tooltip: 'Expand All',
-				handler: function(){ 
-					rootnode.expand(true); 
-				}
-			}, {
-				iconCls: 'icon-collapse-all',
-				tooltip: 'Collapse All',
-				handler: function(){ 
-					rootnode.collapse(true); 
-				}
-			}, '-'
+				tooltip: 'Expand/Collapse All',
+				enableToggle: true,
+				toggleHandler: function(item, pressed){
+					if(pressed === true)
+						this.rootnode.expand(true);
+					else
+						this.rootnode.collapse(true);
+				},
+				pressed: false,
+				scope: this
+			}
 		];
+		
+		this.render = function(memory){
+			this.tree = new Ext.tree.TreePanel({
+				renderTo: memory.view,
+				border: this.border, 		//false
+				useArrows: this.useArrows,		//true
+				autoScroll: true,
+				loader: this.treeLoader,
+				root: this.rootnode,
+				listeners: {
+					'render': function(tp){
+						tp.getSelectionModel().on('selectionchange', function(tree, node){
+							switch(node.attributes.type){
+								case 'service' :
+									ServiceClient.client.Kernel.start(node.attributes.service);
+									break;
+								default : break;
+							}
+						});
+					}
+				}
+			});
+			this.rootnode.expand();
+		}
 	}
+	
+	this.getRenderer = function(params){
+		return new TreeUI(params);
+	}
+	
 }

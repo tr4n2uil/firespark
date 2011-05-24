@@ -64,9 +64,7 @@
 			easing: 'easeBoth'
 		});
 		
-		var treerndr = new ServiceClient.extjs.renderer.TreeRenderer();
-		
-		var sckernel = new ServiceClient.client.Kernel();
+		var sckernel = ServiceClient.client.Kernel;
 		sckernel.addView('element', new ServiceClient.extjs.view.ElementView());
 		sckernel.addView('tab', new ServiceClient.extjs.view.TabView({
 			container : 'tab-container',
@@ -75,43 +73,38 @@
 			autoHeight : true
 		}));
 		sckernel.addTemplate('test', new TestTemplate());
-		sckernel.addLoader('treel', new ServiceClient.extjs.loader.TreeLoader());
 		sckernel.addRenderer('tplrndr', new ServiceClient.extjs.renderer.TemplateRenderer());
-		sckernel.addRenderer('treerndr', treerndr);
+		sckernel.addRenderer('treerndr',  new ServiceClient.extjs.renderer.TreeRenderer());
 		
 		sckernel.start({
-			scview : 'tab',
-			tabtitle: 'ServiceClient',
-			isclosable : true,
-			autoload : false,
-			sctemplate : 'test',
-			scloader : false,
-			screnderer : 'tplrndr',
-			trurl : 'data.json.php'
+			task : {
+				view : 'tab',
+				template : 'test',
+				renderer : 'tplrndr'
+			},
+			params : {
+				tabtitle : 'ServiceClient',
+				isclosable : true,
+				autoload : false,
+				loadurl : 'data.json.php',
+				loadparams : {}
+			}
 		});
 		
 		sckernel.start({
-			scview : 'tab',
-			tabtitle: 'ServiceClient',
-			isclosable : true,
-			autoload : false,
-			sctemplate : 'test',
-			scloader : false,
-			screnderer : 'tplrndr',
-			trurl : 'data.json.php'
-		});
-		
-		sckernel.start({
-			scview : 'element',
-			elid : 'tree-container',
-			sctemplate : false,
-			scloader : 'treel',
-			tloadurl : 'navigation.php',
-			screnderer : 'treerndr',
-			roottext : 'Demo',
-			rootid : '/',
-			trborder : false,
-			trusearrows : true
+			task : {
+				view : 'element',
+				template : false,
+				renderer : 'treerndr'
+			},
+			params : {
+				elementid : 'tree-container',
+				loadurl : 'navigation.php',
+				roottext : 'Demo',
+				rootid : '/',
+				border : false,
+				useArrows : true
+			}
 		});
 		
 	</script>   

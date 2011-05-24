@@ -1,8 +1,9 @@
 <?php
 
 $arr = array('name' => 'Vibhaj Rajan',  'time' => date('c'));
-$json = json_encode($arr);
+echo json_encode($arr);
 
+/*
 echo <<<JSON
 	{
 		metaData: {
@@ -32,5 +33,7 @@ echo <<<JSON
 		]
 	}
 JSON;
+
+*/
 
 ?>

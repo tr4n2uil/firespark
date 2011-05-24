@@ -1,9 +1,9 @@
 TestTemplate = function(){
 	var tpl =new Ext.XTemplate( '<p id="abc">Name: {name}</p>'
-						+'<p>Time: {city}, {time}</p>' );
+						+'<p>Time: {time}</p>' );
 	tpl.compile();
 			
-	this.getTemplate = function(config){
+	this.getTemplate = function(params){
 		return tpl;
 	}
 }

@@ -1,5 +1,5 @@
 ServiceClient.extjs.view.ElementView = function(){
-	this.getView = function(config){
-		return Ext.get(config.elid);
+	this.getView = function(params){
+		return Ext.get(params.elementid);
 	}
 }

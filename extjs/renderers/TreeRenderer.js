@@ -1,47 +1,32 @@
 ServiceClient.extjs.renderer.TreeRenderer = function(){
-
-	this.render = function(config){
-		var rootnode = new Ext.tree.AsyncTreeNode({
-			text: config.roottext,
-			id: config.rootid,
-			iconCls: config.rooticoncls
+	var TreeUI = function(params){
+		this.tree = null;
+		this.border = params.border;
+		this.useArrows = params.useArrows;
+		
+		this.rootnode = new Ext.tree.AsyncTreeNode({
+			text: params.roottext,
+			id: params.rootid,
+			iconCls: params.rooticoncls
 		});
 		
-		var tree = new Ext.tree.TreePanel({
-			renderTo: config.sccontainer,
-			border: config.trborder, 		//false
-			useArrows: config.trusearrows,		//true
-			autoScroll: true,
-			loader: config.scdataloader,
-			root: rootnode,
-			listeners: {
-				'render': function(tp){
-					tp.getSelectionModel().on('selectionchange', function(tree, node){
-						switch(node.attributes.type){
-							case 'service' :
-								sckernel.start(node.attributes.service);
-								break;
-							default : break;
-						}
-					});
-				}
-			}
+		this.treeLoader = new Ext.tree.TreeLoader({
+			dataUrl: params.loadurl
 		});
-		rootnode.expand();
 		
-		var filter = new Ext.tree.TreeFilter(this.tree,  {
+		this.filter = new Ext.tree.TreeFilter(this.tree,  {
             clearBlank: true,
 			autoClear: true
         });
 		
-		var filterTree = function(text){
-			tree.expandAll();
+		this.filterTree = function(text){
+			this.tree.expandAll();
 			if(!text){
-				filter.clear();
+				this.filter.clear();
 				return;
 			}
 			var re = new RegExp('^' + Ext.escapeRe(text), 'i');
-			filter.filterBy(function(n){
+			this.filter.filterBy(function(n){
 				return !n.attributes.leaf || re.test(n.text);
 			}, this);
 		}
@@ -62,17 +47,46 @@ ServiceClient.extjs.renderer.TreeRenderer = function(){
 			}),
 			{
 				iconCls: 'icon-expand-all',
-				tooltip: 'Expand All',
-				handler: function(){ 
-					rootnode.expand(true); 
-				}
-			}, {
-				iconCls: 'icon-collapse-all',
-				tooltip: 'Collapse All',
-				handler: function(){ 
-					rootnode.collapse(true); 
-				}
-			}, '-'
+				tooltip: 'Expand/Collapse All',
+				enableToggle: true,
+				toggleHandler: function(item, pressed){
+					if(pressed === true)
+						this.rootnode.expand(true);
+					else
+						this.rootnode.collapse(true);
+				},
+				pressed: false,
+				scope: this
+			}
 		];
+		
+		this.render = function(memory){
+			this.tree = new Ext.tree.TreePanel({
+				renderTo: memory.view,
+				border: this.border, 		//false
+				useArrows: this.useArrows,		//true
+				autoScroll: true,
+				loader: this.treeLoader,
+				root: this.rootnode,
+				listeners: {
+					'render': function(tp){
+						tp.getSelectionModel().on('selectionchange', function(tree, node){
+							switch(node.attributes.type){
+								case 'service' :
+									ServiceClient.client.Kernel.start(node.attributes.service);
+									break;
+								default : break;
+							}
+						});
+					}
+				}
+			});
+			this.rootnode.expand();
+		}
 	}
+	
+	this.getRenderer = function(params){
+		return new TreeUI(params);
+	}
+	
 }
