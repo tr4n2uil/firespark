@@ -39,6 +39,19 @@ ServiceClient.client.Kernel = (function(){
 	*/
 	var renderers = new Array();
 	
+	/* 
+	*	modules are packages of code to be executed 
+	*	interface ModuleFactory {
+	*		function instantiate(object params);
+	*	}
+	*
+	*	execute used by the kernel
+	*	interface Module {
+	*		function execute(object args);
+	*	}
+	*/
+	var modules = new Array();
+	
 	return {
 		/*
 		*	add a viewfactory with index
@@ -59,6 +72,13 @@ ServiceClient.client.Kernel = (function(){
 		*/
 		addRenderer : function(index, renderer){
 			renderers[index] = renderer;
+		},
+		
+		/*
+		*	add a modulefactory with index
+		*/
+		addModule : function(index, module){
+			modules[index] = module;
 		},
 		
 		/* 
@@ -83,6 +103,16 @@ ServiceClient.client.Kernel = (function(){
 			}
 			
 			return renderer;
+		},
+		
+		/* 
+		*	starts the kernel to execute the module after instantiation
+		*/
+		run : function(config){
+			var params = config.params;
+			var args = config.args;
+			var module = modules[config.module].getModule(params);
+			return module.execute(args);
 		}
 	};
 })();

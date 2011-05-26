@@ -1,6 +1,6 @@
 ServiceClient.extjs = {};
 
 ServiceClient.extjs.view = {};
-ServiceClient.extjs.loader = {};
+ServiceClient.extjs.module = {};
 ServiceClient.extjs.renderer = {};
 ServiceClient.extjs.template = {};

@@ -3,7 +3,7 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>ServiceClient Ext JS Demo</title>
-		<link rel="stylesheet" type="text/css" href="/libraries/extjs/resources/css/ext-all.css.gz" />
+		<link rel="stylesheet" type="text/css" href="/libraries/extjs/resources/css/ext-all.css" />
 		<link rel="stylesheet" type="text/css" href="css/default.css" />
 		<link rel="stylesheet" type="text/css" href="css/extjs.css" />
 		<link rel="stylesheet" type="text/css" href="css/demo.css" />
@@ -38,11 +38,11 @@
 	<script type="text/javascript">
 		document.getElementById('load-status').innerHTML = 'Loading Ext JS Core API ...';
 	</script>
-	<script type="text/javascript" src="/libraries/extjs/adapter/ext/ext-base.js.gz"></script>
+	<script type="text/javascript" src="/libraries/extjs/adapter/ext/ext-base.js"></script>
 	<script type="text/javascript">
 		document.getElementById('load-status').innerHTML = 'Loading Ext JS UI Components ...';
 	</script>
-    <script type="text/javascript" src="/libraries/extjs/ext-all-debug.js.gz"></script>
+    <script type="text/javascript" src="/libraries/extjs/ext-all.js"></script>
 	<script type="text/javascript">
 		document.getElementById('load-status').innerHTML = 'Loading ServiceClient Ext JS ...';
 	</script>
@@ -75,6 +75,7 @@
 		sckernel.addTemplate('test', new TestTemplate());
 		sckernel.addRenderer('tplrndr', new ServiceClient.extjs.renderer.TemplateRenderer());
 		sckernel.addRenderer('treerndr',  new ServiceClient.extjs.renderer.TreeRenderer());
+		sckernel.addRenderer('acfrndr',  new ServiceClient.extjs.renderer.AccountFormRenderer());
 		
 		sckernel.start({
 			task : {
