@@ -50,7 +50,7 @@
 	<script type="text/javascript">
 		document.getElementById('load-status').innerHTML = 'Loading Templates ...';
 	</script>
-    <script type="text/javascript" src="templates/TestTemplate.js"></script>		
+    <script type="text/javascript" src="tpl/Test.tpl.js"></script>		
 	<script type="text/javascript">
 		Ext.onReady(function(){
 			Ext.BLANK_IMAGE_URL = '/libraries/extjs/resources/images/default/s.gif';
@@ -65,23 +65,33 @@
 		});
 		
 		var sckernel = ServiceClient.client.Kernel;
-		sckernel.addView('element', new ServiceClient.extjs.view.ElementView());
-		sckernel.addView('tab', new ServiceClient.extjs.view.TabView({
-			container : 'tab-container',
-			border : true,
-			plain : true,
-			autoHeight : true
-		}));
-		sckernel.addTemplate('test', new TestTemplate());
-		sckernel.addRenderer('tplrndr', new ServiceClient.extjs.renderer.TemplateRenderer());
-		sckernel.addRenderer('treerndr',  new ServiceClient.extjs.renderer.TreeRenderer());
-		sckernel.addRenderer('acfrndr',  new ServiceClient.extjs.renderer.AccountFormRenderer());
-		
-		sckernel.start({
+		var screg = ServiceClient.client.Registry;
+		screg.addModule('alert', ServiceClient.extjs.module.Alert);
+		screg.addRenderer('tplui', ServiceClient.extjs.renderer.TemplateUI);
+		screg.addRenderer('treeui', ServiceClient.extjs.renderer.TreeUI);
+		screg.addRenderer('tabui', ServiceClient.extjs.view.TabUI);
+		screg.addRenderer('accform', ServiceClient.extjs.renderer.AccountForm);
+		screg.addView('element', ServiceClient.extjs.view.ElementView);
+		screg.addView('tabui', sckernel.paint({
 			task : {
-				view : 'tab',
+				view : 'element',
+				template : false,
+				renderer : 'tabui'
+			},
+			params : {
+				elementid : 'tab-container',
+				border : true,
+				plain : true,
+				autoHeight : true
+			}
+		}));
+		screg.addTemplate('test', TestTemplate);
+		
+		sckernel.paint({
+			task : {
+				view : 'tabui',
 				template : 'test',
-				renderer : 'tplrndr'
+				renderer : 'tplui'
 			},
 			params : {
 				tabtitle : 'ServiceClient',
@@ -92,11 +102,11 @@
 			}
 		});
 		
-		sckernel.start({
+		sckernel.paint({
 			task : {
 				view : 'element',
 				template : false,
-				renderer : 'treerndr'
+				renderer : 'treeui'
 			},
 			params : {
 				elementid : 'tree-container',
@@ -108,62 +118,6 @@
 			}
 		});
 		
-	</script>   
-	<!--<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading TabUI ...';
-	</script>
-    <script type="text/javascript" src="/libraries/js/TabUI.js"></script>	
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading CardUI ...';
-	</script>
-    <script type="text/javascript" src="/libraries/js/CardUI.js"></script>	
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading TemplateManager ...';
-	</script>
-    <script type="text/javascript" src="/libraries/js/TemplateManager.js"></script>	
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading ComponentManager ...';
-	</script>
-    <script type="text/javascript" src="/libraries/js/ComponentManager.js"></script>	
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading TreeUI ...';
-	</script>
-    <script type="text/javascript" src="/libraries/js/TreeUI.js"></script>	
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading LoginForm ...';
-	</script>
-    <script type="text/javascript" src="/libraries/js/LoginForm.js"></script>	
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading ResetForm ...';
-	</script>
-
-    <script type="text/javascript" src="/libraries/js/ResetForm.js"></script>	
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading RegisterForm ...';
-	</script>
-    <script type="text/javascript" src="/libraries/js/RegisterForm.js"></script>    
-	
-
-		<script type="text/javascript" >
-				
-			Ext.onReady(function(){
-				//Ext.Msg.alert('Hello', 'World');
-				var tm = new TemplateManager();
-				
-				var cm = new ComponentManager();
-				cm.add('login', LoginForm);
-				cm.add('reset', ResetForm);
-				cm.add('register', RegisterForm);
-				
-				var tabui = new TabUI('tab-container');
-				var treeui = new TreeUI('tree-container', 'json/navigation.php', 'SwarmLead', 'icon-tabs', tabui, tm, cm);
-				
-				var tb = new Ext.Toolbar({
-					items: treeui.menuitems
-				}).render('menu-container');
-				
-			});
-		</script> -->
-		
+	</script>  		
 	</body>
 </html>

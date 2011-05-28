@@ -1,5 +1,12 @@
-ServiceClient.extjs.view.ElementView = function(){
-	this.getView = function(params){
-		return Ext.get(params.elementid);
-	}
-}
+/**
+ * ElementView view
+ *
+ * @param elementid string
+**/
+ServiceClient.extjs.view.ElementView = (function(){
+	return {
+		getView : function(params){
+			return Ext.get(params.elementid);
+		}
+	};
+})();

@@ -1,0 +1,1 @@
+/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.extjs.module.Alert = (function(){	return {		execute : function(args){			Ext.Msg.alert(args.title, args.data);		}	};})();
