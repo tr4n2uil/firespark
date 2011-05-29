@@ -27,7 +27,7 @@ ServiceClient.extjs.renderer.TemplateUI = function(params){
 				});
 			},
 			failure : function(response){
-				memory.view.dom.innerHTML = "<p>The requested resource could not be loaded</p>";
+				memory.view.dom.innerHTML = '<p>The requested resource could not be loaded</p>';
 			}
 		});
 	}

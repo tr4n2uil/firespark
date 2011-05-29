@@ -1,7 +1,16 @@
-choice /N /C 12 /M "Choose the library to build (1:extjs, 2:mootools)"
+@echo off
+echo Choose library to build
+echo 1 extjs
+echo 2 jquery
+choice /N /C 12 
+if errorlevel == 2 goto jquery
 if errorlevel == 1 goto extjs
 goto end
 :extjs
 type ServiceClient.js extjs\init.js extjs\views\*.js extjs\renderers\*.js extjs\modules\*.js > dist\extjs-serviceclient.js
+goto end
+:jquery
+type ServiceClient.js jquery\init.js jquery\views\*.js jquery\renderers\*.js jquery\modules\*.js > dist\jquery-serviceclient.js
+goto end
 :end
 pause
