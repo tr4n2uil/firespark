@@ -3,7 +3,16 @@ JavaScript UI Framework for consuming Services
 
 vibhaj8@gmail.com
 
-For supporting :
+Developed in support of :
 	Google Summer of Code 2011
 	DSpace ClientUI built on REST API
 	https://wiki.duraspace.org/display/GSOC/DSpace+ClientUI+built+on+RESTful+API+-+GSoC+2011
+
+JavaScript Library Neutral Framework
+	Registry
+		Views
+		Renderers
+		Modules
+	Kernel
+		paint()
+		run()
