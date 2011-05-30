@@ -5,11 +5,12 @@
  *	@param collapsible boolean
  *  @param event string
  *	@param tablink boolean
+ * @param indexstart integer
  *
 **/
 ServiceClient.jquery.view.TabUI = function(params){
 	var tab = new Array();
-	var index = -1;
+	var index = params.indexstart || 0;
 	var options = {
 		cache : params.cache || false,
 		collapsible : params.collapsible || false,
@@ -38,6 +39,7 @@ ServiceClient.jquery.view.TabUI = function(params){
 			var indx = $("li", tabpanel).index($(this).parent());
 			tabpanel.tabs( "remove", indx );
 		});
+		index--;
 	}
 	
 	/**
@@ -52,6 +54,7 @@ ServiceClient.jquery.view.TabUI = function(params){
 			url = params.taburl;
 		}
 		tabpanel.tabs('add', url, params.tabtitle);
+		tabpanel.tabs('select', index);
 		return tab[index];
 	}
 }
