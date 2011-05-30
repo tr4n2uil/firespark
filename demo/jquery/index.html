@@ -6,11 +6,20 @@
 		<link rel="stylesheet" type="text/css" href="css/default.css" />
 		<link rel="stylesheet" type="text/css" href="css/jquery.css" />
 		<link rel="stylesheet" type="text/css" href="css/demo.css" />
+		<link rel="stylesheet" type="text/css" href="/libraries/jqueryui/css/redmond/jquery-ui-1.8.13.custom.css" />
 	</head>
 	<body>
 		<p id="load-status"></p>
 		<h1>ServiceClient jQuery Demo</h1>
 
+		<div id="tabs">
+		<ul>
+			<li><a href="#tabs-1">Demo</a></li>
+		</ul>
+		<div id="tabs-1">
+			<p>Welcome to jQuery ServiceClient Demo</p>
+		</div>
+	</div>
 		<div id="test-container"></div>
 		<div id="menu-container"></div>
 		<div id="main-container">
@@ -41,7 +50,7 @@
 	<script type="text/javascript">
 		document.getElementById('load-status').innerHTML = 'Loading jQuery UI Components ...';
 	</script>
-    <script type="text/javascript" src="/libraries/jquery/jquery.tools.min.js"></script>
+    <script type="text/javascript" src="/libraries/jquery/jquery-ui-1.8.13.min.js"></script>
 	<script type="text/javascript">
 		document.getElementById('load-status').innerHTML = 'Loading jQuery Templates plugin ...';
 	</script>
@@ -62,26 +71,28 @@
 			
 			var sckernel = ServiceClient.client.Kernel;
 			var screg = ServiceClient.client.Registry;
+			
 			screg.addModule('alert', ServiceClient.jquery.module.Alert);
+			
+			
 			screg.addRenderer('tplui', ServiceClient.jquery.renderer.TemplateUI);
 			//screg.addRenderer('treeui', ServiceClient.jquery.renderer.TreeUI);
-			//screg.addRenderer('tabui', ServiceClient.jquery.view.TabUI);
+			screg.addRenderer('tabui', ServiceClient.jquery.view.TabUI);
 			//screg.addRenderer('accform', ServiceClient.jquery.renderer.AccountForm);
 			screg.addView('element', ServiceClient.jquery.view.ElementView);
-			/*screg.addView('tabui', sckernel.paint({
+			screg.addView('tabui', sckernel.paint({
 				task : {
 					view : 'element',
 					template : false,
 					renderer : 'tabui'
 				},
 				params : {
-					elementid : 'tab-container',
-					border : true,
-					plain : true,
-					autoHeight : true
+					elementid : '#tabs',
+					event : 'click'
 				}
-			}));*/
+			}));
 			screg.addTemplate('test', TestTemplate);
+			
 			
 			sckernel.paint({
 				task : {
@@ -96,7 +107,7 @@
 				}
 			});
 			
-			/*sckernel.paint({
+			sckernel.paint({
 				task : {
 					view : 'tabui',
 					template : 'test',
@@ -110,7 +121,7 @@
 					loadparams : {}
 				}
 			});
-			
+			/*
 			sckernel.paint({
 				task : {
 					view : 'element',

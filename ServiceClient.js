@@ -41,7 +41,7 @@ ServiceClient.client = (function(){
 	return {
 		/**
 		 *	Registry manages references to
-		 *  ViewGenerators
+		 * 	ViewGenerators
 		 *	Templates
 		 *	Renderers
 		 *	Modules
@@ -103,6 +103,7 @@ ServiceClient.client = (function(){
 				if(task.renderer !== false){
 					var renderer = new (renderers[task.renderer])(params);
 					renderer.render(memory);
+					return renderer;
 				}
 				
 				return renderer;
