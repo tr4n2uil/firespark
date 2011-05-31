@@ -1,6 +1,5 @@
-TestTemplate = (function(){
-	var tpl = $.template( '<p id="abc">Name: ${name}</p>'
-						+'<p>Time: ${time}</p>' );
-	tpl.compile();
+var TestTemplate = (function(){
+	var tpl = $.template('{{each data}}<p class="abc">Name: ${$value.name}</p>'
+						+'<p>Time: ${$value.time}</p>{{/each}}' );
 	return tpl;
 })();

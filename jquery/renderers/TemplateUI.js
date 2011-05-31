@@ -22,7 +22,7 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 			type : 'POST',
 			success : function(data, status, request){
 				memory.view.hide();
-				memory.view.html(memory.template, data.tpldata);
+				memory.view.html($.tmpl(memory.template, data.tpldata))
 				memory.view.fadeIn(1000);
 				if(data.service||false)
 					ServiceClient.client.Kernel.run(data.service);

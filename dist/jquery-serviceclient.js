@@ -187,12 +187,12 @@ ServiceClient.jquery.view.TabUI = function(params){
 	**/
 	this.getView = function(params){
 		index++;
-		var url = '#tab-'+index;
+		var url = '#ui-tab-'+index;
 		if(params.autoload){
 			url = params.taburl;
 		}
 		tabpanel.tabs('add', url, params.tabtitle);
-		tabpanel.tabs('select', index);
+		tabpanel.tabs('select', '#ui-tab-'+index);
 		return tab[index];
 	}
 }
@@ -220,7 +220,7 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 			type : 'POST',
 			success : function(data, status, request){
 				memory.view.hide();
-				memory.view.html(memory.template, data.tpldata);
+				memory.view.html($.tmpl(memory.template, data.tpldata))
 				memory.view.fadeIn(1000);
 				if(data.service||false)
 					ServiceClient.client.Kernel.run(data.service);

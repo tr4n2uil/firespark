@@ -50,12 +50,12 @@ ServiceClient.jquery.view.TabUI = function(params){
 	**/
 	this.getView = function(params){
 		index++;
-		var url = '#tab-'+index;
+		var url = '#ui-tab-'+index;
 		if(params.autoload){
 			url = params.taburl;
 		}
 		tabpanel.tabs('add', url, params.tabtitle);
-		tabpanel.tabs('select', index);
+		tabpanel.tabs('select', '#ui-tab-'+index);
 		return tab[index];
 	}
 }
