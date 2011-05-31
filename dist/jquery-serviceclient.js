@@ -140,9 +140,9 @@ ServiceClient.jquery.view.ElementView = (function(){
  *
  *	@param cache boolean
  *	@param collapsible boolean
- *  @param event string
+ *	@param event string
  *	@param tablink boolean
- * @param indexstart integer
+ *	@param indexstart integer
  *
 **/
 ServiceClient.jquery.view.TabUI = function(params){
@@ -172,6 +172,7 @@ ServiceClient.jquery.view.TabUI = function(params){
 	**/
 	this.render = function(memory){
 		tabpanel = memory.view.tabs(options);
+		memory.view.fadeIn(1000);
 		$('.ui-icon-close').live( "click", function() {
 			var indx = $("li", tabpanel).index($(this).parent());
 			tabpanel.tabs( "remove", indx );
@@ -219,8 +220,10 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 			type : 'POST',
 			success : function(data, status, request){
 				memory.view.hide();
-				memory.view.html(memory.template, data);
+				memory.view.html(memory.template, data.tpldata);
 				memory.view.fadeIn(1000);
+				if(data.service||false)
+					ServiceClient.client.Kernel.run(data.service);
 			},
 			error : function(request, status, error){
 				memory.view.html('<p>The requested resource could not be loaded</p>');

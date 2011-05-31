@@ -89,7 +89,7 @@ ServiceClient.extjs.renderer.TreeUI = function(params){
 								ServiceClient.client.Kernel.paint(node.attributes.paint);
 								break;
 							case 'run' :
-								ServiceClient.client.Kernel.run(node.attributes.run)
+								ServiceClient.client.Kernel.run(node.attributes.run);
 							default : break;
 						}
 					});

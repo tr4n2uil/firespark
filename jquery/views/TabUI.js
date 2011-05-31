@@ -3,9 +3,9 @@
  *
  *	@param cache boolean
  *	@param collapsible boolean
- *  @param event string
+ *	@param event string
  *	@param tablink boolean
- * @param indexstart integer
+ *	@param indexstart integer
  *
 **/
 ServiceClient.jquery.view.TabUI = function(params){
@@ -35,6 +35,7 @@ ServiceClient.jquery.view.TabUI = function(params){
 	**/
 	this.render = function(memory){
 		tabpanel = memory.view.tabs(options);
+		memory.view.fadeIn(1000);
 		$('.ui-icon-close').live( "click", function() {
 			var indx = $("li", tabpanel).index($(this).parent());
 			tabpanel.tabs( "remove", indx );

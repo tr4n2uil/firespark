@@ -3,29 +3,25 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 		<title>ServiceClient jQuery Demo</title>
+		<link rel="stylesheet" type="text/css" href="/libraries/jqueryui/css/redmond/jquery-ui-1.8.13.custom.css" />
 		<link rel="stylesheet" type="text/css" href="css/default.css" />
 		<link rel="stylesheet" type="text/css" href="css/jquery.css" />
 		<link rel="stylesheet" type="text/css" href="css/demo.css" />
-		<link rel="stylesheet" type="text/css" href="/libraries/jqueryui/css/redmond/jquery-ui-1.8.13.custom.css" />
 	</head>
 	<body>
 		<p id="load-status"></p>
 		<h1>ServiceClient jQuery Demo</h1>
 
-		<div id="tabs">
-		<ul>
-			<li><a href="#tabs-1">Demo</a></li>
-		</ul>
-		<div id="tabs-1">
-			<p>Welcome to jQuery ServiceClient Demo</p>
-		</div>
-	</div>
 		<div id="test-container"></div>
-		<div id="menu-container"></div>
-		<div id="main-container">
-			<div id="tree-container" ></div>
-			<div id="tab-container"></div>
+		<div id="tab-container">
+			<ul>
+				<li><a href="#tabs-1">Demo</a></li>
+			</ul>
+			<div id="tabs-1">
+				<p>Welcome to jQuery ServiceClient Demo</p>
+			</div>
 		</div>
+		
 		<div id="footer">
 			<p>Powered by the ServiceClient</p>
 		</div>
@@ -36,109 +32,107 @@
 					<img src="/resources/images/validation/valid-xhtml10-blue.png" alt="Valid XHTML 1.0!" height="31" width="88" />
 				</a>
 			</li>
-
 			<li>
 				<a href="http://jigsaw.w3.org/css-validator/check/referer">
 					<img src="/resources/images/validation/valid-css-blue.png" alt="Valid CSS!" height="31" width="88" />
 				</a>
 			</li>
 		</ul>	
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading jQuery Core API ...';
-	</script>
-	<script type="text/javascript" src="/libraries/jquery/jquery-1.6.1.min.js"></script>
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading jQuery UI Components ...';
-	</script>
-    <script type="text/javascript" src="/libraries/jquery/jquery-ui-1.8.13.min.js"></script>
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading jQuery Templates plugin ...';
-	</script>
-    <script type="text/javascript" src="/libraries/jquery/jquery.template.js"></script>
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading ServiceClient jQuery ...';
-	</script>
-    <script type="text/javascript" src="/services/serviceclient/dist/jquery-serviceclient.js"></script>		
-	<script type="text/javascript">
-		document.getElementById('load-status').innerHTML = 'Loading Templates ...';
-	</script>
-    <script type="text/javascript" src="tpl/Test.tpl.js"></script>		
-	<script type="text/javascript">
-		$(document).ready(function(){
-			var load_el = $('#load-status');
-			load_el.html('Initializing ...');
-			load_el.fadeOut(5000);
-			
-			var sckernel = ServiceClient.client.Kernel;
-			var screg = ServiceClient.client.Registry;
-			
-			screg.addModule('alert', ServiceClient.jquery.module.Alert);
-			
-			
-			screg.addRenderer('tplui', ServiceClient.jquery.renderer.TemplateUI);
-			//screg.addRenderer('treeui', ServiceClient.jquery.renderer.TreeUI);
-			screg.addRenderer('tabui', ServiceClient.jquery.view.TabUI);
-			//screg.addRenderer('accform', ServiceClient.jquery.renderer.AccountForm);
-			screg.addView('element', ServiceClient.jquery.view.ElementView);
-			screg.addView('tabui', sckernel.paint({
-				task : {
-					view : 'element',
-					template : false,
-					renderer : 'tabui'
-				},
-				params : {
-					elementid : '#tabs',
-					event : 'click',
-					indexstart : 1
-				}
-			}));
-			screg.addTemplate('test', TestTemplate);
-			
-			
-			sckernel.paint({
-				task : {
-					view : 'element',
-					template : 'test',
-					renderer : 'tplui'
-				},
-				params : {
-					elementid : '#test-container',
-					loadurl : 'data.json.php',
-					loadparams : {}
-				}
-			});
-			
-			sckernel.paint({
-				task : {
-					view : 'tabui',
-					template : 'test',
-					renderer : 'tplui'
-				},
-				params : {
-					tabtitle : 'ServiceClient',
-					isclosable : true,
-					autoload : false,
-					loadurl : 'data.json.php',
-					loadparams : {}
-				}
-			});
-			/*
-			sckernel.paint({
-				task : {
-					view : 'element',
-					template : false,
-					renderer : 'treeui'
-				},
-				params : {
-					elementid : 'tree-container',
-					loadurl : 'navigation.php',
-					roottext : 'Demo',
-					rootid : '/',
-					border : false,
-					useArrows : true
-				}
-			});*/
-	});
-	</script>  		
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading jQuery Core ...';
+		</script>
+		<script type="text/javascript" src="/libraries/jquery/jquery-1.6.1.min.js"></script>
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading jQuery UI ...';
+		</script>
+		<script type="text/javascript" src="/libraries/jquery/jquery-ui-1.8.13.min.js"></script>
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading jQuery Templates ...';
+		</script>
+		<script type="text/javascript" src="/libraries/jquery/jquery.template.js"></script>
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading jQuery ServiceClient ...';
+		</script>
+		<script type="text/javascript" src="/services/serviceclient/dist/jquery-serviceclient.js"></script>		
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading Demo Templates ...';
+		</script>
+		<script type="text/javascript" src="tpl/Test.tpl.js"></script>		
+		<script type="text/javascript">
+			$(document).ready(function(){
+				var load_el = $('#load-status');
+				load_el.html('Initializing ...');
+				load_el.fadeOut(5000);
+				
+				var sckernel = ServiceClient.client.Kernel;
+				var screg = ServiceClient.client.Registry;
+				
+				screg.addModule('alert', ServiceClient.jquery.module.Alert);
+				
+				screg.addRenderer('tplui', ServiceClient.jquery.renderer.TemplateUI);
+				//screg.addRenderer('treeui', ServiceClient.jquery.renderer.TreeUI);
+				screg.addRenderer('tabui', ServiceClient.jquery.view.TabUI);
+				//screg.addRenderer('accform', ServiceClient.jquery.renderer.AccountForm);
+				screg.addView('element', ServiceClient.jquery.view.ElementView);
+				screg.addView('tabui', sckernel.paint({
+					task : {
+						view : 'element',
+						template : false,
+						renderer : 'tabui'
+					},
+					params : {
+						elementid : '#tab-container',
+						event : 'click',
+						indexstart : 1
+					}
+				}));
+				screg.addTemplate('test', TestTemplate);
+				
+				/*
+				sckernel.paint({
+					task : {
+						view : 'element',
+						template : 'test',
+						renderer : 'tplui'
+					},
+					params : {
+						elementid : '#test-container',
+						loadurl : 'data.json.php',
+						loadparams : {}
+					}
+				});*/
+				
+				sckernel.paint({
+					task : {
+						view : 'tabui',
+						template : 'test',
+						renderer : 'tplui'
+					},
+					params : {
+						tabtitle : 'ServiceClient',
+						isclosable : true,
+						autoload : false,
+						loadurl : 'data.json.php',
+						loadparams : {}
+					}
+				});
+				/*
+				sckernel.paint({
+					task : {
+						view : 'element',
+						template : false,
+						renderer : 'treeui'
+					},
+					params : {
+						elementid : 'tree-container',
+						loadurl : 'navigation.php',
+						roottext : 'Demo',
+						rootid : '/',
+						border : false,
+						useArrows : true
+					}
+				});*/
+		});
+		</script>  		
 	</body>
 </html>

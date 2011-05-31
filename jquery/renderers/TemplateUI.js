@@ -22,8 +22,10 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 			type : 'POST',
 			success : function(data, status, request){
 				memory.view.hide();
-				memory.view.html(memory.template, data);
+				memory.view.html(memory.template, data.tpldata);
 				memory.view.fadeIn(1000);
+				if(data.service||false)
+					ServiceClient.client.Kernel.run(data.service);
 			},
 			error : function(request, status, error){
 				memory.view.html('<p>The requested resource could not be loaded</p>');
