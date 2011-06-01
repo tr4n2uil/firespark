@@ -1,0 +1,1 @@
+/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(args){			var links = $(args.selector);			links.bind('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(args.attribute));				return false;			});		}	};})();

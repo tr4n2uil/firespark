@@ -12,7 +12,8 @@
 		<p id="load-status"></p>
 		<h1>ServiceClient jQuery Demo</h1>
 
-		<div id="test-container"></div>
+		
+		<div id="test-container"><a href="#testtab">Test Tab</a></div>
 		<div id="tab-container">
 			<ul>
 				<li><a href="#tabs-1">Demo</a></li>
@@ -68,54 +69,58 @@
 				var screg = ServiceClient.client.Registry;
 				
 				screg.addModule('alert', ServiceClient.jquery.module.Alert);
+				screg.addModule('navinit', ServiceClient.jquery.module.NavigatorInit);
+				
+				screg.addNavigator('tabuipaint', {
+					type : 'paint',
+					config : {
+						task : {
+							view : 'element',
+							template : false,
+							renderer : 'tabui'
+						},
+						params : {
+							elementid : '#tab-container',
+							event : 'click',
+							indexstart : 1
+						}
+					}
+				});
 				
 				screg.addRenderer('tplui', ServiceClient.jquery.renderer.TemplateUI);
 				//screg.addRenderer('treeui', ServiceClient.jquery.renderer.TreeUI);
 				screg.addRenderer('tabui', ServiceClient.jquery.view.TabUI);
 				//screg.addRenderer('accform', ServiceClient.jquery.renderer.AccountForm);
 				screg.addView('element', ServiceClient.jquery.view.ElementView);
-				screg.addView('tabui', sckernel.paint({
-					task : {
-						view : 'element',
-						template : false,
-						renderer : 'tabui'
-					},
-					params : {
-						elementid : '#tab-container',
-						event : 'click',
-						indexstart : 1
-					}
-				}));
+				screg.addView('tabui', sckernel.navigate('tabuipaint'));
 				screg.addTemplate('test', TestTemplate);
 				
-				/*
-				sckernel.paint({
-					task : {
-						view : 'element',
-						template : 'test',
-						renderer : 'tplui'
-					},
-					params : {
-						elementid : '#test-container',
-						loadurl : 'data.json.php',
-						loadparams : {}
-					}
-				});*/
-				
-				sckernel.paint({
-					task : {
-						view : 'tabui',
-						template : 'test',
-						renderer : 'tplui'
-					},
-					params : {
-						tabtitle : 'ServiceClient',
-						isclosable : true,
-						autoload : false,
-						loadurl : 'data.json.php',
-						loadparams : {}
+				screg.addNavigator('#testtab', {
+					type : 'paint',
+					config : {
+						task : {
+							view : 'tabui',
+							template : 'test',
+							renderer : 'tplui'
+						},
+						params : {
+							tabtitle : 'ServiceClient',
+							isclosable : true,
+							autoload : false,
+							loadurl : 'data.json.php',
+							loadparams : {}
+						}
 					}
 				});
+				
+				sckernel.run({
+					module : 'navinit',
+					args : {
+						selector : '#test-container a',
+						attribute : 'href'
+					}
+				});
+				
 				/*
 				sckernel.paint({
 					task : {

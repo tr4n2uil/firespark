@@ -38,6 +38,15 @@ ServiceClient.client = (function(){
 	**/
 	var modules = new Array();
 	
+	/**
+	 *	navigators are JSON objects that pass messages to the kernel
+	 *	navigator = {	
+	 *		type : 'paint'
+	 *		config : { ... config object for paint() ... }
+	 *	};
+	**/
+	var navigators = new Array();
+	
 	return {
 		/**
 		 *	Registry manages references to
@@ -45,6 +54,7 @@ ServiceClient.client = (function(){
 		 *	Templates
 		 *	Renderers
 		 *	Modules
+		 *	Navigators
 		**/
 		Registry : {
 			/**
@@ -73,6 +83,13 @@ ServiceClient.client = (function(){
 			**/
 			addModule : function(index, module){
 				modules[index] = module;
+			},
+			
+			/**
+			 *	adds a navigator with index
+			**/
+			addNavigator : function(index, navigator){
+				navigators[index] = navigator;
 			}
 		},
 		/**
@@ -82,6 +99,7 @@ ServiceClient.client = (function(){
 		 *		instantiates the renderer
 		 *		calls render method of renderer which can access the view and/or template initialized in memory
 		 *		executes modules
+		 *		processes navigators when received
 		**/
 		Kernel : {
 			/**
@@ -110,10 +128,27 @@ ServiceClient.client = (function(){
 			},
 			
 			/** 
-			 *	starts the kernel to execute the module after instantiation
+			 *	executes the module with the given arguments
 			**/
 			run : function(config){
 				return modules[config.module].execute(config.args);
+			},
+			
+			/**
+			 *	processes the navigator received to provide services defined above like paint and run
+			**/
+			navigate : function(index){
+				var navigator = navigators[index];
+				switch(navigator.type){
+					case 'paint' :
+						return this.paint(navigator.config);
+						break;
+					case 'run' :
+						return this.run(navigator.config);
+						break;
+					default :
+						break;
+				}
 			}
 		}
 	};
@@ -222,8 +257,10 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 				memory.view.hide();
 				memory.view.html($.tmpl(memory.template, data.tpldata))
 				memory.view.fadeIn(1000);
-				if(data.service||false)
-					ServiceClient.client.Kernel.run(data.service);
+				if(data.service||false){
+					for(var i in data.service)
+						ServiceClient.client.Kernel.run(data.service[i]);
+				}
 			},
 			error : function(request, status, error){
 				memory.view.html('<p>The requested resource could not be loaded</p>');
@@ -231,4 +268,4 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 		});
 	}
 }
-/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(args){			alert(args.title + " : " + args.data);		}	};})();
+/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(args){			alert(args.title + " : " + args.data);		}	};})();/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(args){			var links = $(args.selector);			links.bind('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(args.attribute));				return false;			});		}	};})();
