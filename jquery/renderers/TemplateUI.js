@@ -7,7 +7,7 @@
 **/
 ServiceClient.jquery.renderer.TemplateUI = function(params){
 	var loadurl = params.loadurl;
-	var loadparams = params.loadparams;
+	var loadparams = params.loadparams || {};
 	
 	/**
 	 * @param view View

@@ -264,7 +264,7 @@ ServiceClient.jquery.view.TabUI = function(params){
 	this.getView = function(params){
 		index++;
 		var url = '#ui-tab-'+index;
-		if(params.autoload){
+		if(params.autoload || false){
 			url = params.taburl;
 		}
 		tabpanel.tabs('add', url, params.tabtitle);
@@ -281,7 +281,7 @@ ServiceClient.jquery.view.TabUI = function(params){
 **/
 ServiceClient.jquery.renderer.TemplateUI = function(params){
 	var loadurl = params.loadurl;
-	var loadparams = params.loadparams;
+	var loadparams = params.loadparams || {};
 	
 	/**
 	 * @param view View
@@ -310,4 +310,4 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 		});
 	}
 }
-/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(params){			alert(params.title + " : " + params.data);		}	};})();/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(params){			var links = $(params.selector);			links.bind('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(params.attribute));				return false;			});		}	};})();/** *	TestTab navigator * *	@param tabtitle string ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : 'paint',		view : 'tabui',		template : 'test',		renderer : 'tplui',		params : {			tabtitle : config.tabtitle || 'Testing',			isclosable : true,			autoload : false,			loadurl : config.loadurl || 'data.json.php',			loadparams : {}		}	}];}
+/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(params){			alert(params.title + " : " + params.data);		}	};})();/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(params){			var links = $(params.selector);			links.bind('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(params.attribute));				return false;			});		}	};})();/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : 'paint',		view : 'tabui',		template : 'test',		renderer : 'tplui',		params : {			tabtitle : config.tabtitle || 'Testing',			loadurl : config.loadurl || 'data.json.php'		}	}];}

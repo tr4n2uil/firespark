@@ -51,7 +51,7 @@ ServiceClient.jquery.view.TabUI = function(params){
 	this.getView = function(params){
 		index++;
 		var url = '#ui-tab-'+index;
-		if(params.autoload){
+		if(params.autoload || false){
 			url = params.taburl;
 		}
 		tabpanel.tabs('add', url, params.tabtitle);
