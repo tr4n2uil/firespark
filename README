@@ -13,6 +13,8 @@ JavaScript Library Neutral Framework
 		Views
 		Renderers
 		Modules
+		Navigators
 	Kernel
 		paint()
 		run()
+		navigate()

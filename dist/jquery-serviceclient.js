@@ -23,6 +23,11 @@ ServiceClient.client = (function(){
 	var templates = new Array();
 	
 	/**
+	 *	requestors are data request managers controlling the generation of a request for data from server
+	**/
+	var requestors = new Array();
+	
+	/**
 	 *	renderers are output generators that use the view and optional template to display the content appropriately 
 	 *	interface Renderer {
 	 *		function render(object memory);
@@ -33,7 +38,7 @@ ServiceClient.client = (function(){
 	/**
 	 *	modules are generic operations 
 	 *	interface Module {
-	 *		function execute(object args);
+	 *		function execute(object params);
 	 *	}
 	**/
 	var modules = new Array();
@@ -41,8 +46,8 @@ ServiceClient.client = (function(){
 	/**
 	 *	navigators are JSON objects that pass messages to the kernel
 	 *	navigator = {	
-	 *		type : 'paint'
-	 *		config : { ... config object for paint() ... }
+	 *		service : 'paint'
+	 *		... other properties for paint() ... 
 	 *	};
 	**/
 	var navigators = new Array();
@@ -52,6 +57,7 @@ ServiceClient.client = (function(){
 		 *	Registry manages references to
 		 * 	ViewGenerators
 		 *	Templates
+		 *	Requestors
 		 *	Renderers
 		 *	Modules
 		 *	Navigators
@@ -65,28 +71,35 @@ ServiceClient.client = (function(){
 			},
 			
 			/**
-			 *	adds a template with index
+			 *	adds a Template with index
 			**/
 			addTemplate : function(index, template){
 				templates[index] = template;
 			},
 			
 			/**
-			 *	adds a renderer with index
+			 *	adds a Requestor with index
+			**/
+			addRequestor : function(index, requestor){
+				requestors[index] = requestor;
+			},
+			
+			/**
+			 *	adds a Renderer with index
 			**/
 			addRenderer : function(index, renderer){
 				renderers[index] = renderer;
 			},
 			
 			/**
-			 *	adds a module with index
+			 *	adds a Module with index
 			**/
 			addModule : function(index, module){
 				modules[index] = module;
 			},
 			
 			/**
-			 *	adds a navigator with index
+			 *	adds a Navigator with index
 			**/
 			addNavigator : function(index, navigator){
 				navigators[index] = navigator;
@@ -96,59 +109,85 @@ ServiceClient.client = (function(){
 		 *	Kernel manages the following client tasks when required
 		 *		initializes the view into memory
 		 *		initializes the template into memory
+		 *		initializes the requestor into memory
 		 *		instantiates the renderer
 		 *		calls render method of renderer which can access the view and/or template initialized in memory
 		 *		executes modules
-		 *		processes navigators when received
+		 *		processes navigator requests when received
 		**/
 		Kernel : {
 			/**
 			 *	paints the view using the renderer with optional template
 			**/
 			paint : function(config){
-				var task = config.task;
 				var params = config.params;
 				var memory = {};
 				
-				if(task.view !== false){
-					memory.view = views[task.view].getView(params);
+				if(config.view || false){
+					memory.view = views[config.view].getView(params);
+				} else {
+					return 0;
 				}
 					
-				if(task.template !== false){
-					memory.template = templates[task.template];
+				if(config.template || false){
+					memory.template = templates[config.template];
 				}
 				
-				if(task.renderer !== false){
-					var renderer = new (renderers[task.renderer])(params);
+				if(config.requestor || false){
+					memory.requestor = new (requestors[config.requestor])(params);
+				}
+				
+				if(config.renderer || false){
+					var renderer = new (renderers[config.renderer])(params);
 					renderer.render(memory);
 					return renderer;
 				}
 				
-				return renderer;
+				return 0;
 			},
 			
 			/** 
 			 *	executes the module with the given arguments
 			**/
 			run : function(config){
-				return modules[config.module].execute(config.args);
+				if(config.module || false){
+					return modules[config.module].execute(config.params);
+				}
+				
+				return 0;
 			},
 			
 			/**
-			 *	processes the navigator received to provide services defined above like paint and run
+			 *	processes the navigator request received to provide services defined above like paint and run
 			**/
-			navigate : function(index){
-				var navigator = navigators[index];
-				switch(navigator.type){
-					case 'paint' :
-						return this.paint(navigator.config);
-						break;
-					case 'run' :
-						return this.run(navigator.config);
-						break;
-					default :
-						break;
+			navigate : function(request){
+				var req = request.split(':');
+				var index = req[0];
+				var lastresult = 0;
+				
+				var config = new Array();
+				for(var i=1, len=req.length; i<len; i++){
+					var param = (req[i]).split('=');
+					config[param[0]] = param[1];
 				}
+				
+				if(navigators[index] || false){
+					var navigator = new (navigators[index])(config);
+					for(var i in navigator){
+						switch(navigator[i].service){
+							case 'paint' :
+								lastresult = this.paint(navigator[i]);
+								break;
+							case 'run' :
+								lastresult = this.run(navigator[i]);
+								break;
+							default :
+								break;
+						}
+					}
+				}
+				
+				return lastresult;
 			}
 		}
 	};
@@ -158,6 +197,8 @@ ServiceClient.jquery = {};
 ServiceClient.jquery.view = {};
 ServiceClient.jquery.module = {};
 ServiceClient.jquery.renderer = {};
+ServiceClient.jquery.navigator = {};
+ServiceClient.jquery.requestors = {};
 /**
  * ElementView view
  *
@@ -257,9 +298,10 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 				memory.view.hide();
 				memory.view.html($.tmpl(memory.template, data.tpldata))
 				memory.view.fadeIn(1000);
-				if(data.service||false){
-					for(var i in data.service)
-						ServiceClient.client.Kernel.run(data.service[i]);
+				
+				if(data.services||false){
+					for(var i in data.services)
+						ServiceClient.client.Kernel.run(data.services[i]);
 				}
 			},
 			error : function(request, status, error){
@@ -268,4 +310,4 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 		});
 	}
 }
-/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(args){			alert(args.title + " : " + args.data);		}	};})();/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(args){			var links = $(args.selector);			links.bind('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(args.attribute));				return false;			});		}	};})();
+/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(params){			alert(params.title + " : " + params.data);		}	};})();/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(params){			var links = $(params.selector);			links.bind('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(params.attribute));				return false;			});		}	};})();/** *	TestTab navigator * *	@param tabtitle string ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : 'paint',		view : 'tabui',		template : 'test',		renderer : 'tplui',		params : {			tabtitle : config.tabtitle || 'Testing',			isclosable : true,			autoload : false,			loadurl : config.loadurl || 'data.json.php',			loadparams : {}		}	}];}
