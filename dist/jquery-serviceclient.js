@@ -198,7 +198,7 @@ ServiceClient.jquery.view = {};
 ServiceClient.jquery.module = {};
 ServiceClient.jquery.renderer = {};
 ServiceClient.jquery.navigator = {};
-ServiceClient.jquery.requestors = {};
+ServiceClient.jquery.requestor = {};
 /**
  * ElementView view
  *
@@ -310,4 +310,4 @@ ServiceClient.jquery.renderer.TemplateUI = function(params){
 		});
 	}
 }
-/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(params){			alert(params.title + " : " + params.data);		}	};})();/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(params){			var links = $(params.selector);			links.bind('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(params.attribute));				return false;			});		}	};})();/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : 'paint',		view : 'tabui',		template : 'test',		renderer : 'tplui',		params : {			tabtitle : config.tabtitle || 'Testing',			loadurl : config.loadurl || 'data.json.php'		}	}];}
+/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(params){			alert(params.title + " : " + params.data);		}	};})();/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(params){			var links = $(params.selector);			links.live('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(params.attribute));				return false;			});		}	};})();/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : 'paint',		view : 'tabui',		template : 'test',		renderer : 'tplui',		params : {			tabtitle : config.tabtitle || 'Testing',			loadurl : config.loadurl || 'data.json.php'		}	}];}
