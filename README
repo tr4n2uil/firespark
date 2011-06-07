@@ -12,8 +12,8 @@ JavaScript Library Neutral Framework
 	Registry
 		Views
 		Renderers
-		Requestors
 		Templates
+		Loaders
 		Modules
 		Navigators
 	Kernel
