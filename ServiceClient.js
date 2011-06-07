@@ -3,167 +3,151 @@
  *	JavaScript UI Framework for consuming Services 
  *	
  *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
+ *	Services are generic modules providing resuable stateless functionalities
+ *
+ *	interface Service {
+ *		public function run(message, memory){
+ *			... use message for receiving configurations ...
+ *			... use memory for managing state in workflows ...
+ *			... save reference in Registry instead of returning objects ...
+ *		}
+ *	}
  *	
 **/
 
-var ServiceClient = {};
-
-ServiceClient.client = (function(){
+var ServiceClient = (function(){
 	/**
-	 *	views are containers/generators that generates the element where the output must be rendered 
-	 *	interface ViewGenerator {
-	 *		function getView(object params);
-	 *	}
+	 *	@var references array
+	 *
+	 *	an array for saving references
+	 *	references may be accessed through the Registry
+	 *
 	**/
-	var views = new Array();
+	var references = new Array();
 	
 	/**
-	 *	templates are compiled html that is fed with data from the server and rendered to the view 
-	**/
-	var templates = new Array();
-	
-	/**
-	 *	requestors are data request managers controlling the generation of a request for data from server
-	**/
-	var requestors = new Array();
-	
-	/**
-	 *	renderers are output generators that use the view and optional template to display the content appropriately 
-	 *	interface Renderer {
-	 *		function render(object memory);
-	 *	}
-	**/
-	var renderers = new Array();
-	
-	/**
-	 *	modules are generic operations 
-	 *	interface Module {
-	 *		function execute(object params);
-	 *	}
-	**/
-	var modules = new Array();
-	
-	/**
-	 *	navigators are JSON objects that pass messages to the kernel
-	 *	navigator = {	
-	 *		service : 'paint'
-	 *		... other properties for paint() ... 
-	 *	};
+	 *	@var navigators array
+	 *
+	 *	an array that saves indexes to service workflows
+	 *	workflow = [{	
+	 *		service : ...,
+	 *		message : { ... }
+	 *	}];
+	 *
+	 *	indexes usually starts with # (href programming)
+	 *	navigator is index followed by parameters to be overrided delimited by ':'
+	 *
+	 *	example #testtab:tabtitle=Krishna:loadurl=test.php
+	 *
 	**/
 	var navigators = new Array();
 	
 	return {
 		/**
-		 *	Registry manages references to
-		 * 	ViewGenerators
-		 *	Templates
-		 *	Requestors
-		 *	Renderers
-		 *	Modules
-		 *	Navigators
+		 *	@var Registry object
+		 *	
+		 *	manages references and navigator indexes
+		 *
 		**/
 		Registry : {
 			/**
-			 *	adds a ViewGenerator with index
+			 *	saves a Reference with index
+			 *
+			 *	@param index string
+			 *	@param reference object or any type
+			 *
 			**/
-			addView : function(index, view){
-				views[index] = view;
+			save : function(index, reference){
+				references[index] = reference;
 			},
 			
 			/**
-			 *	adds a Template with index
+			 *	gets the Reference for index
+			 *
+			 *	@param index string
+			 *
 			**/
-			addTemplate : function(index, template){
-				templates[index] = template;
+			get : function(index){
+				return references[index];
 			},
 			
 			/**
-			 *	adds a Requestor with index
+			 *	removes a Reference with index
+			 *
+			 *	@param index string
+			 *
 			**/
-			addRequestor : function(index, requestor){
-				requestors[index] = requestor;
-			},
-			
-			/**
-			 *	adds a Renderer with index
-			**/
-			addRenderer : function(index, renderer){
-				renderers[index] = renderer;
-			},
-			
-			/**
-			 *	adds a Module with index
-			**/
-			addModule : function(index, module){
-				modules[index] = module;
+			remove : function(index){
+				references[index] = 0;
 			},
 			
 			/**
 			 *	adds a Navigator with index
+			 *
+			 *	@param index string
+			 *	@param navigator object
+			 *
 			**/
-			addNavigator : function(index, navigator){
+			add : function(index, navigator){
 				navigators[index] = navigator;
+			},
+			
+			/**
+			 *	removes a Navigator with index
+			 *
+			 *	@param index string
+			 *
+			**/
+			removeNavigator : function(index){
+				navigators[index] = 0;
 			}
 		},
+		
 		/**
-		 *	Kernel manages the following client tasks when required
-		 *		initializes the view into memory
-		 *		initializes the template into memory
-		 *		initializes the requestor into memory
-		 *		instantiates the renderer
-		 *		calls render method of renderer which can access the view and/or template initialized in memory
-		 *		executes modules
-		 *		processes navigator requests when received
+		 *	@var Kernel object
+		 *	
+		 *	manages the following tasks
+		 *		runs services when requested
+		 *		processes navigators when received
+		 *
 		**/
-		Kernel : {
-			/**
-			 *	paints the view using the renderer with optional template
-			**/
-			paint : function(config){
-				var params = config.params;
-				var memory = {};
-				
-				if(config.view || false){
-					memory.view = views[config.view].getView(params);
-				} else {
-					return 0;
-				}
-					
-				if(config.template || false){
-					memory.template = templates[config.template];
-				}
-				
-				if(config.requestor || false){
-					memory.requestor = new (requestors[config.requestor])(params);
-				}
-				
-				if(config.renderer || false){
-					var renderer = new (renderers[config.renderer])(params);
-					renderer.render(memory);
-					return renderer;
-				}
-				
-				return 0;
-			},
-			
+		Kernel : {			
 			/** 
-			 *	executes the module with the given arguments
+			 *	executes a workflow with the given definition
+			 *
+			 *	@param config object
+			 *	@param mem object optional
+			 *
 			**/
-			run : function(config){
-				if(config.module || false){
-					return modules[config.module].execute(config.params);
+			run : function(config, mem){
+				/**
+				 *	create a new memory if not passed
+				**/
+				var memory = mem || {};
+				
+				for(var i in config){
+					var service = config[i].service;
+					var message = config[i].message;
+					/**
+					 *	run the service with the message and memory
+					**/
+					if(service.run(message, memory) !== true)
+						return false;
 				}
 				
-				return 0;
+				return true;
 			},
 			
 			/**
-			 *	processes the navigator request received to provide services defined above like paint and run
+			 *	processes the navigator request received to run services and workflows
+			 *
+			 *	@param request string
+			 *
 			**/
 			navigate : function(request){
 				var req = request.split(':');
 				var index = req[0];
-				var lastresult = 0;
 				
 				var config = new Array();
 				for(var i=1, len=req.length; i<len; i++){
@@ -173,21 +157,10 @@ ServiceClient.client = (function(){
 				
 				if(navigators[index] || false){
 					var navigator = new (navigators[index])(config);
-					for(var i in navigator){
-						switch(navigator[i].service){
-							case 'paint' :
-								lastresult = this.paint(navigator[i]);
-								break;
-							case 'run' :
-								lastresult = this.run(navigator[i]);
-								break;
-							default :
-								break;
-						}
-					}
+					return this.run(navigator);
 				}
 				
-				return lastresult;
+				return 0;
 			}
 		}
 	};

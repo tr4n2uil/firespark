@@ -1,1 +1,1 @@
-/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(params){			alert(params.title + " : " + params.data);		}	};})();
+/** *	Alert module * *	@param title string *	@param data content (text) ***/ServiceClient.jquery.module.Alert = {	run : function(message, memory){		alert(message.title + " : " + message.data);		return true;	}};

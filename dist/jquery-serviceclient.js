@@ -3,167 +3,151 @@
  *	JavaScript UI Framework for consuming Services 
  *	
  *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
+ *	Services are generic modules providing resuable stateless functionalities
+ *
+ *	interface Service {
+ *		public function run(message, memory){
+ *			... use message for receiving configurations ...
+ *			... use memory for managing state in workflows ...
+ *			... save reference in Registry instead of returning objects ...
+ *		}
+ *	}
  *	
 **/
 
-var ServiceClient = {};
-
-ServiceClient.client = (function(){
+var ServiceClient = (function(){
 	/**
-	 *	views are containers/generators that generates the element where the output must be rendered 
-	 *	interface ViewGenerator {
-	 *		function getView(object params);
-	 *	}
+	 *	@var references array
+	 *
+	 *	an array for saving references
+	 *	references may be accessed through the Registry
+	 *
 	**/
-	var views = new Array();
+	var references = new Array();
 	
 	/**
-	 *	templates are compiled html that is fed with data from the server and rendered to the view 
-	**/
-	var templates = new Array();
-	
-	/**
-	 *	requestors are data request managers controlling the generation of a request for data from server
-	**/
-	var requestors = new Array();
-	
-	/**
-	 *	renderers are output generators that use the view and optional template to display the content appropriately 
-	 *	interface Renderer {
-	 *		function render(object memory);
-	 *	}
-	**/
-	var renderers = new Array();
-	
-	/**
-	 *	modules are generic operations 
-	 *	interface Module {
-	 *		function execute(object params);
-	 *	}
-	**/
-	var modules = new Array();
-	
-	/**
-	 *	navigators are JSON objects that pass messages to the kernel
-	 *	navigator = {	
-	 *		service : 'paint'
-	 *		... other properties for paint() ... 
-	 *	};
+	 *	@var navigators array
+	 *
+	 *	an array that saves indexes to service workflows
+	 *	workflow = [{	
+	 *		service : ...,
+	 *		message : { ... }
+	 *	}];
+	 *
+	 *	indexes usually starts with # (href programming)
+	 *	navigator is index followed by parameters to be overrided delimited by ':'
+	 *
+	 *	example #testtab:tabtitle=Krishna:loadurl=test.php
+	 *
 	**/
 	var navigators = new Array();
 	
 	return {
 		/**
-		 *	Registry manages references to
-		 * 	ViewGenerators
-		 *	Templates
-		 *	Requestors
-		 *	Renderers
-		 *	Modules
-		 *	Navigators
+		 *	@var Registry object
+		 *	
+		 *	manages references and navigator indexes
+		 *
 		**/
 		Registry : {
 			/**
-			 *	adds a ViewGenerator with index
+			 *	saves a Reference with index
+			 *
+			 *	@param index string
+			 *	@param reference object or any type
+			 *
 			**/
-			addView : function(index, view){
-				views[index] = view;
+			save : function(index, reference){
+				references[index] = reference;
 			},
 			
 			/**
-			 *	adds a Template with index
+			 *	gets the Reference for index
+			 *
+			 *	@param index string
+			 *
 			**/
-			addTemplate : function(index, template){
-				templates[index] = template;
+			get : function(index){
+				return references[index];
 			},
 			
 			/**
-			 *	adds a Requestor with index
+			 *	removes a Reference with index
+			 *
+			 *	@param index string
+			 *
 			**/
-			addRequestor : function(index, requestor){
-				requestors[index] = requestor;
-			},
-			
-			/**
-			 *	adds a Renderer with index
-			**/
-			addRenderer : function(index, renderer){
-				renderers[index] = renderer;
-			},
-			
-			/**
-			 *	adds a Module with index
-			**/
-			addModule : function(index, module){
-				modules[index] = module;
+			remove : function(index){
+				references[index] = 0;
 			},
 			
 			/**
 			 *	adds a Navigator with index
+			 *
+			 *	@param index string
+			 *	@param navigator object
+			 *
 			**/
-			addNavigator : function(index, navigator){
+			add : function(index, navigator){
 				navigators[index] = navigator;
+			},
+			
+			/**
+			 *	removes a Navigator with index
+			 *
+			 *	@param index string
+			 *
+			**/
+			removeNavigator : function(index){
+				navigators[index] = 0;
 			}
 		},
+		
 		/**
-		 *	Kernel manages the following client tasks when required
-		 *		initializes the view into memory
-		 *		initializes the template into memory
-		 *		initializes the requestor into memory
-		 *		instantiates the renderer
-		 *		calls render method of renderer which can access the view and/or template initialized in memory
-		 *		executes modules
-		 *		processes navigator requests when received
+		 *	@var Kernel object
+		 *	
+		 *	manages the following tasks
+		 *		runs services when requested
+		 *		processes navigators when received
+		 *
 		**/
-		Kernel : {
-			/**
-			 *	paints the view using the renderer with optional template
-			**/
-			paint : function(config){
-				var params = config.params;
-				var memory = {};
-				
-				if(config.view || false){
-					memory.view = views[config.view].getView(params);
-				} else {
-					return 0;
-				}
-					
-				if(config.template || false){
-					memory.template = templates[config.template];
-				}
-				
-				if(config.requestor || false){
-					memory.requestor = new (requestors[config.requestor])(params);
-				}
-				
-				if(config.renderer || false){
-					var renderer = new (renderers[config.renderer])(params);
-					renderer.render(memory);
-					return renderer;
-				}
-				
-				return 0;
-			},
-			
+		Kernel : {			
 			/** 
-			 *	executes the module with the given arguments
+			 *	executes a workflow with the given definition
+			 *
+			 *	@param config object
+			 *	@param mem object optional
+			 *
 			**/
-			run : function(config){
-				if(config.module || false){
-					return modules[config.module].execute(config.params);
+			run : function(config, mem){
+				/**
+				 *	create a new memory if not passed
+				**/
+				var memory = mem || {};
+				
+				for(var i in config){
+					var service = config[i].service;
+					var message = config[i].message;
+					/**
+					 *	run the service with the message and memory
+					**/
+					if(service.run(message, memory) !== true)
+						return false;
 				}
 				
-				return 0;
+				return true;
 			},
 			
 			/**
-			 *	processes the navigator request received to provide services defined above like paint and run
+			 *	processes the navigator request received to run services and workflows
+			 *
+			 *	@param request string
+			 *
 			**/
 			navigate : function(request){
 				var req = request.split(':');
 				var index = req[0];
-				var lastresult = 0;
 				
 				var config = new Array();
 				for(var i=1, len=req.length; i<len; i++){
@@ -173,21 +157,10 @@ ServiceClient.client = (function(){
 				
 				if(navigators[index] || false){
 					var navigator = new (navigators[index])(config);
-					for(var i in navigator){
-						switch(navigator[i].service){
-							case 'paint' :
-								lastresult = this.paint(navigator[i]);
-								break;
-							case 'run' :
-								lastresult = this.run(navigator[i]);
-								break;
-							default :
-								break;
-						}
-					}
+					return this.run(navigator);
 				}
 				
-				return lastresult;
+				return 0;
 			}
 		}
 	};
@@ -196,118 +169,156 @@ ServiceClient.jquery = {};
 
 ServiceClient.jquery.view = {};
 ServiceClient.jquery.module = {};
+ServiceClient.jquery.loader = {};
 ServiceClient.jquery.renderer = {};
 ServiceClient.jquery.navigator = {};
 ServiceClient.jquery.requestor = {};
+ServiceClient.jquery.template = {};
 /**
  * ElementView view
  *
  * @param elementid string
+ *
+ *	@return view object
+ *
 **/
-ServiceClient.jquery.view.ElementView = (function(){
-	return {
-		getView : function(params){
-			return $(params.elementid);
-		}
-	};
-})();
+ServiceClient.jquery.view.ElementView = {
+	run : function(message, memory){
+		memory.view = $(message.elementid);
+		return true;
+	}
+};
 /**
- *	TabUI renderer and view generator
+ *	TabUIAdd view
+ *
+ *	@param tabui string
+ *  @param tabtitle string
+ *  @param autoload boolean
+ *  @param taburl string
+ *
+ *	@return view View
+ *
+**/
+ServiceClient.jquery.view.TabUIAdd = {
+	run : function(message, memory){
+		var tabui = ServiceClient.Registry.get(message.tabui);
+		memory.view = tabui.add(message.tabtitle, message.autoload || false, message.taburl || false);
+		return true;
+	}
+};
+/**
+ *	TabUI renderer
  *
  *	@param cache boolean
  *	@param collapsible boolean
  *	@param event string
  *	@param tablink boolean
  *	@param indexstart integer
+ *	@param saveindex string
+ *
+ *	@param view View
+ *
+ *	@save tabpanel object
  *
 **/
-ServiceClient.jquery.view.TabUI = function(params){
-	var tab = new Array();
-	var index = params.indexstart || 0;
-	var options = {
-		cache : params.cache || false,
-		collapsible : params.collapsible || false,
-		event : params.event || 'click',
-		tabTemplate: "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",
-		add: function( event, ui ) {
-			tab[index] = $(ui.panel);
+ServiceClient.jquery.renderer.TabUI = {
+	run : function(message, memory){
+		var tab = new Array();
+		var index = message.indexstart || 0;
+		
+		var options = {
+			cache : message.cache || false,
+			collapsible : message.collapsible || false,
+			event : message.event || 'click',
+			tabTemplate: "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",
+			add: function( event, ui ) {
+				tab[index] = $(ui.panel);
+			}
+		};
+		
+		if(message.tablink || false){
+			options.load = function(event, ui) {
+				$('a', ui.panel).click(function() {
+					$(ui.panel).load(this.href);
+					return false;
+				});
+			}
 		}
-	};
-	if(params.tablink || false){
-		options.load = function(event, ui) {
-			$('a', ui.panel).click(function() {
-				$(ui.panel).load(this.href);
-				return false;
-			});
-		}
-	}
-	var tabpanel = null;
-	
-	/**
-	 * @param view View
-	**/
-	this.render = function(memory){
-		tabpanel = memory.view.tabs(options);
+		
+		var tabpanel = memory.view.tabs(options);
 		memory.view.fadeIn(1000);
+		
 		$('.ui-icon-close').live( "click", function() {
 			var indx = $("li", tabpanel).index($(this).parent());
 			tabpanel.tabs( "remove", indx );
 		});
 		index--;
-	}
-	
-	/**
-	 *  @param tabtitle string
-	 *  @param autoload boolean
-	 *  @param taburl string
-	**/
-	this.getView = function(params){
-		index++;
-		var url = '#ui-tab-'+index;
-		if(params.autoload || false){
-			url = params.taburl;
-		}
-		tabpanel.tabs('add', url, params.tabtitle);
-		tabpanel.tabs('select', '#ui-tab-'+index);
-		return tab[index];
-	}
-}
+		
+		ServiceClient.Registry.save(message.saveindex, {
+			add : function(tabtitle, autoload, taburl){
+				index++;
+				var url = '#ui-tab-'+index;
+				if(autoload || false){
+					url = taburl;
+				}
+				tabpanel.tabs('add', url, tabtitle);
+				tabpanel.tabs('select', '#ui-tab-'+index);
+				return tab[index];
+			}
+		});
+		return true;
+	}	
+};
 /**
  *	TemplateUI renderer
  *
- *	@param loadurl string
- *	@param loadparams object
+ *	@param template Template
+ *
+ *	@param data object
  *
 **/
-ServiceClient.jquery.renderer.TemplateUI = function(params){
-	var loadurl = params.loadurl;
-	var loadparams = params.loadparams || {};
-	
-	/**
-	 * @param view View
-	 * @param template Template
-	**/
-	this.render = function(memory){
-		memory.view.html('<p>Loading ...</p>');
+ServiceClient.jquery.renderer.TemplateUI = {
+	run : function(message, memory){
+		memory.view.hide();
+		memory.view.html($.tmpl(message.template, memory.data))
+		memory.view.fadeIn(1000);
+		return true;
+	}
+};
+/**
+ *	AjaxLoader loader
+ *
+ *	@param loadurl string
+ *	@param workflow Workflow
+ *	
+ *	@param view View
+ *	@param loadurl string
+ *	@param loadparams object
+ *	@param	datatype string
+ *	@param request string
+ *
+ *	@return data string
+ *	@return status integer
+ *
+**/
+ServiceClient.jquery.loader.AjaxLoader = {
+	run : function(message, memory){
+		memory.view.html('<p class="loading">Loading ...</p>');
 		$.ajax({
-			url: loadurl,
-			data: loadparams,
-			dataType : 'json',
-			type : 'POST',
+			url: memory.loadurl || message.loadurl,
+			data: memory.loadparams || {},
+			dataType : memory.datatype || 'json',
+			type : memory.request || 'POST',
 			success : function(data, status, request){
-				memory.view.hide();
-				memory.view.html($.tmpl(memory.template, data.tpldata))
-				memory.view.fadeIn(1000);
-				
-				if(data.services||false){
-					for(var i in data.services)
-						ServiceClient.client.Kernel.run(data.services[i]);
-				}
+				memory.data = data;
+				memory.status = status;
+				ServiceClient.Kernel.run(message.workflow, memory);
 			},
 			error : function(request, status, error){
-				memory.view.html('<p>The requested resource could not be loaded</p>');
+				memory.view.html('<p class="error">The requested resource could not be loaded</p>');
 			}
 		});
+		return true;
 	}
-}
-/** *	Alert module * *	@param title string *	@param data content (text/html) ***/ServiceClient.jquery.module.Alert = (function(){	return {		execute : function(params){			alert(params.title + " : " + params.data);		}	};})();/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = (function(){	return {		execute : function(params){			var links = $(params.selector);			links.live('click', function(){				ServiceClient.client.Kernel.navigate($(this).attr(params.attribute));				return false;			});		}	};})();/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : 'paint',		view : 'tabui',		template : 'test',		renderer : 'tplui',		params : {			tabtitle : config.tabtitle || 'Testing',			loadurl : config.loadurl || 'data.json.php'		}	}];}
+};
+/** *	Alert module * *	@param title string *	@param data content (text) ***/ServiceClient.jquery.module.Alert = {	run : function(message, memory){		alert(message.title + " : " + message.data);		return true;	}};/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = {	run : function(message, memory){		var links = $(message.selector);		links.live('click', function(){			ServiceClient.Kernel.navigate($(this).attr(message.attribute));			return false;		});		return true;	}};/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : ServiceClient.jquery.view.TabUIAdd,		message : {			tabui : 'tabuipanel',			tabtitle : config.tabtitle || 'Testing'		}	},{		service : ServiceClient.jquery.loader.AjaxLoader,		message : {			loadurl : config.loadurl || 'data.json.php',			workflow : [{				service : ServiceClient.jquery.renderer.TemplateUI,				message : {					template : ServiceClient.jquery.template.Test				}			}]		}	}];}

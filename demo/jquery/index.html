@@ -66,35 +66,26 @@
 				load_el.html('Initializing ...');
 				load_el.fadeOut(5000);
 				
-				var sckernel = ServiceClient.client.Kernel;
-				var screg = ServiceClient.client.Registry;
-				
-				screg.addModule('alert', ServiceClient.jquery.module.Alert);
-				screg.addModule('navinit', ServiceClient.jquery.module.NavigatorInit);
-				
-				screg.addRenderer('tplui', ServiceClient.jquery.renderer.TemplateUI);
-				screg.addRenderer('tabui', ServiceClient.jquery.view.TabUI);
-
-				screg.addView('element', ServiceClient.jquery.view.ElementView);
-				screg.addView('tabui', sckernel.paint({
-					view : 'element',
-					renderer : 'tabui',
-					params : {
-						elementid : '#tab-container',
-						indexstart : 1
+				ServiceClient.Kernel.run([{
+					service : ServiceClient.jquery.view.ElementView,
+					message : {
+						elementid : '#tab-container'
 					}
-				}));
-				screg.addTemplate('test', TestTemplate);
-				
-				screg.addNavigator('#testtab', ServiceClient.jquery.navigator.TestTab);
-				
-				sckernel.run({
-					module : 'navinit',
-					params : {
+				},{
+					service : ServiceClient.jquery.renderer.TabUI,
+					message : {
+						indexstart : 1,
+						saveindex : 'tabuipanel'
+					}
+				},{
+					service : ServiceClient.jquery.module.NavigatorInit,
+					message : {
 						selector : '#test-container a',
 						attribute : 'href'
 					}
-				});
+				}]);
+				
+				ServiceClient.Registry.add('#testtab', ServiceClient.jquery.navigator.TestTab);
 				
 		});
 		</script>  		
