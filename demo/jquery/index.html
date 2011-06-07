@@ -68,21 +68,15 @@
 				
 				ServiceClient.Kernel.run([{
 					service : ServiceClient.jquery.view.ElementView,
-					message : {
-						elementid : '#tab-container'
-					}
+					elementid : '#tab-container'
 				},{
 					service : ServiceClient.jquery.renderer.TabUI,
-					message : {
-						indexstart : 1,
-						saveindex : 'tabuipanel'
-					}
+					indexstart : 1,
+					saveindex : 'tabuipanel'
 				},{
 					service : ServiceClient.jquery.module.NavigatorInit,
-					message : {
-						selector : '#test-container a',
-						attribute : 'href'
-					}
+					selector : '#test-container a',
+					attribute : 'href'
 				}]);
 				
 				ServiceClient.Registry.add('#testtab', ServiceClient.jquery.navigator.TestTab);

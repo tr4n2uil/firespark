@@ -32,7 +32,7 @@ var ServiceClient = (function(){
 	 *	an array that saves indexes to service workflows
 	 *	workflow = [{	
 	 *		service : ...,
-	 *		message : { ... }
+	 *		( ... params : ... )
 	 *	}];
 	 *
 	 *	indexes usually starts with # (href programming)
@@ -128,7 +128,7 @@ var ServiceClient = (function(){
 				
 				for(var i in config){
 					var service = config[i].service;
-					var message = config[i].message;
+					var message = config[i];
 					/**
 					 *	run the service with the message and memory
 					**/

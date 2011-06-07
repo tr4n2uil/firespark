@@ -32,7 +32,7 @@ var ServiceClient = (function(){
 	 *	an array that saves indexes to service workflows
 	 *	workflow = [{	
 	 *		service : ...,
-	 *		message : { ... }
+	 *		( ... params : ... )
 	 *	}];
 	 *
 	 *	indexes usually starts with # (href programming)
@@ -128,7 +128,7 @@ var ServiceClient = (function(){
 				
 				for(var i in config){
 					var service = config[i].service;
-					var message = config[i].message;
+					var message = config[i];
 					/**
 					 *	run the service with the message and memory
 					**/
@@ -321,4 +321,4 @@ ServiceClient.jquery.loader.AjaxLoader = {
 		return true;
 	}
 };
-/** *	Alert module * *	@param title string *	@param data content (text) ***/ServiceClient.jquery.module.Alert = {	run : function(message, memory){		alert(message.title + " : " + message.data);		return true;	}};/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = {	run : function(message, memory){		var links = $(message.selector);		links.live('click', function(){			ServiceClient.Kernel.navigate($(this).attr(message.attribute));			return false;		});		return true;	}};/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : ServiceClient.jquery.view.TabUIAdd,		message : {			tabui : 'tabuipanel',			tabtitle : config.tabtitle || 'Testing'		}	},{		service : ServiceClient.jquery.loader.AjaxLoader,		message : {			loadurl : config.loadurl || 'data.json.php',			workflow : [{				service : ServiceClient.jquery.renderer.TemplateUI,				message : {					template : ServiceClient.jquery.template.Test				}			}]		}	}];}
+/** *	Alert module * *	@param title string *	@param data content (text) ***/ServiceClient.jquery.module.Alert = {	run : function(message, memory){		alert(message.title + " : " + message.data);		return true;	}};/** *	NavigatorInit module * *	@param selector string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = {	run : function(message, memory){		var links = $(message.selector);		links.live('click', function(){			ServiceClient.Kernel.navigate($(this).attr(message.attribute));			return false;		});		return true;	}};/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : ServiceClient.jquery.view.TabUIAdd,		tabui : 'tabuipanel',		tabtitle : config.tabtitle || 'Testing'	},{		service : ServiceClient.jquery.loader.AjaxLoader,		loadurl : config.loadurl || 'data.json.php',		workflow : [{			service : ServiceClient.jquery.renderer.TemplateUI,			template : ServiceClient.jquery.template.Test		}]	}];}
