@@ -1,0 +1,1 @@
+/** *	Process module * *	@param selector string * *	@param data object ***/ServiceClient.jquery.module.Process = {	run : function(message, memory){		if(!memory.data.success){			$(message.selector).removeAttr('disabled');		}		memory.data = memory.data.msg;		return true;	}};
