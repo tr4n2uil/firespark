@@ -62,9 +62,9 @@
 		<script type="text/javascript" src="tpl/Test.tpl.js"></script>		
 		<script type="text/javascript">
 			$(document).ready(function(){
-				var load_el = $('#load-status');
-				load_el.html('Initializing ...');
-				load_el.fadeOut(5000);
+				$('#load-status')
+					.html('Initializing ...')
+					.fadeOut(5000);
 				
 				ServiceClient.Kernel.run([{
 					service : ServiceClient.jquery.view.ElementView,

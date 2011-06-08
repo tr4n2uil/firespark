@@ -17,10 +17,10 @@ ServiceClient.jquery.loader.AjaxLoader = {
 	run : function(message, memory){
 		memory.view.html('<p class="loading">Loading ...</p>');
 		$.ajax({
-			url: message.loadurl || message.loadurl,
-			data: message.loadparams || {},
-			dataType : message.datatype || 'json',
-			type : message.request || 'POST',
+			url: memory.loadurl || message.loadurl,
+			data: memory.loadparams || message.loadparams || {},
+			dataType : memory.datatype || message.datatype || 'json',
+			type : memory.request || message.request || 'POST',
 			success : function(data, status, request){
 				memory.data = data;
 				memory.status = status;
