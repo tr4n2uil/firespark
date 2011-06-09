@@ -13,7 +13,9 @@
 		<h1>ServiceClient jQuery Demo</h1>
 
 		<div id="main-container">
-			<div id="test-container"><a href="#testtab:tabtitle=Krishna">Test Tab</a></div>
+		<a href="#testtab:tabtitle=Krishna" class="navigate">Test Tab</a>
+		<a href="#tplload:container=#test-container:loadurl=data.json.php:tpl=tpl-test" class="navigate">Test TplLoad</a>
+			<div id="test-container"></div>
 			<div id="tab-container">
 				<ul>
 					<li><a href="#tabs-1">Demo</a></li>
@@ -75,11 +77,14 @@
 					saveindex : 'tabuipanel'
 				},{
 					service : ServiceClient.jquery.module.NavigatorInit,
-					selector : '#test-container a',
+					selector : 'a.navigate',
 					attribute : 'href'
 				}]);
 				
 				ServiceClient.Registry.add('#testtab', ServiceClient.jquery.navigator.TestTab);
+				ServiceClient.Registry.add('#tplload', ServiceClient.jquery.navigator.TplLoad);
+				
+				ServiceClient.Registry.save('tpl-test', ServiceClient.jquery.template.Test);
 				
 		});
 		</script>  		
