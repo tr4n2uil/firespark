@@ -1,0 +1,1 @@
+/** *	Upload navigator * *	@param sel selector string *	@param val string ***/ServiceClient.jquery.navigator.Upload = function(config){		return [{		service : ServiceClient.jquery.module.Status,		selector : config.sel || '#load-status',		value : config.val || 'Uploading ...',		show : true	}];}

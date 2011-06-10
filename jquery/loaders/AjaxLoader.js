@@ -30,6 +30,11 @@ ServiceClient.jquery.loader.AjaxLoader = {
 				memory.view.html('<p class="error">The requested resource could not be loaded</p>');
 			}
 		});
-		return true;
+		
+		/**
+		 *	@return false 
+		 *	to stop default browser event
+		**/
+		return false;
 	}
 };
