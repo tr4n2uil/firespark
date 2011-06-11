@@ -64,11 +64,14 @@
 		<script type="text/javascript" src="tpl/Test.tpl.js"></script>		
 		<script type="text/javascript">
 			$(document).ready(function(){
-				$('#load-status')
-					.html('Initializing ...')
-					.fadeOut(5000);
 				
 				ServiceClient.Kernel.run([{
+					service : ServiceClient.jquery.module.AlertStatus,
+					selector : '#load-status',
+					value : 'Initializing ...',
+					hide : 1000,
+					delay : 3000
+				},{
 					service : ServiceClient.jquery.view.ElementView,
 					elementid : '#tab-container'
 				},{

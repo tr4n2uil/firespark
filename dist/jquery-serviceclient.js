@@ -145,7 +145,12 @@ var ServiceClient = (function(){
 			 *	@param request string
 			 *
 			**/
-			navigate : function(request){
+			navigate : function(request, escaped){
+				if(escaped || false){
+					request = request.replace(/_/g, '#');
+					request = request.replace(/\./g, '=');
+				}
+				
 				var req = request.split(':');
 				var index = req[0];
 				
@@ -160,7 +165,7 @@ var ServiceClient = (function(){
 					return this.run(navigator);
 				}
 				
-				return 0;
+				return false;
 			}
 		}
 	};
@@ -286,22 +291,6 @@ ServiceClient.jquery.renderer.TabUI = {
 	}	
 };
 /**
- *	TemplateUI renderer
- *
- *	@param template Template
- *
- *	@param data object
- *
-**/
-ServiceClient.jquery.renderer.TemplateUI = {
-	run : function(message, memory){
-		memory.view.hide();
-		memory.view.html($.tmpl(message.template, memory.data))
-		memory.view.fadeIn(1000);
-		return true;
-	}
-};
-/**
  *	AjaxLoader loader
  *
  *	@param loadurl string
@@ -309,28 +298,93 @@ ServiceClient.jquery.renderer.TemplateUI = {
  *	@param	datatype string
  *	@param request string
  *	@param workflow Workflow
+ *	@param errorflow	Workflow
+ *
+ *	@param process boolean
+ *	@param status string
+ *	@param processflow Workflow
+ *	@param replace string
  *	
  *	@param view View
  *
  *	@return data string
  *	@return status integer
+ *	@param error string
  *
 **/
 ServiceClient.jquery.loader.AjaxLoader = {
 	run : function(message, memory){
+		/**
+		 *	Show the loading message
+		**/
 		memory.view.html('<p class="loading">Loading ...</p>');
+		
+		/**
+		 *	Load data from server using AJAX
+		**/
 		$.ajax({
 			url: memory.loadurl || message.loadurl,
 			data: memory.loadparams || message.loadparams || {},
 			dataType : memory.datatype || message.datatype || 'json',
 			type : memory.request || message.request || 'POST',
+			
 			success : function(data, status, request){
+				var success = true;
 				memory.data = data;
 				memory.status = status;
-				ServiceClient.Kernel.run(message.workflow, memory);
+				/**
+				 *	If process is true, check for status value in JSON data received and set success variable accordingly
+				**/
+				if(message.process || false){
+					if(data[message.status] || false){
+						success = true;
+						/**
+						 *	Check for processflow definitions and execute them
+						**/
+						var run = data[message.processflow] || false;
+						if(run){
+							for(var i in run){
+								run[i].service = ServiceClient.Registry.get(run[i].service);
+							}
+							return ServiceClient.Kernel.run(run);
+						}
+					}
+					else {
+						success = false;
+					}
+					/**
+					 *	Replace data with data to be processed further using replace index
+					**/
+					memory.data = data[message.replace];
+				}
+				/**
+				 *	If success is true, run the workflow; otherwise run the errorflow or display error message
+				**/
+				if(success){
+					ServiceClient.Kernel.run(message.workflow, memory);
+				}
+				else {
+					if(message.errorflow){
+						ServiceClient.Kernel.run(message.errorflow, memory);
+					}
+					else {
+						memory.view.html(memory.data);
+					}
+				}
 			},
 			error : function(request, status, error){
-				memory.view.html('<p class="error">The requested resource could not be loaded</p>');
+				memory.error = error;
+				memory.status = status;
+				memory.data ='<p class="error">The requested resource could not be loaded</p>';
+				/**
+				 *	Run the errorflow or display error message
+				**/
+				if(message.errorflow){
+					ServiceClient.Kernel.run(message.errorflow, memory);
+				}
+				else {
+					memory.view.html(memory.data);
+				}
 			}
 		});
 		
@@ -341,4 +395,18 @@ ServiceClient.jquery.loader.AjaxLoader = {
 		return false;
 	}
 };
-/** *	Alert module * *	@param title string *	@param data content (text) ***/ServiceClient.jquery.module.Alert = {	run : function(message, memory){		alert(message.title + " : " + message.data);		return true;	}};/** *	NavigatorInit module * *	@param selector string *	@param event string *	@param attribute string ***/ServiceClient.jquery.module.NavigatorInit = {	run : function(message, memory){		var result = $(message.selector);		result.live(message.event || 'click', function(){			return ServiceClient.Kernel.navigate($(this).attr(message.attribute));		});		return true;	}};/** *	Process module * *	@param selector string *	@param navigate navigator : escaped with ; * *	@param data object *	@param run workflow object ***/ServiceClient.jquery.module.Process = {	run : function(message, memory){		if(memory.data.success){			var navigate = memory.data.navigate || message.navigate || false;			if(message.navigate || false){				navigate.replace(";", ":");			}			if(navigate){				ServiceClient.Kernel.navigate(navigate);			}			var run = memory.data.run || false;			if(run){				for(var i in run){					run[i].service = ServiceClient.Registry.get(run[i].service);				}				return ServiceClient.Kernel.run(run);			}		}		else {			$(message.selector).removeAttr('disabled');		}		memory.data = memory.data.msg;		return true;	}};/** *	Status module * *	@param selector string *	@param value string *	@param show integer  *	@param hide integer *	@param delay integer ***/ServiceClient.jquery.module.Status = {	run : function(message, memory){		var el = $(message.selector)		el.html(message.value);		if(message.show || false){			el.delay(message.delay || 0)				.fadeIn(message.show);		}		if(message.hide || false){			el.delay(message.delay || 0)				.fadeOut(message.hide);		}		return true;	}};/** *	HtmlLoad navigator * *	@param container selector *	@param loadurl URL ***/ServiceClient.jquery.navigator.HtmlLoad = function(config){	return [{		service : ServiceClient.jquery.view.ElementView,		elementid : config.container	},{		service : ServiceClient.jquery.loader.AjaxLoader,		loadurl : config.loadurl,		datatype : 'html',		workflow : [{			service : ServiceClient.jquery.renderer.ContentUI		}]	}];}/** *	SubmitLoad navigator * *	@param sel form parent selector string *	@param nav navigator : escaped with ; ***/ServiceClient.jquery.navigator.SubmitLoad = function(config){	var form = $(config.sel + ' form');		var params = form.serialize();	var d= new Date();	params._ts = d.getTime();		$(config.sel + ' input[name=submit]').attr('disabled', true);		return [{		service : ServiceClient.jquery.view.ElementView,		elementid : config.sel +' div.status'	},{		service : ServiceClient.jquery.loader.AjaxLoader,		loadurl : form.attr('action'),		loadparams : params,		workflow : [{			service : ServiceClient.jquery.module.Process,			selector : config.sel + ' input[name=submit]',			navigate : config.nav || false		},{			service : ServiceClient.jquery.renderer.ContentUI		}]	}];}/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : ServiceClient.jquery.view.TabUIAdd,		tabui : 'tabuipanel',		tabtitle : config.tabtitle || 'Testing'	},{		service : ServiceClient.jquery.loader.AjaxLoader,		loadurl : config.loadurl || 'data.json.php',		workflow : [{			service : ServiceClient.jquery.renderer.TemplateUI,			template : ServiceClient.jquery.template.Test		}]	}];}/** *	TplLoad navigator * *	@param container selector *	@param loadurl URL *	@param tpl template-index ***/ServiceClient.jquery.navigator.TplLoad = function(config){	return [{		service : ServiceClient.jquery.view.ElementView,		elementid : config.container	},{		service : ServiceClient.jquery.loader.AjaxLoader,		loadurl : config.loadurl,		workflow : [{			service : ServiceClient.jquery.renderer.TemplateUI,			template : ServiceClient.Registry.get(config.tpl)		}]	}];}/** *	Upload navigator * *	@param sel selector string *	@param val string ***/ServiceClient.jquery.navigator.Upload = function(config){		return [{		service : ServiceClient.jquery.module.Status,		selector : config.sel || '#load-status',		value : config.val || 'Uploading ...',		show : 100	}];}
+/** *	AlertStatus module * *	@param selector string *	@param value string *	@param show integer  *	@param hide integer *	@param delay integer ***/ServiceClient.jquery.module.AlertStatus = {	run : function(message, memory){		var el = $(message.selector)		el.html(message.value);		if(message.show || false){			el.delay(message.delay || 0)				.fadeIn(message.show);		}		if(message.hide || false){			el.delay(message.delay || 0)				.fadeOut(message.hide);		}		return true;	}};/**
+ *	ApplyTemplate module
+ *
+ *	@param template Template
+ *
+ *	@param data object
+ *
+**/
+ServiceClient.jquery.module.ApplyTemplate = {
+	run : function(message, memory){
+		memory.data = $.tmpl(message.template, memory.data || message.data);
+		return true;
+	}
+};
+/** *	ElementStatus module * *	@param selector string *	@param disabled boolean ***/ServiceClient.jquery.module.ElementStatus = {	run : function(message, memory){		if(message.disabled || false){			$(message.selector).attr('disabled', true);		}		else {			$(message.selector).removeAttr('disabled');		}		return true;	}};/** *	NavigatorInit module * *	@param selector string *	@param event string *	@param attribute string *	@param escaped boolean ***/ServiceClient.jquery.module.NavigatorInit = {	run : function(message, memory){		var result = $(message.selector);		result.live(message.event || 'click', function(){			return ServiceClient.Kernel.navigate($(this).attr(message.attribute), message.escaped || false);		});		return true;	}};/** *	ReadForm module * *	@param selector string * *	@return loadurl string *	@return request string *	@return loadparams object ***/ServiceClient.jquery.module.ReadForm = {	run : function(message, memory){		var form = $(message.selector);		memory.loadurl = form.attr('action');		memory.request = form.attr('method').toUpperCase();				var params = form.serialize();		var d= new Date();		params._ts = d.getTime();		memory.loadparams = params;				return true;	}};/** *	FormSubmit navigator * *	@param sel form parent selector string ***/ServiceClient.jquery.navigator.FormSubmit = function(config){		return [{		service : ServiceClient.jquery.view.ElementView,		elementid : config.sel +' div.status'	},{		service : ServiceClient.jquery.module.ReadForm,		selector : config.sel + ' form'	},{		service : ServiceClient.jquery.module.ElementStatus,		selector : config.sel + ' input[name=submit]',		disabled : true	},{		service : ServiceClient.jquery.loader.AjaxLoader,		process : true,		status : 'success',		processflow : 'run',		replace : 'msg',		workflow : [{			service : ServiceClient.jquery.renderer.ContentUI		}],		errorflow : [{			service : ServiceClient.jquery.module.ElementStatus,			selector : config.sel + ' input[name=submit]'		},{			service : ServiceClient.jquery.renderer.ContentUI		}]	}];	}/** *	HtmlLoad navigator * *	@param container selector *	@param loadurl URL ***/ServiceClient.jquery.navigator.HtmlLoad = function(config){	return [{		service : ServiceClient.jquery.view.ElementView,		elementid : config.container	},{		service : ServiceClient.jquery.loader.AjaxLoader,		loadurl : config.loadurl,		datatype : 'html',		workflow : [{			service : ServiceClient.jquery.renderer.ContentUI		}]	}];}/** *	TestTab navigator * *	@param tabtitle string *	@param loadurl URL ***/ServiceClient.jquery.navigator.TestTab = function(config){	return [{		service : ServiceClient.jquery.view.TabUIAdd,		tabui : 'tabuipanel',		tabtitle : config.tabtitle || 'Testing'	},{		service : ServiceClient.jquery.loader.AjaxLoader,		loadurl : config.loadurl || 'data.json.php',		workflow : [{			service : ServiceClient.jquery.module.ApplyTemplate,			template : ServiceClient.jquery.template.Test		},{			service : ServiceClient.jquery.renderer.ContentUI		}]	}];}/** *	TplLoad navigator * *	@param container selector *	@param loadurl URL *	@param tpl template-index *	@param param string = escaped by ~ ***/ServiceClient.jquery.navigator.TplLoad = function(config){	if(config.param || false){		config.param = config.param.replace(/~/g, '=');	}	return [{		service : ServiceClient.jquery.view.ElementView,		elementid : config.container	},{		service : ServiceClient.jquery.loader.AjaxLoader,		loadurl : config.loadurl,		loadparams : config.param || {},		workflow : [{			service : ServiceClient.jquery.module.ApplyTemplate,			template : ServiceClient.Registry.get(config.tpl)		},{			service : ServiceClient.jquery.renderer.ContentUI		}]	}];}/** *	Upload navigator * *	@param sel selector string *	@param val string ***/ServiceClient.jquery.navigator.Upload = function(config){		return [{		service : ServiceClient.jquery.module.Status,		selector : config.sel || '#load-status',		value : config.val || 'Uploading ...',		show : 100	}];}

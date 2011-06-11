@@ -145,7 +145,12 @@ var ServiceClient = (function(){
 			 *	@param request string
 			 *
 			**/
-			navigate : function(request){
+			navigate : function(request, escaped){
+				if(escaped || false){
+					request = request.replace(/_/g, '#');
+					request = request.replace(/\./g, '=');
+				}
+				
 				var req = request.split(':');
 				var index = req[0];
 				
@@ -160,7 +165,7 @@ var ServiceClient = (function(){
 					return this.run(navigator);
 				}
 				
-				return 0;
+				return false;
 			}
 		}
 	};
