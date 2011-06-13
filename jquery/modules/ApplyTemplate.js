@@ -1,14 +1,15 @@
 /**
  *	ApplyTemplate module
  *
- *	@param template Template
+ *	@param template Template [memory]
+ *	@param data object [memory|message]
  *
- *	@param data object
+ *	@return data html
  *
 **/
 ServiceClient.jquery.module.ApplyTemplate = {
 	run : function(message, memory){
-		memory.data = $.tmpl(message.template, memory.data || message.data);
+		memory.data = $.tmpl(memory.tpl, memory.data || message.data);
 		return true;
 	}
 };

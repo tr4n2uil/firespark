@@ -40,6 +40,10 @@ var ServiceClient = (function(){
 	 *
 	 *	example #testtab:tabtitle=Krishna:loadurl=test.php
 	 *
+	 *	escapes for usage in form id
+	 *	# by _ 
+	 *	= by .
+	 *
 	**/
 	var navigators = new Array();
 	

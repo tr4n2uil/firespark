@@ -1,19 +1,19 @@
 /**
  *	AjaxLoader loader
  *
- *	@param loadurl string
- *	@param loadparams object
- *	@param	datatype string
- *	@param request string
- *	@param workflow Workflow
- *	@param errorflow	Workflow
+ *	@param loadurl string [memory|message]
+ *	@param loadparams object [memory|message]
+ *	@param	datatype string [memory|message]
+ *	@param request string [memory|message]
+ *	@param workflow Workflow [message]
+ *	@param errorflow	Workflow [message] optional
  *
- *	@param process boolean
- *	@param status string
- *	@param processflow Workflow
- *	@param replace string
+ *	@param process boolean [message] optional
+ *	@param status string [message] optional
+ *	@param processflow Workflow [message] optional
+ *	@param replace string [message] optional
  *	
- *	@param view View
+ *	@param view View [memory]
  *
  *	@return data string
  *	@return status integer
@@ -63,7 +63,9 @@ ServiceClient.jquery.loader.AjaxLoader = {
 					/**
 					 *	Replace data with data to be processed further using replace index
 					**/
-					memory.data = data[message.replace];
+					if(message.replace || false){
+						memory.data = data[message.replace];
+					}
 				}
 				/**
 				 *	If success is true, run the workflow; otherwise run the errorflow or display error message
@@ -72,7 +74,7 @@ ServiceClient.jquery.loader.AjaxLoader = {
 					ServiceClient.Kernel.run(message.workflow, memory);
 				}
 				else {
-					if(message.errorflow){
+					if(message.errorflow || false){
 						ServiceClient.Kernel.run(message.errorflow, memory);
 					}
 					else {

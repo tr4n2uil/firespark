@@ -1,0 +1,1 @@
+/** *	CookieLogin module * *	@param key string [message] *	@param sessionid string [message] *	@param expires integer[message] default 1 day ***/ServiceClient.jquery.module.CookieLogin = {	run : function(message, memory){		$.cookie(message.key, message.sessionid, {			expires : message.expires || 1		});		window.location.reload();		return false;	}};
