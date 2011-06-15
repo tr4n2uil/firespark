@@ -9,7 +9,7 @@
 **/
 ServiceClient.jquery.module.ApplyTemplate = {
 	run : function(message, memory){
-		memory.data = $.tmpl(memory.tpl, memory.data || message.data);
+		memory.data = $.tmpl(memory.tpl || message.template, memory.data || message.data);
 		return true;
 	}
 };
