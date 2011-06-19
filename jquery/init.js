@@ -7,3 +7,4 @@ ServiceClient.jquery.renderer = {};
 ServiceClient.jquery.navigator = {};
 ServiceClient.jquery.requestor = {};
 ServiceClient.jquery.template = {};
+ServiceClient.jquery.helper = {};
