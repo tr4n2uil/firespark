@@ -17,7 +17,7 @@
  *
  *	@return data string
  *	@return status integer
- *	@param error string
+ *	@return error string
  *
 **/
 ServiceClient.jquery.loader.AjaxLoader = {
