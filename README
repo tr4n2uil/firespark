@@ -1,5 +1,5 @@
 ServiceClient
-JavaScript UI Framework for consuming Services 
+JavaScript Service Architecture and Workflow Framework
 
 vibhaj8@gmail.com
 
@@ -8,7 +8,7 @@ Developed in support of :
 	DSpace RESTClient
 	https://wiki.duraspace.org/display/GSOC/DSpace+ClientUI+built+on+RESTful+API+-+GSoC+2011
 
-JavaScript Library Neutral Framework
+JavaScript Library Neutral Framework (Currently supported completely for jQuery)
 	Registry
 		Views
 		Renderers
@@ -17,6 +17,5 @@ JavaScript Library Neutral Framework
 		Modules
 		Navigators
 	Kernel
-		paint()
 		run()
 		navigate()
