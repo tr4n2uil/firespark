@@ -10,7 +10,7 @@ goto end
 type ServiceClient.js extjs\init.js extjs\views\*.js extjs\loaders\*.js extjs\renderers\*.js extjs\modules\*.js extjs\navigators\*.js > dist\extjs-serviceclient.js
 goto end
 :jquery
-type ServiceClient.js jquery\init.js jquery\views\*.js jquery\renderers\*.js jquery\loaders\*.js jquery\modules\*.js jquery\navigators\*.js jquery\helpers\*.js > dist\jquery-serviceclient.js
+type ServiceClient.js jquery\init.js jquery\services\*.js jquery\workflows\*.js jquery\navigators\*.js jquery\helpers\*.js > dist\jquery-serviceclient.js
 goto end
 :end
 pause

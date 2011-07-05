@@ -1,6 +1,9 @@
 /**
- *	ServiceClient
- *	JavaScript UI Framework for consuming Services 
+ *	@project ServiceClient
+ *	@desc JavaScript Service Architecture and Workflow Framework
+ *
+ *	@class ServiceClient
+ *	@desc Provides Registry and Kernel functionalities
  *	
  *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
@@ -13,14 +16,30 @@
  *			... save reference in Registry instead of returning objects ...
  *		}
  *	}
+ *
+ *	Workflows are array of services that use common memory for state management
+ *
+ *	workflow = [{	
+ *		service : ...,
+ *		( ... params : ... )
+ *	}];
+ *
+ * 	Navigator is index followed by parameters to be overrided delimited by ':'
+ *	indexes usually starts with # (href programming)
+ *
+ *	example #testtab:tabtitle=Krishna:loadurl=test.php
+ *
+ *	escapes for usage in form id
+ *	# by _ 
+ *	= by .
  *	
 **/
 
 var ServiceClient = (function(){
 	/**
 	 *	@var references array
-	 *
-	 *	an array for saving references
+	 *	@desc an array for saving references
+	 *	
 	 *	references may be accessed through the Registry
 	 *
 	**/
@@ -28,21 +47,7 @@ var ServiceClient = (function(){
 	
 	/**
 	 *	@var navigators array
-	 *
-	 *	an array that saves indexes to service workflows
-	 *	workflow = [{	
-	 *		service : ...,
-	 *		( ... params : ... )
-	 *	}];
-	 *
-	 *	indexes usually starts with # (href programming)
-	 *	navigator is index followed by parameters to be overrided delimited by ':'
-	 *
-	 *	example #testtab:tabtitle=Krishna:loadurl=test.php
-	 *
-	 *	escapes for usage in form id
-	 *	# by _ 
-	 *	= by .
+	 *	@desc an array that saves indexes to service workflows
 	 *
 	**/
 	var navigators = new Array();
@@ -50,13 +55,13 @@ var ServiceClient = (function(){
 	return {
 		/**
 		 *	@var Registry object
-		 *	
-		 *	manages references and navigator indexes
+		 *	@desc manages references and navigator indexes
 		 *
 		**/
 		Registry : {
 			/**
-			 *	saves a Reference with index
+			 *	@method save
+			 *	@desc saves a Reference with index
 			 *
 			 *	@param index string
 			 *	@param reference object or any type
@@ -67,7 +72,8 @@ var ServiceClient = (function(){
 			},
 			
 			/**
-			 *	gets the Reference for index
+			 *	@method get
+			 *	@desc gets the Reference for index
 			 *
 			 *	@param index string
 			 *
@@ -77,7 +83,8 @@ var ServiceClient = (function(){
 			},
 			
 			/**
-			 *	removes a Reference with index
+			 *	@method remove
+			 *	@desc removes a Reference with index
 			 *
 			 *	@param index string
 			 *
@@ -87,7 +94,8 @@ var ServiceClient = (function(){
 			},
 			
 			/**
-			 *	adds a Navigator with index
+			 *	@method add
+			 *	@desc adds a Navigator with index
 			 *
 			 *	@param index string
 			 *	@param navigator object
@@ -98,7 +106,8 @@ var ServiceClient = (function(){
 			},
 			
 			/**
-			 *	removes a Navigator with index
+			 *	@method removeNavigator
+			 *	@desc removes a Navigator with index
 			 *
 			 *	@param index string
 			 *
@@ -111,17 +120,18 @@ var ServiceClient = (function(){
 		/**
 		 *	@var Kernel object
 		 *	
-		 *	manages the following tasks
+		 *	@desc manages the following tasks
 		 *		runs services when requested
 		 *		processes navigators when received
 		 *
 		**/
 		Kernel : {			
 			/** 
-			 *	executes a workflow with the given definition
+			 *	@method run
+			 *	@desc executes a workflow with the given definition
 			 *
 			 *	@param config object
-			 *	@param mem object optional
+			 *	@param mem object optional default {}
 			 *
 			**/
 			run : function(config, mem){
@@ -129,24 +139,34 @@ var ServiceClient = (function(){
 				 *	create a new memory if not passed
 				**/
 				var memory = mem || {};
+				var result = true;
 				
 				for(var i in config){
 					var service = config[i].service;
 					var message = config[i];
+					var strict = config[i].strict || true;
+					
+					/**
+					 *	continue on invalid state
+					**/
+					if(result !== true && strict === true)
+						continue;
+					
 					/**
 					 *	run the service with the message and memory
 					**/
-					if(service.run(message, memory) !== true)
-						return false;
+					result = service.run(message, memory);
 				}
 				
-				return true;
+				return result;
 			},
 			
 			/**
-			 *	processes the navigator request received to run services and workflows
+			 *	@method navigate
+			 *	@desc processes the navigator request received to run services and workflows
 			 *
 			 *	@param request string
+			 *	@param escaped boolean optional default false
 			 *
 			**/
 			navigate : function(request, escaped){

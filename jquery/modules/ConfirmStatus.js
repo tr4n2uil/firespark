@@ -1,1 +1,0 @@
-/** *	ConfirmStatus module * *	@param confirm boolean [message] *	@param value string [message] ***/ServiceClient.jquery.module.ConfirmStatus = {	run : function(message, memory){		if(message.confirm || false){			return confirm(message.value);		}		return true;	}};

@@ -1,1 +1,0 @@
-/** *	ElementStatus module * *	@param selector string [message] *	@param disabled boolean [message] ***/ServiceClient.jquery.module.ElementStatus = {	run : function(message, memory){		if(message.disabled || false){			$(message.selector).attr('disabled', true);		}		else {			$(message.selector).removeAttr('disabled');		}		return true;	}};

@@ -1,10 +1,13 @@
 ServiceClient.jquery = {};
 
-ServiceClient.jquery.view = {};
-ServiceClient.jquery.module = {};
-ServiceClient.jquery.loader = {};
-ServiceClient.jquery.renderer = {};
+ServiceClient.jquery.service = {};
+ServiceClient.jquery.workflow = {};
 ServiceClient.jquery.navigator = {};
-ServiceClient.jquery.requestor = {};
+
 ServiceClient.jquery.template = {};
 ServiceClient.jquery.helper = {};
+
+ServiceClient.jquery.constant = {};
+
+ServiceClient.jquery.constant.loadview = '<p class="loading">Loading ...</p>';
+ServiceClient.jquery.constant.loaderror = '<p class="error">The requested resource could not be loaded</p>';

@@ -1,0 +1,1 @@
+/** *	@service CookieMake *	@desc Creates a new Cookie * *	@param key string [message] *	@param value string [message] *	@param expires integer[message] default 1 day ***/ServiceClient.jquery.service.CookieMake = {	run : function(message, memory){		$.cookie(message.key, message.value, {			expires : message.expires || 1		});		return true;	}};

@@ -1,0 +1,19 @@
+/**
+ *	@service ElementTab
+ *	@desc Creates a new tab and returns the element
+ *
+ *	@param tabui string [message]
+ *  @param tabtitle string [message]
+ *  @param autoload boolean [message] optional default false
+ *  @param taburl string [message] optional default false
+ *
+ *	@return element Element [memory]
+ *
+**/
+ServiceClient.jquery.service.ElementTab = {
+	run : function(message, memory){
+		var tabui = ServiceClient.Registry.get(message.tabui);
+		memory.element = tabui.add(message.tabtitle, message.autoload || false, message.taburl || false);
+		return true;
+	}
+};
