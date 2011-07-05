@@ -7,10 +7,10 @@ if errorlevel == 2 goto jquery
 if errorlevel == 1 goto extjs
 goto end
 :extjs
-type ServiceClient.js extjs\init.js extjs\views\*.js extjs\loaders\*.js extjs\renderers\*.js extjs\modules\*.js extjs\navigators\*.js > dist\extjs-serviceclient.js
+type FireSpark.js core\init.js core\services\*.js core\workflows\*.js core\helpers\*.js extjs\init.js extjs\services\*.js extjs\workflows\*.js extjs\helpers\*.js > dist\extjs-firespark.js
 goto end
 :jquery
-type ServiceClient.js jquery\init.js jquery\services\*.js jquery\workflows\*.js jquery\navigators\*.js jquery\helpers\*.js > dist\jquery-serviceclient.js
+type FireSpark.js core\init.js core\services\*.js core\workflows\*.js core\helpers\*.js jquery\init.js jquery\services\*.js jquery\workflows\*.js jquery\helpers\*.js > dist\jquery-firespark.js
 goto end
 :end
 pause

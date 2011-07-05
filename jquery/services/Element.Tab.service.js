@@ -10,9 +10,9 @@
  *	@return element Element [memory]
  *
 **/
-ServiceClient.jquery.service.ElementTab = {
+FireSpark.jquery.service.ElementTab = {
 	run : function(message, memory){
-		var tabui = ServiceClient.Registry.get(message.tabui);
+		var tabui = FireSpark.Registry.get(message.tabui);
 		memory.element = tabui.add(message.tabtitle, message.autoload || false, message.taburl || false);
 		return true;
 	}

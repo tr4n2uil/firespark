@@ -8,13 +8,13 @@
  *	@param template template [memory]
  *
 **/
-ServiceClient.jquery.service.TemplateRead = {
+FireSpark.jquery.service.TemplateRead = {
 	run : function(message, memory){
 		if(memory.data.template || false){
 			memory.template = $.template(memory.data.template);
 		}
 		else {
-			memory.template = ServiceClient.Registry.get(message.template);
+			memory.template = FireSpark.Registry.get(message.template);
 		}
 		return true;
 	}

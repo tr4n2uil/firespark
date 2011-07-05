@@ -1,0 +1,1 @@
+/** *	@service LoadConfirm *	@desc Confirms whether to continue  * *	@param confirm boolean [message] *	@param value string [message] ***/FireSpark.core.service.LoadConfirm = {	run : function(message, memory){		if(message.confirm || false){			return confirm(message.value);		}		return true;	}};

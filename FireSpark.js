@@ -1,8 +1,8 @@
 /**
- *	@project ServiceClient
+ *	@project FireSpark
  *	@desc JavaScript Service Architecture and Workflow Framework
  *
- *	@class ServiceClient
+ *	@class FireSpark
  *	@desc Provides Registry and Kernel functionalities
  *	
  *	@author Vibhaj Rajan <vibhaj8@gmail.com>
@@ -24,7 +24,7 @@
  *		( ... params : ... )
  *	}];
  *
- * 	Navigator is index followed by parameters to be overrided delimited by ':'
+ * 	Navigator is index (workflow alias) followed by parameters to be overrided delimited by ':'
  *	indexes usually starts with # (href programming)
  *
  *	example #testtab:tabtitle=Krishna:loadurl=test.php
@@ -35,7 +35,7 @@
  *	
 **/
 
-var ServiceClient = (function(){
+var FireSpark = (function(){
 	/**
 	 *	@var references array
 	 *	@desc an array for saving references
@@ -55,7 +55,7 @@ var ServiceClient = (function(){
 	return {
 		/**
 		 *	@var Registry object
-		 *	@desc manages references and navigator indexes
+		 *	@desc manages references and navigators
 		 *
 		**/
 		Registry : {
@@ -95,19 +95,19 @@ var ServiceClient = (function(){
 			
 			/**
 			 *	@method add
-			 *	@desc adds a Navigator with index
+			 *	@desc adds a Navigator index
 			 *
 			 *	@param index string
-			 *	@param navigator object
+			 *	@param workflow object
 			 *
 			**/
-			add : function(index, navigator){
-				navigators[index] = navigator;
+			add : function(index, workflow){
+				navigators[index] = workflow;
 			},
 			
 			/**
 			 *	@method removeNavigator
-			 *	@desc removes a Navigator with index
+			 *	@desc removes a Navigator index
 			 *
 			 *	@param index string
 			 *
@@ -121,8 +121,8 @@ var ServiceClient = (function(){
 		 *	@var Kernel object
 		 *	
 		 *	@desc manages the following tasks
-		 *		runs services when requested
-		 *		processes navigators when received
+		 *		runs services and workflows when requested
+		 *		processes navigators when received and launch workflows
 		 *
 		**/
 		Kernel : {			
@@ -162,31 +162,44 @@ var ServiceClient = (function(){
 			},
 			
 			/**
-			 *	@method navigate
-			 *	@desc processes the navigator request received to run services and workflows
+			 *	@method launch
+			 *	@desc processes the navigator received to launch workflows
 			 *
-			 *	@param request string
+			 *	@param navigator string
 			 *	@param escaped boolean optional default false
 			 *
 			**/
-			navigate : function(request, escaped){
+			launch : function(navigator, escaped){
+				
+				/**
+				 *	Process escaped navigator
+				**/
 				if(escaped || false){
-					request = request.replace(/_/g, '#');
-					request = request.replace(/\./g, '=');
+					navigator = navigator.replace(/_/g, '#');
+					navigator = navigator.replace(/\./g, '=');
 				}
 				
-				var req = request.split(':');
+				/**
+				 *	Parse navigator
+				 **/
+				var req = navigator.split(':');
 				var index = req[0];
 				
-				var config = new Array();
+				/**
+				 *	Construct message for workflow
+				**/
+				var message = new Array();
 				for(var i=1, len=req.length; i<len; i++){
 					var param = (req[i]).split('=');
-					config[param[0]] = param[1];
+					message[param[0]] = param[1];
 				}
 				
+				/**
+				 *	Run the workflow
+				**/
 				if(navigators[index] || false){
-					var navigator = new (navigators[index])(config);
-					return this.run(navigator);
+					$message['service'] = navigators[index];
+					return this.run([$message]);
 				}
 				
 				return false;

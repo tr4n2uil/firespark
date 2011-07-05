@@ -1,4 +1,4 @@
-ServiceClient
+FireSpark
 JavaScript Service Architecture and Workflow Framework
 
 vibhaj8@gmail.com
@@ -8,14 +8,10 @@ Developed in support of :
 	DSpace RESTClient
 	https://wiki.duraspace.org/display/GSOC/DSpace+ClientUI+built+on+RESTful+API+-+GSoC+2011
 
-JavaScript Library Neutral Framework (Currently supported completely for jQuery)
+JavaScript Library Neutral Framework (Currently supported completely for jQuery only)
 	Registry
-		Views
-		Renderers
-		Templates
-		Loaders
-		Modules
-		Navigators
+		Workflows
+		References
 	Kernel
 		run()
-		navigate()
+		launch()

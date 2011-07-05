@@ -13,7 +13,7 @@
  *	@save tabpanel object
  *
 **/
-ServiceClient.jquery.service.ElementTabpanel = {
+FireSpark.jquery.service.ElementTabpanel = {
 	run : function(message, memory){
 		if(message.element || false){
 			var element = $(message.element);
@@ -54,7 +54,7 @@ ServiceClient.jquery.service.ElementTabpanel = {
 		});
 		index--;
 		
-		ServiceClient.Registry.save(message.savekey, {
+		FireSpark.Registry.save(message.savekey, {
 			add : function(tabtitle, autoload, taburl){
 				index++;
 				var url = '#ui-tab-'+index;

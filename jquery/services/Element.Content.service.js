@@ -9,7 +9,7 @@
  *	@param delay integer [message] optional default 0
  *
 **/
-ServiceClient.jquery.service.ElementContent = {
+FireSpark.jquery.service.ElementContent = {
 	run : function(message, memory){
 		if(message.element || false){
 			var element = $(message.element);

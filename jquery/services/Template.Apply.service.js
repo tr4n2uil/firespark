@@ -8,7 +8,7 @@
  *	@return data html [memory]
  *
 **/
-ServiceClient.jquery.service.TemplateApply = {
+FireSpark.jquery.service.TemplateApply = {
 	run : function(message, memory){
 		memory.data = $.tmpl(message.template || memory.template, message.data || memory.data);
 		return true;

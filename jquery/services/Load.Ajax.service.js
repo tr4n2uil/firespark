@@ -22,7 +22,7 @@
  *	@return response string [memory] optional
  *
 **/
-ServiceClient.jquery.service.LoadAjax = {
+FireSpark.jquery.service.LoadAjax = {
 	run : function(message, memory){
 		
 		/**
@@ -56,9 +56,9 @@ ServiceClient.jquery.service.LoadAjax = {
 						var run = data[message.processflow] || false;
 						if(run){
 							for(var i in run){
-								run[i].service = ServiceClient.Registry.get(run[i].service);
+								run[i].service = FireSpark.Registry.get(run[i].service);
 							}
-							return ServiceClient.Kernel.run(run);
+							return FireSpark.Kernel.run(run);
 						}
 					}
 					else {
@@ -78,11 +78,11 @@ ServiceClient.jquery.service.LoadAjax = {
 				 *	If success is true, run the workflow; otherwise run the errorflow if exists
 				**/
 				if(success){
-					ServiceClient.Kernel.run(message.workflow, memory);
+					FireSpark.Kernel.run(message.workflow, memory);
 				}
 				else {
 					if(message.errorflow || false){
-						ServiceClient.Kernel.run(message.errorflow, memory);
+						FireSpark.Kernel.run(message.errorflow, memory);
 					}
 				}
 			},
@@ -90,7 +90,7 @@ ServiceClient.jquery.service.LoadAjax = {
 			error : function(request, status, error){
 				memory.error = error;
 				memory.status = status;
-				memory.data = ServiceClient.jquery.constant.loaderror;
+				memory.data = FireSpark.core.constant.loaderror;
 				
 				/**
 				 *	Run the errorflow if any

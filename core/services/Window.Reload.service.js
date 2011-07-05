@@ -1,0 +1,1 @@
+/** *	@service WindowReload *	@desc Reloads the window ***/FireSpark.core.service.WindowReload = {	run : function(message, memory){		window.location.reload();		return false;	}};
