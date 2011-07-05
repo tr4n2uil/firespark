@@ -1,12 +1,14 @@
 /**
  *	@service ElementContent
- *	@desc Fills element with content and animates it
+ *	@desc Fills element with content and animates it and returns element in memory
  *
  *	@param element string [message|memory]
  *	@param data html/text [message|memory] optional default ''
  *	@param animation string [message] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
  *	@param duration integer [message] optional default 1000
  *	@param delay integer [message] optional default 0
+ *
+ *	@return element element [memory]
  *
 **/
 FireSpark.jquery.service.ElementContent = {
@@ -18,12 +20,15 @@ FireSpark.jquery.service.ElementContent = {
 			var element = memory.element;
 		}
 		
-		element.hide();
-		element.html(message.data || memory.data || '');
-		element.delay(message.delay || 0);
-		
 		var animation = message.animation || 'fadein';
 		var duration = message.duration || 1000;
+		
+		if(animation == 'fadein' || animation == 'slidein'){
+			element.hide();
+		}
+		
+		element.html(message.data || memory.data || '');
+		element.delay(message.delay || 0);
 		
 		switch(animation){
 			case 'fadein' :
@@ -42,6 +47,8 @@ FireSpark.jquery.service.ElementContent = {
 				element.html('Animation type not supported').fadeIn(duration);
 				break;
 		}
+		
+		memory.element = element;
 		
 		return true;
 	}

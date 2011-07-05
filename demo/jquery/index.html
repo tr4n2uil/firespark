@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-		<title>ServiceClient jQuery Demo</title>
+		<title>FireSpark jQuery Demo</title>
 		<link rel="stylesheet" type="text/css" href="/libraries/jqueryui/css/redmond/jquery-ui-1.8.13.custom.css" />
 		<link rel="stylesheet" type="text/css" href="css/default.css" />
 		<link rel="stylesheet" type="text/css" href="css/jquery.css" />
@@ -10,10 +10,10 @@
 	</head>
 	<body>
 		<p id="load-status"></p>
-		<h1>ServiceClient jQuery Demo</h1>
+		<h1>FireSpark jQuery Demo</h1>
 
 		<div id="main-container">
-		<a href="#testtab:title=Krishna" class="navigate">Test Tab</a>
+		<a href="#tabtpl:title=Krishna:tpl=tpl-test" class="navigate">Test Tab</a>
 		<a href="#tplload:cntr=#test-container:url=data.json.php:tpl=tpl-test" class="navigate">Test TplLoad</a>
 			<div id="test-container"></div>
 			<div id="tab-container">
@@ -21,13 +21,27 @@
 					<li><a href="#tabs-1">Demo</a></li>
 				</ul>
 				<div id="tabs-1">
-					<p>Welcome to jQuery ServiceClient Demo</p>
+					<p>Welcome to jQuery FireSpark Demo</p>
 				</div>
 			</div>
+		<div id="form-test-panel" class="panel form-panel">
+	<form action="/iitbhucse/launch.php?uri=ec.user.info.json&request=post" method="post" class="navigate" id="_formsubmit:sel._form-test-panel">
+		<fieldset>
+			<legend class="headdark">Execute</legend>
+			<label>User ID
+				<input type="text" name="uid" class="required"/>
+			</label>
+			<p class="error hidden margin5" style="display:none" >Invalid User ID</p>
+			<input name="submit" type="submit" value="Submit" class="margin5"/>
+			<input name="reset" type="reset" value="Reset" class="margin5"/>
+			<div class="status"></div>
+		</fieldset>
+	</form>
+</div>
 		</div>
 		
 		<div id="footer">
-			<p>Powered by the ServiceClient</p>
+			<p>Powered by the FireSpark</p>
 		</div>
 
 		<ul id="validation">
@@ -59,9 +73,9 @@
 		</script>
 		<script type="text/javascript" src="/libraries/jquery/json2.js"></script>
 		<script type="text/javascript">
-			document.getElementById('load-status').innerHTML = 'Loading jQuery ServiceClient ...';
+			document.getElementById('load-status').innerHTML = 'Loading jQuery FireSpark ...';
 		</script>
-		<script type="text/javascript" src="/services/serviceclient/dist/jquery-serviceclient.js"></script>		
+		<script type="text/javascript" src="/services/firespark/dist/jquery-firespark.js"></script>		
 		<script type="text/javascript">
 			document.getElementById('load-status').innerHTML = 'Loading Demo Templates ...';
 		</script>
@@ -69,29 +83,35 @@
 		<script type="text/javascript">
 			$(document).ready(function(){
 				
-				ServiceClient.Kernel.run([{
-					service : ServiceClient.jquery.module.AlertStatus,
-					selector : '#load-status',
-					value : 'Initializing ...',
-					hide : 1000,
-					delay : 3000
-				},{
-					service : ServiceClient.jquery.view.ElementView,
-					elementid : '#tab-container'
-				},{
-					service : ServiceClient.jquery.renderer.TabUI,
+				FireSpark.Kernel.run([{
+					service : FireSpark.jquery.service.ElementTabpanel,
+					element : '#tab-container',
 					indexstart : 1,
-					saveindex : 'tabuipanel'
+					savekey : 'tabuipanel'
 				},{
-					service : ServiceClient.jquery.module.NavigatorInit,
+					service : FireSpark.jquery.service.NavigatorInit,
 					selector : 'a.navigate',
 					attribute : 'href'
+				},{
+					service : FireSpark.jquery.service.NavigatorInit,
+					selector : 'form.navigate',
+					event : 'submit',
+					attribute : 'id',
+					escaped : true
+				},{
+					service : FireSpark.jquery.service.ElementContent,
+					element : '#load-status',
+					data : 'Initializing ...',
+					animation : 'fadeout',
+					duration : 1000,
+					delay : 3000
 				}]);
 				
-				ServiceClient.Registry.add('#testtab', ServiceClient.jquery.navigator.TestTab);
-				ServiceClient.Registry.add('#tplload', ServiceClient.jquery.navigator.TplLoad);
+				FireSpark.Registry.add('#tabtpl', FireSpark.jquery.workflow.TabTemplate);
+				FireSpark.Registry.add('#tplload', FireSpark.jquery.workflow.ElementTemplate);
+				FireSpark.Registry.add('#formsubmit', FireSpark.jquery.workflow.AjaxSubmit);
 				
-				ServiceClient.Registry.save('tpl-test', ServiceClient.jquery.template.Test);
+				FireSpark.Registry.save('tpl-test', FireSpark.jquery.template.Test);
 				
 		});
 		</script>  		

@@ -10,7 +10,7 @@ goto end
 type FireSpark.js core\init.js core\services\*.js core\workflows\*.js core\helpers\*.js extjs\init.js extjs\services\*.js extjs\workflows\*.js extjs\helpers\*.js > dist\extjs-firespark.js
 goto end
 :jquery
-type FireSpark.js core\init.js core\services\*.js core\workflows\*.js core\helpers\*.js jquery\init.js jquery\services\*.js jquery\workflows\*.js jquery\helpers\*.js > dist\jquery-firespark.js
+type FireSpark.js core\init.js core\services\*.js core\workflows\*.js core\helpers\*.js jquery\init.js jquery\services\*.js jquery\workflows\*.js jquery\helpers\*.js jquery\templates\*.js > dist\jquery-firespark.js
 goto end
 :end
 pause

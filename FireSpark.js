@@ -29,6 +29,8 @@
  *
  *	example #testtab:tabtitle=Krishna:loadurl=test.php
  *
+ *	basic escape = with ~
+ *
  *	escapes for usage in form id
  *	# by _ 
  *	= by .
@@ -188,18 +190,20 @@ var FireSpark = (function(){
 				/**
 				 *	Construct message for workflow
 				**/
-				var message = new Array();
+				var message = {};
 				for(var i=1, len=req.length; i<len; i++){
 					var param = (req[i]).split('=');
-					message[param[0]] = param[1];
+					var arg = param[1];
+					arg = arg.replace(/~/g, '=');
+					message[param[0]] = arg;
 				}
 				
 				/**
 				 *	Run the workflow
 				**/
 				if(navigators[index] || false){
-					$message['service'] = navigators[index];
-					return this.run([$message]);
+					message['service'] = navigators[index];
+					return this.run([message]);
 				}
 				
 				return false;

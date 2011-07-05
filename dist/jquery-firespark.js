@@ -29,6 +29,8 @@
  *
  *	example #testtab:tabtitle=Krishna:loadurl=test.php
  *
+ *	basic escape = with ~
+ *
  *	escapes for usage in form id
  *	# by _ 
  *	= by .
@@ -188,18 +190,20 @@ var FireSpark = (function(){
 				/**
 				 *	Construct message for workflow
 				**/
-				var message = new Array();
+				var message = {};
 				for(var i=1, len=req.length; i<len; i++){
 					var param = (req[i]).split('=');
-					message[param[0]] = param[1];
+					var arg = param[1];
+					arg = arg.replace(/~/g, '=');
+					message[param[0]] = arg;
 				}
 				
 				/**
 				 *	Run the workflow
 				**/
 				if(navigators[index] || false){
-					$message['service'] = navigators[index];
-					return this.run([$message]);
+					message['service'] = navigators[index];
+					return this.run([message]);
 				}
 				
 				return false;
@@ -217,11 +221,11 @@ FireSpark.core.constant = {};
 
 FireSpark.core.constant.loadmsg = '<p class="loading">Loading ...</p>';
 FireSpark.core.constant.loaderror = '<p class="error">The requested resource could not be loaded</p>';
-/** *	@service LoadConfirm *	@desc Confirms whether to continue  * *	@param confirm boolean [message] *	@param value string [message] ***/FireSpark.core.service.LoadConfirm = {	run : function(message, memory){		if(message.confirm || false){			return confirm(message.value);		}		return true;	}};/** *	@service WindowReload *	@desc Reloads the window ***/FireSpark.core.service.WindowReload = {	run : function(message, memory){		window.location.reload();		return false;	}};/** *	Equals helper * *	@param value1 *	@param value2 ***/ServiceClient.jquery.helper.equals = function(value1, value2){	return value1==value2;}/** *	GetDate helper * *	@param time ***/ServiceClient.jquery.helper.getDate = function(time){	var d = new Date(time);	return d.toDateString();}/**
+/** *	@service LoadConfirm *	@desc Confirms whether to continue  * *	@param confirm boolean [message] *	@param value string [message] ***/FireSpark.core.service.LoadConfirm = {	run : function(message, memory){		if(message.confirm || false){			return confirm(message.value);		}		return true;	}};/** *	@service WindowReload *	@desc Reloads the window ***/FireSpark.core.service.WindowReload = {	run : function(message, memory){		window.location.reload();		return false;	}};/** *	Equals helper * *	@param value1 *	@param value2 ***/FireSpark.core.helper.equals = function(value1, value2){	return value1==value2;}/** *	GetDate helper * *	@param time ***/FireSpark.core.helper.getDate = function(time){	var d = new Date(time);	return d.toDateString();}/**
  *	@helper readFileSize
  *
 **/
-ServiceClient.jquery.helper.readFileSize = function(size){
+FireSpark.core.helper.readFileSize = function(size){
 	var kb = size/1024.0;
 	if(kb > 1024.0){
 		var mb = kb/1024.0;
@@ -240,13 +244,15 @@ FireSpark.jquery.constant = {};
 FireSpark.jquery.template = {};
 /** *	@service CookieMake *	@desc Creates a new Cookie * *	@param key string [message] *	@param value string [message] *	@param expires integer[message] default 1 day ***/FireSpark.jquery.service.CookieMake = {	run : function(message, memory){		$.cookie(message.key, message.value, {			expires : message.expires || 1		});		return true;	}};/**
  *	@service ElementContent
- *	@desc Fills element with content and animates it
+ *	@desc Fills element with content and animates it and returns element in memory
  *
  *	@param element string [message|memory]
  *	@param data html/text [message|memory] optional default ''
  *	@param animation string [message] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
  *	@param duration integer [message] optional default 1000
  *	@param delay integer [message] optional default 0
+ *
+ *	@return element element [memory]
  *
 **/
 FireSpark.jquery.service.ElementContent = {
@@ -258,12 +264,15 @@ FireSpark.jquery.service.ElementContent = {
 			var element = memory.element;
 		}
 		
-		element.hide();
-		element.html(message.data || memory.data || '');
-		element.delay(message.delay || 0);
-		
 		var animation = message.animation || 'fadein';
 		var duration = message.duration || 1000;
+		
+		if(animation == 'fadein' || animation == 'slidein'){
+			element.hide();
+		}
+		
+		element.html(message.data || memory.data || '');
+		element.delay(message.delay || 0);
 		
 		switch(animation){
 			case 'fadein' :
@@ -283,10 +292,12 @@ FireSpark.jquery.service.ElementContent = {
 				break;
 		}
 		
+		memory.element = element;
+		
 		return true;
 	}
 };
-/** *	@service ElementState *	@desc Enables and disables element * *	@param element string [message] *	@param disabled boolean [message] optional default false ***/FireSpark.jquery.service.ElementState = {	run : function(message, memory){		if(message.disabled || false){			$(message.element).attr('disabled', true);		}		else {			$(message.element).removeAttr('disabled');		}		return true;	}};/**
+/** *	@service ElementState *	@desc Enables and disables element * *	@param element string [message] *	@param disabled boolean [message] optional default false ***/FireSpark.jquery.service.ElementState = {	run : function(message, memory){		if(message.element || false){			if(message.disabled || false){				$(message.element).attr('disabled', true);			}			else {				$(message.element).removeAttr('disabled');			}		}		return true;	}};/**
  *	@service ElementTab
  *	@desc Creates a new tab and returns the element
  *
@@ -376,7 +387,7 @@ FireSpark.jquery.service.ElementTabpanel = {
 		return true;
 	}	
 };
-/** *	@service FormRead *	@desc Serializes form into url-encoded data and reads form submit parameters * *	@param form string [message] * *	@return loadurl string [memory] *	@return request string [memory] *	@return loadparams object [memory] ***/FireSpark.jquery.service.FormRead = {	run : function(message, memory){		var form = $(message.form);		memory.loadurl = form.attr('action');		memory.request = form.attr('method').toUpperCase();				var params = form.serialize();		var d= new Date();		params = params + '&_ts='+ d.getTime();		memory.loadparams = params;				return true;	}};/** *	@service FormValidate *	@desc Validates form input values (required and email) using style class * *	@style .required *	@style .email * *	@param form string [message] ***/FireSpark.jquery.service.FormValidate = {	run : function(message, memory){		var result = true;				var checkRequired = function(index, el){			if($(this).val() == ''){				result = false;				$(this).parent()					.next('p.error')					.slideDown(1000)					.delay(5000)					.slideUp(1000);				return false;			}		}		$(message.form + ' .required').each(checkRequired);				var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;		var checkEmail = function(index, el){			if(!emailRegex.test($(this).val())){				result = false;				$(this).parent()					.next('p.error')					.slideDown(1000)					.delay(5000)					.slideUp(1000);				return false;			}		}		$(message.form + ' .email').each(checkEmail);				return result;	}};/**
+/** *	@service FormRead *	@desc Serializes form into url-encoded data and reads form submit parameters * *	@param form string [message] * *	@return loadurl string [memory] *	@return request string [memory] *	@return loadparams object [memory] ***/FireSpark.jquery.service.FormRead = {	run : function(message, memory){		var form = $(message.form);				memory.loadurl = form.attr('action');		memory.request = form.attr('method').toUpperCase();				var params = form.serialize();		var d= new Date();		params = params + '&_ts='+ d.getTime();		memory.loadparams = params;				return true;	}};/** *	@service FormValidate *	@desc Validates form input values (required and email) using style class * *	@style .required *	@style .email * *	@param form string [message] ***/FireSpark.jquery.service.FormValidate = {	run : function(message, memory){		var result = true;				var checkRequired = function(index, el){			if($(this).val() == ''){				result = false;				$(this).parent()					.next('p.error')					.slideDown(1000)					.delay(5000)					.slideUp(1000);				return false;			}		}		$(message.form + ' .required').each(checkRequired);				var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;		var checkEmail = function(index, el){			if(!emailRegex.test($(this).val())){				result = false;				$(this).parent()					.next('p.error')					.slideDown(1000)					.delay(5000)					.slideUp(1000);				return false;			}		}		$(message.form + ' .email').each(checkEmail);				return result;	}};/**
  *	@service LoadAjax
  *	@desc Uses AJAX to load data from server and optionally process it
  *
@@ -387,17 +398,11 @@ FireSpark.jquery.service.ElementTabpanel = {
  *	@param processData boolean [message] optional default true
  *
  *	@param workflow Workflow [message]
- *	@param errorflow	Workflow [message] optional default []
- *
- *	@param process boolean [message] optional default false
- *	@param status string [message] optional default valid
- *	@param processflow Workflow [message] optional default false
- *	@param replace string [message] optional default false
+ *	@param errorflow	Workflow [message] optional default false
  *
  *	@return data string [memory]
  *	@return status integer Status code [memory]
  *	@return error string [memory] optional
- *	@return response string [memory] optional
  *
 **/
 FireSpark.jquery.service.LoadAjax = {
@@ -411,58 +416,16 @@ FireSpark.jquery.service.LoadAjax = {
 			data: message.loadparams || memory.loadparams || {},
 			dataType : message.datatype || memory.datatype || 'json',
 			type : message.request || memory.request || 'POST',
-			processData : memory.request || true,
+			processData : memory.processData || true,
 			
 			success : function(data, status, request){
-				var success = true;
-				
 				memory.data = data;
 				memory.status = status;
 				
 				/**
-				 *	If process is true, check for status value in JSON data received and set success variable accordingly
+				 *	Run the workflow
 				**/
-				if(message.process || false){
-					var key = message.status || 'valid';
-					
-					if(data[key] || false){
-						success = true;
-						
-						/**
-						 *	Check for processflow definitions and execute them
-						**/
-						var run = data[message.processflow] || false;
-						if(run){
-							for(var i in run){
-								run[i].service = FireSpark.Registry.get(run[i].service);
-							}
-							return FireSpark.Kernel.run(run);
-						}
-					}
-					else {
-						success = false;
-					}
-					
-					/**
-					 *	Replace data with data to be processed further using replace index
-					**/
-					if(message.replace || false){
-						memory.response = data;
-						memory.data = data[message.replace];
-					}
-				}
-				
-				/**
-				 *	If success is true, run the workflow; otherwise run the errorflow if exists
-				**/
-				if(success){
-					FireSpark.Kernel.run(message.workflow, memory);
-				}
-				else {
-					if(message.errorflow || false){
-						FireSpark.Kernel.run(message.errorflow, memory);
-					}
-				}
+				FireSpark.Kernel.run(message.workflow, memory);
 			},
 			
 			error : function(request, status, error){
@@ -474,7 +437,7 @@ FireSpark.jquery.service.LoadAjax = {
 				 *	Run the errorflow if any
 				**/
 				if(message.errorflow || false){
-					ServiceClient.Kernel.run(message.errorflow, memory);
+					FireSpark.Kernel.run(message.errorflow, memory);
 				}
 			}
 		});
@@ -486,7 +449,7 @@ FireSpark.jquery.service.LoadAjax = {
 		return false;
 	}
 };
-/** *	@service NavigatorInit *	@desc Initializes navigator launch triggers * *	@param selector string [message] *	@param event string [message] optional default 'click' *	@param attribute string [message] *	@param escaped boolean [message] optional default false ***/FireSpark.jquery.service.NavigatorInit = {	run : function(message, memory){		var result = $(message.selector);		result.live(message.event || 'click', function(){			return FireSpark.Kernel.launch($(this).attr(message.attribute), message.escaped || false);		});		return true;	}};/**
+/** *	@service NavigatorInit *	@desc Initializes navigator launch triggers * *	@param selector string [message] *	@param event string [message] optional default 'click' *	@param attribute string [message] *	@param escaped boolean [message] optional default false ***/FireSpark.jquery.service.NavigatorInit = {	run : function(message, memory){		var result = $(message.selector);		result.live(message.event || 'click', function(){			return FireSpark.Kernel.launch($(this).attr(message.attribute), message.escaped || false);		});		return true;	}};/** *	@service RequestWrite *	@desc Processes loadparams from url-encoded other formats * *	@param type string [message] optional default 'url' ('url', 'json') *	@param loadparams object [message|memory] optional default false * *	@return loadparams object [memory] ***/FireSpark.jquery.service.RequestWrite = {	run : function(message, memory){		var arg = message.loadparams || memory.loadparams || false;		var type = message.type || 'url';				if(arg !== false){			if(type != 'url'){				var params = arg.split('&');				var result = new Object();				for(var i=0, len=params.length; i<len; i++){					var prm = (params[i]).split('=');					result[prm[0]] = prm[1];				}				arg = result;			}						switch(type){				case 'json' :					arg = JSON.stringify(arg);					break;									case 'url' :				default :					break;			}		}		memory.loadparams = arg;				return true;	}};/** *	@service ResponseRead *	@desc Processes response to run workflows * *	@param data object [memory] *	@param process boolean [message] optional default false *	@param status string [message] optional default 'valid' *	@param processflow Workflow [message] optional default 'run' *	@param replace string [message] optional default false * *	@return response object [memory] optional ***/FireSpark.jquery.service.ResponseRead = {	run : function(message, memory){		if(message.process || false){			var status = message.status || 'valid';			var data = memory.data || {};			if(data[status] || false){				var runkey = message.processflow || 'run';				var run = data[runkey] || false;				if(run){					for(var i in run){						run[i].service = FireSpark.Registry.get(run[i].service);					}					return FireSpark.Kernel.run(run);				}			}			if(message.replace || false){				memory.response = data;				memory.data = data[message.replace];			}		}			return true;	}};/**
  *	@service TemplateApply
  *	@desc Applies template
  *
@@ -507,7 +470,7 @@ FireSpark.jquery.service.TemplateApply = {
  *	@desc Reads template definition into memory
  *
  *	@param data.template string [memory]
- *	@param template string [message]
+ *	@param template string [message] optional default FireSpark.jquery.template.Default
  *
  *	@param template template [memory]
  *
@@ -517,10 +480,20 @@ FireSpark.jquery.service.TemplateRead = {
 		if(memory.data.template || false){
 			memory.template = $.template(memory.data.template);
 		}
-		else {
+		else if(message.template || false){
 			memory.template = FireSpark.Registry.get(message.template);
 		}
+		else{
+			memory.template = FireSpark.jquery.template.Default;
+		}
+		
 		return true;
 	}
 };
-/** *	@workflow CookieLogin *	@desc Sign in using Cookie * *	@param key string [message] optional default 'sessionid' *	@param value string [message] *	@param expires integer[message] default 1 day ***/FireSpark.jquery.workflow.CookieLogin = {	run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.jquery.service.CookieMake,			key : message.key || 'sessionid',			value : message.value,			expires : message.expires || 1		},{			service : FireSpark.core.service.WindowReload		}]);	}};/** *	@workflow LoadHtml * *	@param loadmsg string [message] optional default (FireSpark.core.constant.loadmsg) *	@param cntr string [message] *	@param url URL [message] ***/FireSpark.jquery.workflow.LoadHtml = {	run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.jquery.service.ElementContent,			element : message.cntr,			data : message.loadmsg || FireSpark.core.constant.loadmsg,			duration : 10		},{			service : ServiceClient.jquery.loader.AjaxLoader,			loadurl : message.url,			datatype : 'html',			workflow : [{				service : ServiceClient.jquery.service.ElementContent,				element : message.cntr			}]		}]);	}};
+/** *	@workflow AjaxSubmit * *	@param sel form-parent selector string *	@param loadmsg string [message] optional default (FireSpark.core.constant.loadmsg) *	@param tpl string [message|memory] *	@param cf boolean [message] optional default false ***/FireSpark.jquery.workflow.AjaxSubmit = {	run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.jquery.service.FormValidate,			form : message.sel + ' form'		},{			service : FireSpark.jquery.service.FormRead,			form : message.sel + ' form'		},{			service : FireSpark.jquery.workflow.LoadTemplate,			url : message.url,			element : message.sel +' div.status',			template : message.tpl || false,			confirm : message.cf || false,			loadmsg : message.loadmsg || false		}], memory);	}};/** *	@workflow CookieLogin *	@desc Sign in using Cookie * *	@param key string [message] optional default 'sessionid' *	@param value string [message] *	@param expires integer[message] default 1 day ***/FireSpark.jquery.workflow.CookieLogin = {	run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.jquery.service.CookieMake,			key : message.key || 'sessionid',			value : message.value,			expires : message.expires || 1		},{			service : FireSpark.core.service.WindowReload		}]);	}};/** *	@workflow ElementHtml *	@desc Loads HTML content into element * *	@param loadmsg string [message] optional default (FireSpark.core.constant.loadmsg) *	@param cntr string [message] *	@param url URL [message] ***/FireSpark.jquery.workflow.ElementHtml = {	run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.jquery.workflow.LoadHtml,			url : message.url,			element : message.cntr		}], memory);	}};/** *	@workflow ElementTemplate * *	@param cntr string [message] *	@param loadmsg string [message] optional default (FireSpark.core.constant.loadmsg) *	@param url URL [message] *	@param tpl string [message|memory]  *	@param arg string [message] optional default false *	@param cf boolean [message] optional default false ***/FireSpark.jquery.workflow.ElementTemplate = {	run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.jquery.workflow.LoadTemplate,			url : message.url,			element : message.cntr,			template : message.tpl || false,			confirm : message.cf || false,			loadparams : message.arg || false		}], memory);	}};/** *	@workflow IframeSubmit * *	@param sel form selector string *	@param val string ***/FireSpark.jquery.workflow.IframeSubmit = {		run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.jquery.service.ElementState,			selector : message.sel + ' input[name=submit]',			disabled : true		},{			service : FireSpark.jquery.service.ElementContent,			element : message.sel + ' div.status',			data : message.loadmsg || FireSpark.core.constant.loadmsg,			duration : 10		}]);	}};	/** *	@workflow LoadHtml *	@desc Loads HTML content into element * *	@param url URL [message] *	@param element element [message|memory] ***/FireSpark.jquery.workflow.LoadHtml = {	run : function(message, memory){		return FireSpark.Kernel.run([{				service : FireSpark.jquery.service.ElementContent,				element : message.element || false,				data : message.loadmsg || FireSpark.core.constant.loadmsg,				duration : 10			},{			service : FireSpark.jquery.service.LoadAjax,			loadurl : message.url,			datatype : 'html',			workflow : [{				service : FireSpark.jquery.service.ElementContent			}],			errorflow : [{				service : FireSpark.jquery.service.ElementContent			}]		}], memory);	}};/** *	@workflow LoadTemplate * *	@param url URL [message] *	@param loadparams string/object [message|memory] *	@param encode string [message] optional default false *  *	@param element element [message|memory] *	@param loadmsg string [message] optional default (FireSpark.core.constant.loadmsg) * *	@param confirm boolean [message] optional default false *	@param confirmmsg string [message] optional default 'Are you sure you want to continue ?' *	@param selector string [message] optional default false * *	@param process boolean [message] optional default false * 	@param status string [message] optional default false * 	@param processflow string [message] optional default false * *	@param template string [message|memory] optional default false (FireSpark.jquery.template.Default) ***/FireSpark.jquery.workflow.LoadTemplate = {	run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.core.service.LoadConfirm,			confirm : message.confirm || false,			value : message.confirmmsg || 'Are you sure you want to continue ?'		},{			service : FireSpark.jquery.service.RequestWrite,			loadparams : message.loadparams || false,			type : message.encode || false		},{			service : FireSpark.jquery.service.ElementState,			selector : message.selector || false,			disabled : true		},{			service : FireSpark.jquery.service.ElementContent,			element : message.element || false,			data : message.loadmsg || FireSpark.core.constant.loadmsg,			duration : 10		},{			service : FireSpark.jquery.service.LoadAjax,			loadurl : message.url,			processData : false,			workflow : [{				service : FireSpark.jquery.service.ResponseRead,				process : message.process || true,				status : message.status || false,				processflow : message.processflow || false,			},{				service : FireSpark.jquery.service.TemplateRead,				template : message.template || false			},{				service : FireSpark.jquery.service.TemplateApply			},{				service : FireSpark.jquery.service.ElementContent			}],			errorflow : [{				service : FireSpark.jquery.service.ElementState,				selector : message.selector || false			},{				service : FireSpark.jquery.service.ElementContent			}]		}], memory);	}};/** *	@workflow TabTemplate * *	@param tabui string [message] optional default 'tabuipanel' *	@param title string [message] optional default 'Krishna' *	@param loadmsg string [message] optional default (FireSpark.core.constant.loadmsg) *	@param url URL [message] optional default 'data.json.php' *	@param tpl string [message|memory]  ***/FireSpark.jquery.workflow.TabTemplate = {	run : function(message, memory){		return FireSpark.Kernel.run([{			service : FireSpark.jquery.service.ElementTab,			tabui : message.tabui || 'tabuipanel',			tabtitle : message.title || 'Krishna'		},{			service : FireSpark.jquery.workflow.LoadTemplate,			url : message.url || 'data.json.php',			template : message.tpl || 'tpl-test',			loadmsg : message.loadmsg || false		}], memory);	}};/**
+ *	@template Default
+**/
+FireSpark.jquery.template.Default = $.template('\
+	<p class="{{if valid}}success{{else}}error{{/if}}">${msg}</p>\
+');
+

@@ -1,1 +1,1 @@
-/** *	GetDate helper * *	@param time ***/ServiceClient.jquery.helper.getDate = function(time){	var d = new Date(time);	return d.toDateString();}
+/** *	GetDate helper * *	@param time ***/FireSpark.core.helper.getDate = function(time){	var d = new Date(time);	return d.toDateString();}
