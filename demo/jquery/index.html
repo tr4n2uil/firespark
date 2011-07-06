@@ -25,7 +25,7 @@
 				</div>
 			</div>
 		<div id="form-test-panel" class="panel form-panel">
-	<form action="/iitbhucse/launch.php?uri=ec.user.info.json&request=post" method="post" class="navigate" id="_formsubmit:sel._form-test-panel">
+	<form action="/iitbhucse/launch.php?uri=ec.user.info.json&request=post" method="post" class="navigate" id="_formsubmit:sel._form-test-panel:iframe.true">
 		<fieldset>
 			<legend class="headdark">Execute</legend>
 			<label>User ID
@@ -109,7 +109,7 @@
 				
 				FireSpark.Registry.add('#tabtpl', FireSpark.jquery.workflow.TabTemplate);
 				FireSpark.Registry.add('#tplload', FireSpark.jquery.workflow.ElementTemplate);
-				FireSpark.Registry.add('#formsubmit', FireSpark.jquery.workflow.AjaxSubmit);
+				FireSpark.Registry.add('#formsubmit', FireSpark.jquery.workflow.FormSubmit);
 				
 				FireSpark.Registry.save('tpl-test', FireSpark.jquery.template.Test);
 				

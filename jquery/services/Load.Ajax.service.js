@@ -1,12 +1,13 @@
 /**
  *	@service LoadAjax
- *	@desc Uses AJAX to load data from server and optionally process it
+ *	@desc Uses AJAX to load data from server
  *
  *	@param loadurl string [message|memory]
  *	@param loadparams object [message|memory]
  *	@param datatype string [message|memory] optional default 'json'
  *	@param request string [message|memory] optional default 'POST'
  *	@param processData boolean [message] optional default true
+ *	@param contentType string [message|memory] optional default 'application/x-www-form-urlencoded'
  *
  *	@param workflow Workflow [message]
  *	@param errorflow	Workflow [message] optional default false
@@ -28,6 +29,7 @@ FireSpark.jquery.service.LoadAjax = {
 			dataType : message.datatype || memory.datatype || 'json',
 			type : message.request || memory.request || 'POST',
 			processData : memory.processData || true,
+			contentType : message.contentType || memory.contentType || 'application/x-www-form-urlencoded',
 			
 			success : function(data, status, request){
 				memory.data = data;
@@ -42,7 +44,7 @@ FireSpark.jquery.service.LoadAjax = {
 			error : function(request, status, error){
 				memory.error = error;
 				memory.status = status;
-				memory.data = FireSpark.core.constant.loaderror;
+				memory.data = FireSpark.core.constant.loaderror + ' [Error : ' + error + ']';
 				
 				/**
 				 *	Run the errorflow if any
