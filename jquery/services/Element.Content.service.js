@@ -28,6 +28,7 @@ FireSpark.jquery.service.ElementContent = {
 		}
 		
 		element.html(message.data || memory.data || '');
+		element.trigger('load');
 		element.delay(message.delay || 0);
 		
 		switch(animation){

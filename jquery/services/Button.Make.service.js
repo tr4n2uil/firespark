@@ -1,0 +1,1 @@
+/** *	@service ButtonMake *	@desc creates button UI element * *	@param selector string [message] ***/FireSpark.jquery.service.ButtonMake = {	run : function(message, memory){		$(message.selector).button();		return true;	}};
