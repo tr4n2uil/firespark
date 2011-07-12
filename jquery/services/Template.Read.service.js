@@ -10,7 +10,7 @@
 **/
 FireSpark.jquery.service.TemplateRead = {
 	run : function(message, memory){
-		if(memory.data.template || false){
+		if((memory.data && memory.data.template) || false){
 			memory.template = $.template(memory.data.template);
 		}
 		else if(message.template || false){
