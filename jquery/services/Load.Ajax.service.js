@@ -44,7 +44,7 @@ FireSpark.jquery.service.LoadAjax = {
 			error : function(request, status, error){
 				memory.error = error;
 				memory.status = status;
-				memory.data = FireSpark.core.constant.loaderror + ' [Error : ( ' + status + ' ) ' + error + ']';
+				memory.data = FireSpark.core.constant.loaderror + ' [Error : ' + error + ']';
 				
 				/**
 				 *	Run the errorflow if any
