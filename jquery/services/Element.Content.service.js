@@ -2,8 +2,9 @@
  *	@service ElementContent
  *	@desc Fills element with content and animates it and returns element in memory
  *
- *	@param element string [message|memory]
- *	@param data html/text [message|memory] optional default ''
+ *	@param element string [memory]
+ *	@param select boolean [memory] optional default false
+ *	@param data html/text [memory] optional default ''
  *	@param animation string [message] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
  *	@param duration integer [message] optional default 1000
  *	@param delay integer [message] optional default 0
@@ -12,45 +13,62 @@
  *
 **/
 FireSpark.jquery.service.ElementContent = {
-	run : function(message, memory){
-		if(message.element || false){
-			var element = $(message.element);
+	input : function(){
+		return {
+			required : ['element'],
+			optional : { 
+				select : false,
+				data : '',
+				animation : 'fadein',
+				duration : 1000,
+				delay : 0
+			}
+		};
+	},
+	
+	run : function($memory){
+		if($memory['select'] || false){
+			var $element = $($memory['element']);
 		}
 		else {
-			var element = memory.element;
+			$element = $memory['element'];
 		}
 		
-		var animation = message.animation || 'fadein';
-		var duration = message.duration || 1000;
+		var $animation = $memory['animation'];
+		var $duration = $memory['duration'];
 		
-		if(animation == 'fadein' || animation == 'slidein'){
-			element.hide();
+		if($animation == 'fadein' || $animation == 'slidein'){
+			$element.hide();
 		}
 		
-		element.html(message.data || memory.data || '');
-		element.trigger('load');
-		element.delay(message.delay || 0);
+		$element.html($memory['data']);
+		$element.trigger('load');
+		$element.delay($memory['delay']);
 		
-		switch(animation){
+		switch($animation){
 			case 'fadein' :
-				element.fadeIn(duration);
+				$element.fadeIn($duration);
 				break;
 			case 'fadeout' :
-				element.fadeOut(duration);
+				$element.fadeOut($duration);
 				break;
 			case 'slidein' :
-				element.slideIn(duration);
+				$element.slideIn($duration);
 				break;
 			case 'slideout' :
-				element.slideOut(duration);
+				$element.slideOut($duration);
 				break;
 			default :
-				element.html('Animation type not supported').fadeIn(duration);
+				$element.html('Animation type not supported').fadeIn($duration);
 				break;
 		}
 		
-		memory.element = element;
-		
-		return true;
+		$memory['element'] = $element;
+		$memory['valid'] = true;
+		return $memory;
+	},
+	
+	output : function(){
+		return ['element'];
 	}
 };

@@ -1,17 +1,18 @@
 FireSpark
 JavaScript Service Computing Platform
 
-vibhaj8@gmail.com
+Vibhaj Rajan <vibhaj8@gmail.com>
 
 Developed in support of :
 	Google Summer of Code 2011
 	DSpace RESTClient
 	https://wiki.duraspace.org/display/GSOC/DSpace+ClientUI+built+on+RESTful+API+-+GSoC+2011
 
-JavaScript Library Neutral Framework (Currently supported completely for jQuery only)
+JavaScript Library Neutral Platform (Currently complete support for jQuery only)
 	Registry
-		Workflows
+		Navigators
 		References
 	Kernel
 		run()
+		execute()
 		launch()

@@ -1,39 +1,51 @@
 /**
  *	@project FireSpark
- *	@desc JavaScript Service Architecture and Workflow Framework
+ *	@desc JavaScript Service Computing Platform
  *
  *	@class FireSpark
  *	@desc Provides Registry and Kernel functionalities
  *	
  *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
- *	Services are generic modules providing resuable stateless functionalities
+ *	@desc Services are generic modules providing resuable stateless functionalities
  *
- *	interface Service {
+ *	@interface Service {
+ *		public function input(){
+ *			... returns array of required parameters and object of optional parameters
+ *		}
  *		public function run(message, memory){
- *			... use message for receiving configurations ...
- *			... use memory for managing state in workflows ...
- *			... save reference in Registry instead of returning objects ...
+ *			... uses memory during execution for receiving and returning parameters
+ *			... save reference in Registry, if required, instead of returning objects
+ *		}
+ *		public function output(){
+ *			... returns array of parameters to return 
  *		}
  *	}
  *
- *	Workflows are array of services that use common memory for state management
+ *	@format Message {
+ *		service : (reference),
+ *		... parameters ...
+ *	}
  *
- *	workflow = [{	
+ *	@desc Workflows are array of services that use common memory for state management
+ *
+ *	@format workflow = [{	
  *		service : ...,
  *		( ... params : ... )
  *	}];
  *
- * 	Navigator is index (workflow alias) followed by parameters to be overrided delimited by ':'
- *	indexes usually starts with # (href programming)
+ * 	@desc Navigator is compact way of representing messages
+ *	@format Navigator root:name=value:name=value
  *
- *	example #testtab:tabtitle=Krishna:loadurl=test.php
+ *	@example #testtab:tabtitle=Krishna:loadurl=test.php
  *
- *	basic escape = with ~
+ *	@escapes basic '=' with '~'
  *
- *	escapes for usage in form id
- *	# by _ 
- *	= by .
+ *	@escapes limited for usage in form id
+ *	'#' by '_' 
+ *	'=' by '.'
+ *
+ *	@escapes advanced (not implemented yet) using URL encoding
  *	
 **/
 
@@ -45,19 +57,19 @@ var FireSpark = (function(){
 	 *	references may be accessed through the Registry
 	 *
 	**/
-	var references = new Array();
+	var $references = new Array();
 	
 	/**
-	 *	@var navigators array
-	 *	@desc an array that saves indexes to service workflows
+	 *	@var navigator roots array
+	 *	@desc an array that saves roots to service workflows
 	 *
 	**/
-	var navigators = new Array();
+	var $navigators = new Array();
 	
 	return {
 		/**
 		 *	@var Registry object
-		 *	@desc manages references and navigators
+		 *	@desc manages references and navigator roots
 		 *
 		**/
 		Registry : {
@@ -69,8 +81,8 @@ var FireSpark = (function(){
 			 *	@param reference object or any type
 			 *
 			**/
-			save : function(index, reference){
-				references[index] = reference;
+			save : function($index, $reference){
+				$references[$index] = $reference;
 			},
 			
 			/**
@@ -80,8 +92,8 @@ var FireSpark = (function(){
 			 *	@param index string
 			 *
 			**/
-			get : function(index){
-				return references[index];
+			get : function($index){
+				return $references[$index];
 			},
 			
 			/**
@@ -91,31 +103,31 @@ var FireSpark = (function(){
 			 *	@param index string
 			 *
 			**/
-			remove : function(index){
-				references[index] = 0;
+			remove : function($index){
+				$references[$index] = 0;
 			},
 			
 			/**
 			 *	@method add
-			 *	@desc adds a Navigator index
+			 *	@desc adds a Navigator root 
 			 *
-			 *	@param index string
+			 *	@param root string
 			 *	@param workflow object
 			 *
 			**/
-			add : function(index, workflow){
-				navigators[index] = workflow;
+			add : function($root, $workflow){
+				$navigators[$root] = $workflow;
 			},
 			
 			/**
 			 *	@method removeNavigator
-			 *	@desc removes a Navigator index
+			 *	@desc removes a Navigator root
 			 *
-			 *	@param index string
+			 *	@param root string
 			 *
 			**/
-			removeNavigator : function(index){
-				navigators[index] = 0;
+			removeNavigator : function($root){
+				$navigators[$root] = 0;
 			}
 		},
 		
@@ -129,38 +141,126 @@ var FireSpark = (function(){
 		**/
 		Kernel : {			
 			/** 
-			 *	@method run
+			 *	@method execute
 			 *	@desc executes a workflow with the given definition
 			 *
-			 *	@param config object
-			 *	@param mem object optional default {}
+			 *	@param message object Workflow definition
+			 *	@param memory object optional default {}
 			 *
 			**/
-			run : function(config, mem){
+			execute : function($workflow, $memory){
 				/**
 				 *	create a new memory if not passed
 				**/
-				var memory = mem || {};
-				var result = true;
-				
-				for(var i in config){
-					var service = config[i].service;
-					var message = config[i];
-					var strict = config[i].strict || true;
+				$memory = $memory || {};
+				$memory['valid'] = $memory['valid'] || true;
+			
+				for(var $i in workflow){
+					var $message = $workflow[$i];
 					
 					/**
-					 *	continue on invalid state
+					 *	Check for strictness
 					**/
-					if(result !== true && strict === true)
+					var $strict = $message.strict || true;
+					
+					/**
+					 *	Continue on invalid state if strict
+					**/
+					if($memory['valid'] !== true && strict === true)
 						continue;
 					
 					/**
 					 *	run the service with the message and memory
 					**/
-					result = service.run(message, memory);
+					$memory = this.run($message, $memory);
 				}
 				
-				return result;
+				return $memory;
+			},
+			
+			/** 
+			 *	@method run
+			 *	@desc runs a service with the given definition
+			 *
+			 *	@param message object Service definition
+			 *	@param memory object optional default {}
+			 *
+			**/
+			run : function($message, $memory){
+				/**
+				 *	Read the service instance
+				**/
+				var $service = $message['service'];
+				
+				/**
+				 *	Read the service arguments
+				**/
+				var $args = $message['args'] || [];
+				
+				/**
+				 *	Copy arguments if necessary
+				**/
+				for(var $i in $args){
+					var $key = $args[$i];
+					$message[$key] = $message[$key] || $memory[$key] || false
+				}
+				
+				/**
+				 *	Read the service input
+				**/
+				var $input = $message['input'] || {};
+				var $sin = $service.input();
+				var $sinreq = $sin['required'] || [];
+				var $sinopt = $sin['optional'] || {};
+				
+				/**
+				 *	Copy required input if not exists (no check due to peculiarity of false values in JavaScript)
+				**/
+				for(var $i in $sinreq){
+					var $key = $sinreq[$i];
+					var $param = $input[$key] || $key;
+					$message[$key] = $message[$key] || $memory[$param] || false;
+				}
+				
+				/**
+				 *	Copy optional input if not exists
+				**/
+				for(var $i in $sinopt){
+					var $key = $sinopt[$i];
+					var $param = $input[$key] || $key;
+					$message[$key] = $message[$key] || $memory[$param] || $sinopt[$key];
+				}
+				
+				/**
+				 *	Run the service with the message as memory
+				**/
+				$message = $service.run($message);
+				
+				/**
+				 *	Read the service output and return if not valid
+				**/
+				var $output = [];
+				if($message['valid'] || false){
+					$output = $message['output'] || [];
+				}
+				else {
+					return $memory;
+				}
+				var $sout = $service.output();
+				
+				/**
+				 *	Copy output
+				**/
+				for(var $i in $sout){
+					var $key = $sout[$i];
+					var $param = $input[$key] || $key;
+					$memory[$param] = $message[$key] || false;
+				}
+				
+				/**
+				 *	Return the memory
+				**/
+				return $memory;
 			},
 			
 			/**
@@ -171,39 +271,42 @@ var FireSpark = (function(){
 			 *	@param escaped boolean optional default false
 			 *
 			**/
-			launch : function(navigator, escaped){
+			launch : function($navigator, $escaped){
 				
 				/**
 				 *	Process escaped navigator
 				**/
-				if(escaped || false){
-					navigator = navigator.replace(/_/g, '#');
-					navigator = navigator.replace(/\./g, '=');
+				if($escaped || false){
+					$navigator = $navigator.replace(/_/g, '#');
+					$navigator = $navigator.replace(/\./g, '=');
 				}
+				//$navigator = $navigator.replace(/\+/g, '%20');
 				
 				/**
 				 *	Parse navigator
 				 **/
-				var req = navigator.split(':');
-				var index = req[0];
+				var $req = $navigator.split(':');
+				var $index = $req[0];
 				
 				/**
 				 *	Construct message for workflow
 				**/
-				var message = {};
-				for(var i=1, len=req.length; i<len; i++){
-					var param = (req[i]).split('=');
-					var arg = param[1];
-					arg = arg.replace(/~/g, '=');
-					message[param[0]] = arg;
+				var $message = {};
+				for(var $i=1, $len=$req.length; $i<$len; $i++){
+					var $param = ($req[i]).split('=');
+					var $arg = $param[1];
+					$arg = $arg.replace(/~/g, '=');
+					//$arg = unescape($arg);
+					$message[$param[0]] = $arg;
 				}
 				
 				/**
 				 *	Run the workflow
 				**/
-				if(navigators[index] || false){
-					message['service'] = navigators[index];
-					return this.run([message]);
+				if($navigators[$index] || false){
+					$message['service'] = $navigators[$index];
+					$message = this.run($message);
+					return $message['valid'];
 				}
 				
 				return false;
