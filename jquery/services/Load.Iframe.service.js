@@ -8,14 +8,14 @@
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
  *
- *	@return result string [memory]
+ *	@return data string [memory]
  *	@return error string [memory] optional
  *
 **/
 FireSpark.jquery.service.LoadIframe = {
 	input : function(){
 		return {
-			required : ['agent', 'workflow']
+			required : ['agent', 'workflow'],
 			optional : { 
 				type : 'json', 
 				errorflow : false
@@ -47,18 +47,18 @@ FireSpark.jquery.service.LoadIframe = {
 					var $data = $frame.document.body.innerHTML;
 					switch($memory['type']){
 						case 'html' :
-							$memory['result'] = $data;
+							$memory['data'] = $data;
 							break;
 						case 'json' :
 						default :
-							$memory['result'] = $.parseJSON($data);
+							$memory['data'] = $.parseJSON($data);
 							break;
 					}
 					
 					/**
 					 *	Run the workflow
 					**/
-					FireSpark.Kernel.run($memory['workflow'], $memory);
+					FireSpark.Kernel.execute($memory['workflow'], $memory);
 				}
 				catch($error){
 					$memory['error'] = $error.description;
@@ -68,7 +68,7 @@ FireSpark.jquery.service.LoadIframe = {
 					 *	Run the errorflow if any
 					**/
 					if($memory['errorflow']){
-						FireSpark.Kernel.run($memory['errorflow'], $memory);
+						FireSpark.Kernel.execute($memory['errorflow'], $memory);
 					}
 				}
 			})
@@ -80,7 +80,7 @@ FireSpark.jquery.service.LoadIframe = {
 				 *	Run the errorflow if any
 				**/
 				if($memory['errorflow']){
-					FireSpark.Kernel.run($memory['errorflow'], $memory);
+					FireSpark.Kernel.execute($memory['errorflow'], $memory);
 				}
 			});
 			
@@ -95,8 +95,7 @@ FireSpark.jquery.service.LoadIframe = {
 		 *	@return true 
 		 *	to continue default browser event with target on iframe
 		**/
-		$memory['valid'] = true;
-		return $memory;
+		return { valid : true };
 	},
 	
 	output : function(){

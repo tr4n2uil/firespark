@@ -16,7 +16,7 @@ FireSpark.jquery.service.TemplateRead = {
 		};
 	},
 	
-	run : function(message, memory){
+	run : function($memory){
 		if($memory['data'][$memory['key']]){
 			$memory['result'] = $.template($memory['data'][$memory['key']]);
 		}
@@ -26,7 +26,7 @@ FireSpark.jquery.service.TemplateRead = {
 		
 		$memory['valid'] = true;
 		return $memory;
-	}
+	},
 	
 	output : function(){
 		return ['result'];

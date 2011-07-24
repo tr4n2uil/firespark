@@ -3,7 +3,7 @@
  *	@desc Uses AJAX to load data from server
  *
  *	@param url string [memory]
- *	@param data object [memory]
+ *	@param data object [memory] optional default {}
  *	@param type string [memory] optional default 'json'
  *	@param request string [memory] optional default 'POST'
  *	@param process boolean [memory] optional default false
@@ -12,7 +12,7 @@
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
  *
- *	@return result string [memory]
+ *	@return data string [memory]
  *	@return status integer Status code [memory]
  *	@return error string [memory] optional
  *
@@ -20,7 +20,7 @@
 FireSpark.jquery.service.LoadAjax = {
 	input : function(){
 		return {
-			required : ['url', 'workflow']
+			required : ['url', 'workflow'],
 			optional : { 
 				data : {}, 
 				type : 'json', 
@@ -46,7 +46,7 @@ FireSpark.jquery.service.LoadAjax = {
 			contentType : $memory['mime'],
 			
 			success : function($data, $status, $request){
-				$memory['result'] = $data;
+				$memory['data'] = $data;
 				$memory['status'] = $status;
 				
 				/**
@@ -58,7 +58,7 @@ FireSpark.jquery.service.LoadAjax = {
 			error : function($request, $status, $error){
 				$memory['error'] = $error;
 				$memory['status'] = $status;
-				$memory['result'] = FireSpark.core.constant.loaderror + ' [Error : ' + $error + ']';
+				$memory['data'] = FireSpark.core.constant.loaderror + ' [Error : ' + $error + ']';
 				
 				/**
 				 *	Run the errorflow if any
@@ -73,8 +73,7 @@ FireSpark.jquery.service.LoadAjax = {
 		 *	@return false 
 		 *	to stop default browser event
 		**/
-		$memory['valid'] = false;
-		return $memory;
+		return { valid : false };
 	},
 	
 	output : function(){

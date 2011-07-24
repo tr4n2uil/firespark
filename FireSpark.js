@@ -155,18 +155,18 @@ var FireSpark = (function(){
 				$memory = $memory || {};
 				$memory['valid'] = $memory['valid'] || true;
 			
-				for(var $i in workflow){
+				for(var $i in $workflow){
 					var $message = $workflow[$i];
 					
 					/**
-					 *	Check for strictness
+					 *	Check for non strictness
 					**/
-					var $strict = $message.strict || true;
+					var $nonstrict = $message['nonstrict'] || false;
 					
 					/**
-					 *	Continue on invalid state if strict
+					 *	Continue on invalid state if non-strict
 					**/
-					if($memory['valid'] !== true && strict === true)
+					if($memory['valid'] !== true && $nonstrict !== true)
 						continue;
 					
 					/**
@@ -229,8 +229,7 @@ var FireSpark = (function(){
 				/**
 				 *	Copy optional input if not exists
 				**/
-				for(var $i in $sinopt){
-					var $key = $sinopt[$i];
+				for(var $key in $sinopt){
 					var $param = $input[$key] || $key;
 					$message[$key] = $message[$key] || $memory[$param] || $sinopt[$key];
 				}
@@ -298,7 +297,7 @@ var FireSpark = (function(){
 				**/
 				var $message = {};
 				for(var $i=1, $len=$req.length; $i<$len; $i++){
-					var $param = ($req[i]).split('=');
+					var $param = ($req[$i]).split('=');
 					var $arg = $param[1];
 					$arg = $arg.replace(/~/g, '=');
 					//$arg = unescape($arg);
@@ -310,7 +309,7 @@ var FireSpark = (function(){
 				**/
 				if($navigators[$index] || false){
 					$message['service'] = $navigators[$index];
-					$message = this.run($message);
+					$message = this.run($message, {});
 					return $message['valid'];
 				}
 				

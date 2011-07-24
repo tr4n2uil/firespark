@@ -1,8 +1,9 @@
 <?php
 
 $data = array('name' => 'Vibhaj Rajan',  'time' => date('c'));
-$arr = array('valid' => (time()%2 ==0), 'msg' => 'Sorry Time not an Even Number', 'data' => array($data, $data));
-												
+$valid = (time()%5);
+$arr = array('valid' => $valid, 'msg' => 'Sorry Time not divisible by 5', 'data' => array($data, $data));
+
 echo json_encode($arr);
 
 ?>
