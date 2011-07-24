@@ -257,7 +257,7 @@ var FireSpark = (function(){
 				**/
 				for(var $i in $sout){
 					var $key = $sout[$i];
-					var $param = $input[$key] || $key;
+					var $param = $output[$key] || $key;
 					$memory[$param] = $message[$key] || false;
 				}
 				

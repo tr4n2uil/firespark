@@ -3,7 +3,7 @@
  *	@desc Uses AJAX to load data from server
  *
  *	@param url string [memory]
- *	@param data object [memory] optional default {}
+ *	@param data object [memory] optional default ''
  *	@param type string [memory] optional default 'json'
  *	@param request string [memory] optional default 'POST'
  *	@param process boolean [memory] optional default false
@@ -22,7 +22,7 @@ FireSpark.jquery.service.LoadAjax = {
 		return {
 			required : ['url', 'workflow'],
 			optional : { 
-				data : {}, 
+				data : '', 
 				type : 'json', 
 				request : 'POST', 
 				process : false, 
@@ -64,7 +64,7 @@ FireSpark.jquery.service.LoadAjax = {
 				 *	Run the errorflow if any
 				**/
 				if($memory['errorflow']){
-					FireSpark.Kernel.run($memory['errorflow'], $memory);
+					FireSpark.Kernel.execute($memory['errorflow'], $memory);
 				}
 			}
 		});
