@@ -53,10 +53,10 @@ FireSpark.jquery.service.ElementContent = {
 				$element.fadeOut($duration);
 				break;
 			case 'slidein' :
-				$element.slideIn($duration);
+				$element.slideDown($duration);
 				break;
 			case 'slideout' :
-				$element.slideOut($duration);
+				$element.slideUp($duration);
 				break;
 			default :
 				$element.html('Animation type not supported').fadeIn($duration);
