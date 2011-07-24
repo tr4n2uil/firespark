@@ -12,7 +12,7 @@ FireSpark.jquery.service.TemplateApply = {
 	input : function(){
 		return {
 			required : ['template'],
-			optional { data : {} }
+			optional : { data : {} }
 		};
 	},
 	

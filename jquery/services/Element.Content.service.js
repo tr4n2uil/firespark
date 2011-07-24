@@ -5,9 +5,9 @@
  *	@param element string [memory]
  *	@param select boolean [memory] optional default false
  *	@param data html/text [memory] optional default ''
- *	@param animation string [message] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
- *	@param duration integer [message] optional default 1000
- *	@param delay integer [message] optional default 0
+ *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
+ *	@param duration integer [memory] optional default 1000
+ *	@param delay integer [memory] optional default 0
  *
  *	@return element element [memory]
  *

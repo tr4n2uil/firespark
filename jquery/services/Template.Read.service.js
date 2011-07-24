@@ -12,7 +12,7 @@
 FireSpark.jquery.service.TemplateRead = {
 	input : function(){
 		return {
-			optional { data : {}, key : 'template', template : 'tpl-default' }
+			optional : { data : {}, key : 'template', template : 'tpl-default' }
 		};
 	},
 	
