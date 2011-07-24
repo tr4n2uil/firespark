@@ -1,1 +1,0 @@
-/** *	@service ButtonMake *	@desc creates button UI element * *	@param selector string [memory] ***/FireSpark.jquery.service.ButtonMake = {	input : function(){		return {};	},		run : function($memory){		$($memory['selector']).button();		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};

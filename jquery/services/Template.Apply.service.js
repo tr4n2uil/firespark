@@ -2,15 +2,27 @@
  *	@service TemplateApply
  *	@desc Applies template
  *
- *	@param template Template [message|memory]
- *	@param data object [message|memory]
+ *	@param template Template [memory]
+ *	@param data object [memory] optional default {}
  *
- *	@return data html [memory]
+ *	@return result html [memory]
  *
 **/
 FireSpark.jquery.service.TemplateApply = {
-	run : function(message, memory){
-		memory.data = $.tmpl(message.template || memory.template, message.data || memory.data);
-		return true;
+	input : function(){
+		return {
+			required : ['template'],
+			optional { data : {} }
+		};
+	},
+	
+	run : function($memory){
+		$memory['result'] = $.tmpl($memory['template'], $memory['data']);
+		$memory['valid'] = true;
+		return $memory;
+	},
+	
+	output : function(){
+		return ['result'];
 	}
 };

@@ -2,24 +2,33 @@
  *	@service TemplateRead
  *	@desc Reads template definition into memory
  *
- *	@param data.template string [memory]
- *	@param template string [message] optional default FireSpark.jquery.template.Default
+ *	@param data object [memory] optional default {}
+ *	@param key string [memory] optional default 'template'
+ *	@param template string [memory] optional default 'tpl-default' (FireSpark.jquery.template.Default)
  *
- *	@param template template [memory]
+ *	@param result Template [memory]
  *
 **/
 FireSpark.jquery.service.TemplateRead = {
+	input : function(){
+		return {
+			optional { data : {}, key : 'template', template : 'tpl-default' }
+		};
+	},
+	
 	run : function(message, memory){
-		if((memory.data && memory.data.template) || false){
-			memory.template = $.template(memory.data.template);
+		if($memory['data'][$memory['key']]){
+			$memory['result'] = $.template($memory['data'][$memory['key']]);
 		}
-		else if(message.template || false){
-			memory.template = FireSpark.Registry.get(message.template);
-		}
-		else{
-			memory.template = FireSpark.jquery.template.Default;
+		else {
+			$memory['result'] = FireSpark.Registry.get($memory['template']);
 		}
 		
-		return true;
+		$memory['valid'] = true;
+		return $memory;
+	}
+	
+	output : function(){
+		return ['result'];
 	}
 };

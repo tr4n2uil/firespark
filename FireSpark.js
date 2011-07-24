@@ -214,12 +214,16 @@ var FireSpark = (function(){
 				var $sinopt = $sin['optional'] || {};
 				
 				/**
-				 *	Copy required input if not exists (no check due to peculiarity of false values in JavaScript)
+				 *	Copy required input if not exists (return valid false if value not found)
 				**/
 				for(var $i in $sinreq){
 					var $key = $sinreq[$i];
 					var $param = $input[$key] || $key;
 					$message[$key] = $message[$key] || $memory[$param] || false;
+					if($message[$key] === false){
+						$memory['valid'] = false;
+						return $memory;
+					}
 				}
 				
 				/**
@@ -240,7 +244,8 @@ var FireSpark = (function(){
 				 *	Read the service output and return if not valid
 				**/
 				var $output = [];
-				if($message['valid'] || false){
+				$memory['valid'] = $message['valid'] || false;
+				if($memory['valid']){
 					$output = $message['output'] || [];
 				}
 				else {
@@ -301,7 +306,7 @@ var FireSpark = (function(){
 				}
 				
 				/**
-				 *	Run the workflow
+				 *	Run the workflow and return the valid value
 				**/
 				if($navigators[$index] || false){
 					$message['service'] = $navigators[$index];
