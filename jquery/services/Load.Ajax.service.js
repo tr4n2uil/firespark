@@ -13,7 +13,6 @@
  *	@param errorflow	Workflow [memory] optional default false
  *
  *	@return data string [memory]
- *	@return status integer Status code [memory]
  *	@return error string [memory] optional
  *
 **/
@@ -47,7 +46,7 @@ FireSpark.jquery.service.LoadAjax = {
 			
 			success : function($data, $status, $request){
 				$memory['data'] = $data;
-				$memory['status'] = $status;
+				//$memory['status'] = $status;
 				
 				/**
 				 *	Run the workflow
@@ -57,7 +56,7 @@ FireSpark.jquery.service.LoadAjax = {
 			
 			error : function($request, $status, $error){
 				$memory['error'] = $error;
-				$memory['status'] = $status;
+				//$memory['status'] = $status;
 				$memory['data'] = FireSpark.core.constant.loaderror + ' [Error : ' + $error + ']';
 				
 				/**
