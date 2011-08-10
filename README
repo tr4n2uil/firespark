@@ -8,6 +8,18 @@ Developed in support of :
 	DSpace RESTClient
 	https://wiki.duraspace.org/display/GSOC/DSpace+ClientUI+built+on+RESTful+API+-+GSoC+2011
 
+Acknowledgements
+	jQuery Templates 
+		http://api.jquery.com/category/plugins/templates/
+	JSON2
+		https://github.com/douglascrockford/JSON-js
+	MD5
+		http://pajhome.org.uk/crypt/md5/index.html
+	CKEditor
+		http://ckeditor.com/
+	jQuery Cookie
+		http://plugins.jquery.com/project/Cookie
+
 JavaScript Library Neutral Platform (Currently complete support for jQuery only)
 	Registry
 		Navigators
