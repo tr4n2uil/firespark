@@ -7,6 +7,7 @@
  *	@param template string [memory] optional default 'tpl-default' (FireSpark.jquery.template.Default)
  *
  *	@param result Template [memory]
+ *	@param data object [memory]
  *
 **/
 FireSpark.jquery.service.TemplateRead = {
@@ -20,6 +21,10 @@ FireSpark.jquery.service.TemplateRead = {
 		if($memory['data'][$memory['key']]){
 			$memory['result'] = $.template($memory['data'][$memory['key']]);
 		}
+		else if ($memory['data']['message'] && $memory['data']['message'][$memory['key']]){
+			$memory['result'] = $.template($memory['data']['message'][$memory['key']]);
+			$memory['data']['content'] = $memory['data']['message']['content'] || false;
+		}
 		else {
 			$memory['result'] = FireSpark.Registry.get($memory['template']);
 		}
@@ -29,6 +34,6 @@ FireSpark.jquery.service.TemplateRead = {
 	},
 	
 	output : function(){
-		return ['result'];
+		return ['result', 'data'];
 	}
 };
