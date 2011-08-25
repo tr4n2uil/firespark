@@ -9,7 +9,10 @@
 		<link rel="stylesheet" type="text/css" href="css/demo.css" />
 	</head>
 	<body>
-		<p id="load-status"></p>
+		<div id="load-panel" class="loadinit">
+			<p id="load-status"></p>
+		</div>
+		<div id="firespark_console" class="hidden">
 		<h1>FireSpark jQuery Demo</h1>
 
 		<div id="main-container">
@@ -25,7 +28,7 @@
 				</div>
 			</div>
 			<div id="form-test-panel" class="panel form-panel">
-				<form action="http://127.0.0.1/services/snowblozm/demo/demov2.php?type=post.json.none.none" method="post" class="navigate" id="_formsubmit:sel._form-test-panel:iframe.true">
+				<form action="http://127.0.0.1/services/snowblozm/demo/demov2.php?type=post.json.none.none" method="post" class="navigate" id="_formsubmit:sel._form-test-panel">
 					<fieldset>
 						<legend class="headdark">Authenticate</legend>
 						<input type="hidden" name="service" value="sb.key.authenticate" />
@@ -87,6 +90,8 @@
 		<script type="text/javascript" src="tpl/Test.tpl.js"></script>		
 		<script type="text/javascript">
 			$(document).ready(function(){
+				$('div#load-panel').fadeOut(100).removeClass('loadinit').show(100);
+				$('div#firespark_console').fadeIn(1500);
 				
 				FireSpark.Kernel.execute([{
 					service : FireSpark.jquery.service.ElementTabpanel,
@@ -94,10 +99,6 @@
 					select : true,
 					indexstart : 1,
 					savekey : 'tabuipanel'
-				},{
-					service : FireSpark.jquery.service.NavigatorInit,
-					selector : 'a.navigate',
-					attribute : 'href'
 				},{
 					service : FireSpark.jquery.service.NavigatorInit,
 					selector : 'form.navigate',
@@ -120,7 +121,16 @@
 				
 				FireSpark.Registry.save('tpl-test', FireSpark.jquery.template.Test);
 				
+				var $current_hash = '';
+				window.setInterval(function(){
+					if($current_hash != window.location.hash){
+						$current_hash = window.location.hash
+						FireSpark.Kernel.launch($current_hash);
+					}
+				}, 500);
+				
 		});
-		</script>  		
+		</script>  
+		</div>
 	</body>
 </html>

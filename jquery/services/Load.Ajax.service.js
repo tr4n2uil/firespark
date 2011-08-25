@@ -11,6 +11,7 @@
  *
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
+ *	@param stop boolean [memory] optional default false
  *
  *	@return data string [memory]
  *	@return error string [memory] optional
@@ -26,7 +27,8 @@ FireSpark.jquery.service.LoadAjax = {
 				request : 'POST', 
 				process : false, 
 				mime : 'application/x-www-form-urlencoded' ,
-				errorflow : false
+				errorflow : false,
+				stop : false
 			}
 		}
 	},
@@ -72,7 +74,7 @@ FireSpark.jquery.service.LoadAjax = {
 		 *	@return false 
 		 *	to stop default browser event
 		**/
-		return { valid : false };
+		return { valid : $memory['stop'] };
 	},
 	
 	output : function(){

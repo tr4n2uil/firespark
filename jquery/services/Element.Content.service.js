@@ -29,6 +29,9 @@ FireSpark.jquery.service.ElementContent = {
 	run : function($memory){
 		if($memory['select'] || false){
 			var $element = $($memory['element']);
+			if(!$element.length){
+				$element = $('#main-container');
+			}
 		}
 		else {
 			$element = $memory['element'];
