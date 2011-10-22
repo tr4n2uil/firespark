@@ -1,1 +1,0 @@
-/** *	@service WindowReload *	@desc Reloads the window ***/FireSpark.core.service.WindowReload = {	input : function(){		return {};	},		run : function($memory){		window.location.reload();		$memory['valid'] = false;		return $memory;	},		output : function(){		return [];	}};

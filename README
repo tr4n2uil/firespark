@@ -1,30 +1,16 @@
 FireSpark
-JavaScript Service Computing Platform
+Service Computing Platform Kernel
 
 Vibhaj Rajan <vibhaj8@gmail.com>
 
-Developed in support of :
+JavaScript platform developed in support of :
 	Google Summer of Code 2011
 	DSpace RESTClient
 	https://wiki.duraspace.org/display/GSOC/DSpace+ClientUI+built+on+RESTful+API+-+GSoC+2011
 
-Acknowledgements
-	jQuery Templates 
-		http://api.jquery.com/category/plugins/templates/
-	JSON2
-		https://github.com/douglascrockford/JSON-js
-	MD5
-		http://pajhome.org.uk/crypt/md5/index.html
-	CKEditor
-		http://ckeditor.com/
-	jQuery Cookie
-		http://plugins.jquery.com/project/Cookie
+PHP platform developed in support of :
+	IITBHUCSE
+	https://github.com/tr4n2uil/iitbhucse
 
-JavaScript Library Neutral Platform (Currently complete support for jQuery only)
-	Registry
-		Navigators
-		References
-	Kernel
-		run()
-		execute()
-		launch()
+Java platform developed in support of :
+	TGMC 2011
