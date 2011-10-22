@@ -1,0 +1,136 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+		<title>FireSpark jQuery Demo</title>
+		<link rel="stylesheet" type="text/css" href="css/redmond/jquery-ui-1.8.13.custom.css" />
+		<link rel="stylesheet" type="text/css" href="css/default.css" />
+		<link rel="stylesheet" type="text/css" href="css/jquery.css" />
+		<link rel="stylesheet" type="text/css" href="css/demo.css" />
+	</head>
+	<body>
+		<div id="load-panel" class="loadinit">
+			<p id="load-status"></p>
+		</div>
+		<div id="firespark_console" class="hidden">
+		<h1>FireSpark jQuery Demo</h1>
+
+		<div id="main-container">
+			<a href="#tabtpl:title=Krishna:url=data.json.php:tpl=tpl-test:anm=slidein:dur=5000" class="navigate">Test Tab</a>
+			<a href="#tplload:cntr=#test-container:url=data.json.php:tpl=tpl-test" class="navigate">Test TplLoad</a>
+			<div id="test-container"></div>
+			<div id="tab-container">
+				<ul>
+					<li><a href="#tabs-1">Demo</a></li>
+				</ul>
+				<div id="tabs-1">
+					<p>Welcome to jQuery FireSpark Demo</p>
+				</div>
+			</div>
+			<div id="form-test-panel" class="panel form-panel">
+				<form action="http://127.0.0.1/services/snowblozm/demo/demov2.php?type=post.json.none.none" method="post" class="navigate" id="_formsubmit:sel._form-test-panel">
+					<fieldset>
+						<legend class="headdark">Authenticate</legend>
+						<input type="hidden" name="service" value="sb.key.authenticate" />
+						<label>Email
+							<input type="text" name="email" class="required email"/>
+						</label>
+						<p class="error hidden margin5" style="display:none" >Invalid Email</p>
+						<label>Key
+							<input type="text" name="key" class="required"/>
+						</label>
+						<p class="error hidden margin5" style="display:none" >Invalid Key</p>
+						<input name="submit" type="submit" value="Submit" class="margin5"/>
+						<input name="reset" type="reset" value="Reset" class="margin5"/>
+						<div class="status"></div>
+					</fieldset>
+				</form>
+			</div>
+		</div>
+		
+		<div id="footer">
+			<p>Powered by FireSpark</p>
+		</div>
+
+		<ul id="validation">
+			<li>
+				<a href="http://validator.w3.org/check?uri=referer">
+					<img src="img/validation/valid-xhtml10-blue.png" alt="Valid XHTML 1.0!" height="31" width="88" />
+				</a>
+			</li>
+			<li>
+				<a href="http://jigsaw.w3.org/css-validator/check/referer">
+					<img src="img/validation/valid-css-blue.png" alt="Valid CSS!" height="31" width="88" />
+				</a>
+			</li>
+		</ul>	
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading jQuery Core ...';
+		</script>
+		<script type="text/javascript" src="js/jquery-1.6.1.min.js"></script>
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading jQuery UI ...';
+		</script>
+		<script type="text/javascript" src="js/jquery-ui-1.8.13.min.js"></script>
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading jQuery Templates ...';
+		</script>
+		<script type="text/javascript" src="js/jquery.tmpl.min.js"></script>
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading JSON Library ...';
+		</script>
+		<script type="text/javascript" src="js/json2.js"></script>
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading jQuery FireSpark ...';
+		</script>
+		<script type="text/javascript" src="/services/firespark/dist/jquery-firespark.js"></script>		
+		<script type="text/javascript">
+			document.getElementById('load-status').innerHTML = 'Loading Demo Templates ...';
+		</script>
+		<script type="text/javascript" src="tpl/Test.tpl.js"></script>		
+		<script type="text/javascript">
+			$(document).ready(function(){
+				$('div#load-panel').fadeOut(100).removeClass('loadinit').show(100);
+				$('div#firespark_console').fadeIn(1500);
+				
+				FireSpark.Kernel.execute([{
+					service : FireSpark.jquery.service.ElementTabpanel,
+					element : '#tab-container',
+					select : true,
+					indexstart : 1,
+					savekey : 'tabuipanel'
+				},{
+					service : FireSpark.jquery.service.NavigatorInit,
+					selector : 'form.navigate',
+					event : 'submit',
+					attribute : 'id',
+					escaped : true
+				},{
+					service : FireSpark.jquery.service.ElementContent,
+					element : '#load-status',
+					select : true,
+					data : 'Initializing ...',
+					animation : 'fadeout',
+					duration : 1000,
+					delay : 3000
+				}]);
+				
+				FireSpark.Registry.add('#tabtpl', FireSpark.jquery.workflow.TabTemplate);
+				FireSpark.Registry.add('#tplload', FireSpark.jquery.workflow.ElementTemplate);
+				FireSpark.Registry.add('#formsubmit', FireSpark.jquery.workflow.FormSubmit);
+				
+				FireSpark.Registry.save('tpl-test', FireSpark.jquery.template.Test);
+				
+				var $current_hash = '';
+				window.setInterval(function(){
+					if($current_hash != window.location.hash){
+						$current_hash = window.location.hash
+						FireSpark.Kernel.launch($current_hash);
+					}
+				}, 500);
+				
+		});
+		</script>  
+		</div>
+	</body>
+</html>
