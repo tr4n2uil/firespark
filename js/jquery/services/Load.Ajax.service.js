@@ -53,7 +53,7 @@ FireSpark.jquery.service.LoadAjax = {
 				/**
 				 *	Run the workflow
 				**/
-				FireSpark.Kernel.execute($memory['workflow'], $memory);
+				Snowblozm.Kernel.execute($memory['workflow'], $memory);
 			},
 			
 			error : function($request, $status, $error){
@@ -65,7 +65,7 @@ FireSpark.jquery.service.LoadAjax = {
 				 *	Run the errorflow if any
 				**/
 				if($memory['errorflow']){
-					FireSpark.Kernel.execute($memory['errorflow'], $memory);
+					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
 				}
 			}
 		});

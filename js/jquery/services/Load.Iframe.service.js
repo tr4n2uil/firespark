@@ -58,7 +58,7 @@ FireSpark.jquery.service.LoadIframe = {
 					/**
 					 *	Run the workflow
 					**/
-					FireSpark.Kernel.execute($memory['workflow'], $memory);
+					Snowblozm.Kernel.execute($memory['workflow'], $memory);
 				}
 				catch($error){
 					$memory['error'] = $error.description;
@@ -68,7 +68,7 @@ FireSpark.jquery.service.LoadIframe = {
 					 *	Run the errorflow if any
 					**/
 					if($memory['errorflow']){
-						FireSpark.Kernel.execute($memory['errorflow'], $memory);
+						Snowblozm.Kernel.execute($memory['errorflow'], $memory);
 					}
 				}
 			})
@@ -80,7 +80,7 @@ FireSpark.jquery.service.LoadIframe = {
 				 *	Run the errorflow if any
 				**/
 				if($memory['errorflow']){
-					FireSpark.Kernel.execute($memory['errorflow'], $memory);
+					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
 				}
 			});
 			

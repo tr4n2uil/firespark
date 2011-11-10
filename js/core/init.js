@@ -1,10 +1,11 @@
-AquaDew.core = {};
+FireSpark = {};
+FireSpark.core = {};
 
-AquaDew.core.service = {};
-AquaDew.core.workflow = {};
+FireSpark.core.service = {};
+FireSpark.core.workflow = {};
 
-AquaDew.core.helper = {};
-AquaDew.core.constant = {};
+FireSpark.core.helper = {};
+FireSpark.core.constant = {};
 
-AquaDew.core.constant.loadmsg = '<p class="loading">Loading ...</p>';
-AquaDew.core.constant.loaderror = '<p class="error">The requested resource could not be loaded</p>';
+FireSpark.core.constant.loadmsg = '<p class="loading">Loading ...</p>';
+FireSpark.core.constant.loaderror = '<p class="error">The requested resource could not be loaded</p>';

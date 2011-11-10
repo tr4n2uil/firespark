@@ -19,7 +19,7 @@ FireSpark.jquery.service.ElementTab = {
 	},
 	
 	run : function($memory){
-		var $tabui = FireSpark.Registry.get($memory['tabui']);
+		var $tabui = Snowblozm.Registry.get($memory['tabui']);
 		$memory['element'] = $tabui.add($memory['title'], $memory['autoload'], $memory['taburl']);
 		$memory['valid'] = true;
 		return $memory;

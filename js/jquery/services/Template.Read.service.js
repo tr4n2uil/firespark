@@ -26,7 +26,7 @@ FireSpark.jquery.service.TemplateRead = {
 			$memory['data']['content'] = $memory['data']['message']['content'] || false;
 		}
 		else {
-			$memory['result'] = FireSpark.Registry.get($memory['template']);
+			$memory['result'] = Snowblozm.Registry.get($memory['template']);
 		}
 		
 		$memory['valid'] = true;

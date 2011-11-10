@@ -69,7 +69,7 @@ FireSpark.jquery.service.ElementTabpanel = {
 		});
 		$index--;
 		
-		FireSpark.Registry.save($memory['savekey'], {
+		Snowblozm.Registry.save($memory['savekey'], {
 			add : function($tabtitle, $autoload, $taburl){
 				$index++;
 				var $url = '#ui-tab-' + $index;
