@@ -62,7 +62,7 @@ FireSpark.jquery.service.LoadIframe = {
 				}
 				catch($error){
 					$memory['error'] = $error.description;
-					$memory['result'] = FireSpark.core.constant.loaderror + '[Error :' + $error.description + ']';
+					$memory['result'] = FireSpark.core.constant.loaderror + '<span class="hidden"> [Error :' + $error.description + ']</span>';
 					
 					/**
 					 *	Run the errorflow if any
