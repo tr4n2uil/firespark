@@ -1,4 +1,4 @@
-FireSpark = {};
+var FireSpark = FireSpark || {};
 FireSpark.core = {};
 
 FireSpark.core.service = {};
@@ -7,8 +7,8 @@ FireSpark.core.workflow = {};
 FireSpark.core.helper = {};
 FireSpark.core.constant = {};
 
-FireSpark.core.constant.loadmsg = '<p class="loading">Loading ...</p>';
-FireSpark.core.constant.loaderror = '<p class="error">The requested resource could not be loaded</p>';
+FireSpark.core.constant.loadmsg = '<span class="loading">Loading ...</span>';
+FireSpark.core.constant.loaderror = '<span class="error">The requested resource could not be loaded</span>';
 /** *	@service LoadConfirm *	@desc Confirms whether to continue  * *	@param confirm boolean [memory] optional default false *	@param value string [memory] ***/FireSpark.core.service.LoadConfirm = {	input : function(){		return {			required : ['value'],			optional : { confirm : false }		}	},		run : function($memory){		if($memory['confirm']){			$memory['valid'] = confirm($memory['value']);			return $memory;		}		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service WindowReload *	@desc Reloads the window * *	@param continue string [message] optional default false ***/FireSpark.core.service.WindowReload = {	input : function(){		return {			'optional' : { 'continue' : false }		};	},		run : function($memory){		window.location.hash = '';		if($memory['continue'] || false){			window.location = $memory['continue'];		}		else {			window.location.reload();		}		$memory['valid'] = false;		return $memory;	},		output : function(){		return [];	}};/** *	@helper DataSplit * *	@param data *	@param separator optional default : ***/FireSpark.core.helper.dataSplit = function($data, $separator){	$separator = $separator || ':';	return $data.split($separator);}/** *	Equals helper * *	@param value1 *	@param value2 ***/FireSpark.core.helper.equals = function(value1, value2){	return value1==value2;}/** *	GetDate helper * *	@param time ***/FireSpark.core.helper.getDate = function(time){	var d = new Date(time);	return d.toDateString();}/** *	@helper GetFrame * *	@param name ***/FireSpark.core.helper.getFrame = function(name){	for (var i = 0; i < frames.length; i++){		if (frames[i].name == name)			return frames[i];	}		return false;}/**
  *	@helper readFileSize
  *
@@ -30,16 +30,192 @@ FireSpark.jquery.helper = {};
 FireSpark.jquery.constant = {};
 
 FireSpark.jquery.template = {};
+/**
+ *	@service ContainerData
+ *	@desc Used to prepare container data
+ *
+ *	@param key string [memory] optional default 'ui-global'
+ *	@param id long int [memory] optional default '0'
+ *
+ *	@param iframe string [memory] optional default false
+ *	@param agent string [memory] optional default false
+ *	@param root object [memory] optional default false
+ *
+ *	@param url string [memory] optional default ''
+ *	@param data object [memory] optional default ''
+ *	@param type string [memory] optional default 'json'
+ *	@param request string [memory] optional default 'POST'
+ *	@param process boolean [memory] optional default false
+ *	@param mime string [memory] optional default 'application/x-www-form-urlencoded'
+ *	@param args array [args]
+ *
+ *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ContainerRender }
+ *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent }
+ *	@param stop boolean [memory] optional default false
+ *
+ *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg
+ *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
+ *	@param dur integer [memory] optional default 1000
+ *	@param dly integer [memory] optional default 0
+ *
+ *	@return data string [memory]
+ *	@return error string [memory] optional
+ *
+**/
+FireSpark.jquery.service.ContainerData = {
+	input : function(){
+		return {
+			optional : { 
+				key : 'ui-global', 
+				id : '0',
+				iframe : false,
+				root : false,
+				agent : false,
+				url : '',
+				data : '', 
+				type : 'json', 
+				request : 'POST', 
+				process : false, 
+				mime : 'application/x-www-form-urlencoded' ,
+				workflowend : { service : FireSpark.jquery.service.ContainerRender },
+				errorflowend : { service : FireSpark.jquery.service.ElementContent },
+				loaddata : FireSpark.core.constant.loadmsg,
+				anm : 'fadein',
+				dur : 1000,
+				dly : 0, 
+				stop : false
+			}
+		}
+	},
+	
+	run : function($memory){
+		if($memory['iframe']){
+			var $loader = FireSpark.jquery.service.LoadIframe;
+		}
+		else {
+			var $loader = FireSpark.jquery.service.LoadAjax;
+		}
+		
+		var $config = Snowblozm.Registry.get($memory['key']) || {};
+		var $instance = $memory['key']+'-'+$memory['id'];
+		var $value = Snowblozm.Registry.get($instance) || {};
+		
+		if($value['data'] || false){
+			$memory['data'] = $value;
+			return Snowblozm.Kernel.run($memory['workflowend'], $memory);
+		}
+		else {
+			return Snowblozm.Kernel.execute([{
+				service : FireSpark.jquery.service.ElementContent,
+				input : { data : 'loaddata' },
+				duration : 5
+			},{
+				service : $memory['loader'],
+				args : $memory['args'],
+				agent : $memory['agent'] || $memory['root'],
+				key : $instance,
+				workflow : [{
+					service : FireSpark.jquery.service.DataCache
+				},
+					$memory['workflowend']
+				],
+				errorflow : [
+					$memory['errorflowend']
+				]
+			}], $memory);
+		}
+		
+		$memory['valid'] = true;
+		return $memory;
+	},
+	
+	output : function(){
+		return [];
+	}
+};
+/** *	@service ContainerInitialize *	@desc Initializes a new Container * *	@param key string [memory] optional default 'ui-global' *	@param id long int [memory] optional default '0'  *	@param instance object [save] with 'key-id' ***/FireSpark.jquery.service.ContainerInitialize = {	input : function(){		return {			optional : { 				key : 'ui-global', 				id : '0' 			}		};	},		run : function($memory){		var $config = Snowblozm.Registry.get($memory['key']);		var $instance = $memory['key']+'-'+$memory['id'];		var $value = Snowblozm.Registry.get($instance) || {};				if($value['ui'] || 0){			$memory['valid'] = false;			return $memory;		} 		else {			$value['tilehead'] = $config['tilehead'];			$value['inline'] = $config['inline'];						switch($config['data']){				case 'global' :					$data = TileUI['global']['data'];					for(var $i in $data){						$value[$i] = $data[$i];					}					$value['data'] = true;					break;									case 'server' :					$value['expiry'] = $config['expiry'];					$value['data'] = $value['data'] || false;					break;									default :					break;			}						$admin = $value['message']['admin'] || false;			$tiles = $config['tiles'];			$value['tiles'] = [];						for(var $i in $tiles){				if($tiles[$i]['privileged'] & !$admin){					continue;				}				$value['tiles'].push($tiles[$i]);			}						$value['ui'] = true;		}				Snowblozm.Registry.save($instance, $value);		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
+ *	@service ContainerRender
+ *	@desc Used to render container
+ *
+ *	@param key string [memory] optional default 'ui-global'
+ *	@param id long int [memory] optional default '0'
+ *	@param ins string [memory] optional default '#ui-global-0'
+ *	@param root object [memory] optional default false
+ *	@param tile string [memory] optional default false
+ *
+ *	@return element element [memory]
+ *
+**/
+FireSpark.jquery.service.ContainerRender = {
+	input : function(){
+		return {
+			optional : { 
+				key : 'ui-global', 
+				id : '0',
+				ins : 'ui-global-0',
+				root : false,
+				tile : false
+			}
+		}
+	},
+	
+	run : function($memory){		
+		var $config = Snowblozm.Registry.get($memory['key']) || {};
+		var $instance = $memory['key']+'-'+$memory['id'];
+		var $value = Snowblozm.Registry.get($instance) || {};
+		
+		if($value['inline'] || false){
+			
+		}
+		else {
+			$value['instance'] = $memory['ins'];
+			$memory = Snowblozm.Kernel.execute([{
+				service : FireSpark.jquery.workflow.TemplateApply,
+				element : $memory['ins'] + '>.tiles',
+				select : true,
+				template : 'tpl-tiles',
+				animation : 'fadein',
+				data : $value,
+				action : 'first'
+			}], $memory);
+			
+			if($memory['valid'] || false){
+			} else {
+				return $memory;
+			}
+		}
+		
+		$memory = Snowblozm.Kernel.execute([{
+			service : FireSpark.jquery.workflow.TemplateApply,
+			element : $memory['ins'] + '>.bands',
+			select : true,
+			template : 'tpl-bands',
+			animation : 'none',
+			data : $value,
+			action : 'first'
+		},{
+			service : FireSpark.jquery.workflow.TileShow
+		}], $memory);
+		
+		$memory['valid'] = true;
+		return $memory;
+	},
+	
+	output : function(){
+		return ['element'];
+	}
+};
 /** *	@service CookieMake *	@desc Creates a new Cookie * *	@param key string [message] *	@param value string [message] *	@param expires integer[message] default 1 day ***/FireSpark.jquery.service.CookieMake = {	input : function(){		return {			required : ['key', 'value'],			optional : { expires : 1 }		};	},		run : function($memory){		$.cookie($memory['key'], $memory['value'], {			expires : $memory['expires']		});		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service DataEncode *	@desc Encodes data from url-encoded other formats * *	@param type string [memory] optional default 'url' ('url', 'json', 'rest-id') *	@param data string [memory] optional default false *	@param url string [memory] optional default false * *	@return data object [memory] *	@return result string [memory] *	@return mime string [memory] *	@return url string [memory] ***/FireSpark.jquery.service.DataEncode = {	input : function(){		return {			optional : { type : 'url', data : false, url : '' }		}	},		run : function($memory){		var $data = $memory['data'];		var $type = $memory['type'];		var $mime =  'application/x-www-form-urlencoded';				if($data !== false && $data != ''){			$data = $data.replace(/\+/g, '%20');			if($type != 'url'){				var $params = $data.split('&');				var $result = {};				for(var $i=0, $len=$params.length; $i<$len; $i++){					var $prm = ($params[$i]).split('=');					$result[$prm[0]] = unescape($prm[1]);				}				$memory['data'] = $data = $result;			}						switch($type){				case 'json' :					$data = JSON.stringify($data);					$mime =  'application/json';					break;								case 'rest-id' :					$memory['url'] = $memory['url'] + '/' + $data['id'];									case 'url' :				default :					break;			}		}				$memory['result'] = $data;		$memory['mime'] = $mime;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['data', 'result', 'mime', 'url'];	}};/** *	@service ElementButton *	@desc creates button UI element * *	@param selector string [memory] ***/FireSpark.jquery.service.ElementButton = {	input : function(){		return {};	},		run : function($memory){		$($memory['selector']).button();		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
  *	@service ElementContent
- *	@desc Fills element with content and animates it and returns element in memory
+ *	@desc Fills element with content and animates it or removes it and returns element in memory
  *
  *	@param element string [memory]
  *	@param select boolean [memory] optional default false
  *	@param data html/text [memory] optional default ''
- *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
+ *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout', 'none')
  *	@param duration integer [memory] optional default 1000
  *	@param delay integer [memory] optional default 0
+ *	@param action string [memory] optional default 'all'
  *
  *	@return element element [memory]
  *
@@ -53,7 +229,8 @@ FireSpark.jquery.service.ElementContent = {
 				data : '',
 				animation : 'fadein',
 				duration : 1000,
-				delay : 0
+				delay : 0,
+				action : 'all'
 			}
 		};
 	},
@@ -72,30 +249,53 @@ FireSpark.jquery.service.ElementContent = {
 		var $animation = $memory['animation'];
 		var $duration = $memory['duration'];
 		
-		if($animation == 'fadein' || $animation == 'slidein'){
-			$element.hide();
+		switch($memory['action']){
+			case 'all' :
+				if($animation == 'fadein' || $animation == 'slidein'){
+					$element.hide();
+				}
+				$element.html($memory['data']);
+				$element.trigger('load');
+				break;
+			
+			case 'first' :
+				$element.prepend($memory['data']);
+				break;
+			
+			case 'last' :
+				$element.append($memory['data']);
+				break;
+				
+			case 'action' :
+				$element.remove();
+				break;
+				
+			default :
+				break;
 		}
 		
-		$element.html($memory['data']);
-		$element.trigger('load');
-		$element.delay($memory['delay']);
-		
-		switch($animation){
-			case 'fadein' :
-				$element.fadeIn($duration);
-				break;
-			case 'fadeout' :
-				$element.fadeOut($duration);
-				break;
-			case 'slidein' :
-				$element.slideDown($duration);
-				break;
-			case 'slideout' :
-				$element.slideUp($duration);
-				break;
-			default :
-				$element.html('Animation type not supported').fadeIn($duration);
-				break;
+		if($memory['action'] != 'remove'){
+			$element.delay($memory['delay']);
+			
+			switch($animation){
+				case 'fadein' :
+					$element.fadeIn($duration);
+					break;
+				case 'fadeout' :
+					$element.fadeOut($duration);
+					break;
+				case 'slidein' :
+					$element.slideDown($duration);
+					break;
+				case 'slideout' :
+					$element.slideUp($duration);
+					break;
+				case 'none' :
+					break;
+				default :
+					$element.html('Animation type not supported').fadeIn($duration);
+					break;
+			}
 		}
 		
 		$memory['element'] = $element;
@@ -491,7 +691,7 @@ FireSpark.jquery.service.LoadIframe = {
 		return [];
 	}
 };
-/** *	@service NavigatorInit *	@desc Initializes navigator launch triggers * *	@param selector string [memory] *	@param event string [memory] optional default 'click' *	@param attribute string [memory] *	@param escaped boolean [memory] optional default false ***/FireSpark.jquery.service.NavigatorInit = {	input : function(){		return {			required : ['selector', 'attribute'],			optional : { event : 'click', escaped : false }		};	},		run : function($memory){		$($memory['selector']).live($memory['event'], function(){			var $navigator = $(this).attr($memory['attribute']);			if($memory['attribute'] == 'href' || false){				$navigator = unescape($navigator);			}			return Snowblozm.Kernel.launch($navigator, $memory['escaped']);		});		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
+/** *	@service NavigatorInit *	@desc Initializes navigator launch triggers * *	@param selector string [memory] *	@param event string [memory] optional default 'click' *	@param attribute string [memory] *	@param escaped boolean [memory] optional default false ***/FireSpark.jquery.service.NavigatorInit = {	input : function(){		return {			required : ['selector', 'attribute'],			optional : { event : 'click', escaped : false }		};	},		run : function($memory){		$($memory['selector']).live($memory['event'], function(){			var $root = $(this);			var $navigator = $root.attr($memory['attribute']);			if($memory['attribute'] == 'href' || false){				$navigator = unescape($navigator);			}			return Snowblozm.Kernel.launch($navigator, $memory['escaped'], $root);		});		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
  *	@service TemplateApply
  *	@desc Applies template
  *
@@ -558,11 +758,55 @@ FireSpark.jquery.service.TemplateRead = {
 		return ['result', 'data'];
 	}
 };
-/** *	@workflow BindTemplate *	@desc Binds template with data into element * *	@param cntr string [memory] *	@param select boolean [memory] optional default true *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param tpl string [memory] optional default 'tpl-default' *	@param arg string [memory] optional default {} * *	@return element element [memory] ***/FireSpark.jquery.workflow.BindTemplate = {	input : function(){		return {			required : ['cntr'],			optional : { 				select : true, 				anm : 'fadein',				dur : 1000,				dly : 0, 				key : 'template', 				tpl : 'tpl-default' ,				arg : ''			}		};	},		run : function($memory){		$memory = Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.DataEncode,			input : { data : 'arg' },			type : 'json'		},{ 			service : FireSpark.jquery.workflow.TemplateApply,			input : {				element : 'cntr',				template : 'tpl', 				animation : 'anm',				duration : 'dur',				delay : 'dly'			}		}], $memory);				$memory['valid'] = true;		return $memory;	},		output : function(){		return ['element'];	}};/** *	@workflow CookieLogin *	@desc Sign in using Cookie * *	@param key string [message] optional default 'sessionid' *	@param value string [message] *	@param expires integer[message] optional default 1 day *	@param continue string [message] optional default false ***/FireSpark.jquery.workflow.CookieLogin = {	input : function(){		return {			required : ['value'],			optional : { key : 'sessionid', expires : 1, 'continue' : false }		}	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.CookieMake		},{			service : FireSpark.core.service.WindowReload		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow ElementHtml *	@desc Loads HTML content into container * *	@param url URL [memory] *	@param cntr string [memory] *	@param ld string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 ***/FireSpark.jquery.workflow.ElementHtml = {	input : function(){		return {			required : ['url', 'cntr'],			optional : { 				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.workflow.LoadHtml,			input : { element : 'cntr', animation : 'anm', duration : 'dur', delay : 'dly', loaddata : 'ld' },			select : true		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow ElementTemplate *	@desc Loads template with data into container * *	@param cntr string [message] * *	@param loader object [memory] optional default FireSpark.jquery.service.LoadAjax *	@param agent string [memory] optional default false * *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param tpl string [memory] optional default 'tpl-default' * *	@param cf boolean [memory] optional default false *	@param confirmmsg string [memory] optional default 'Are you sure you want to continue ?' *	@param sel string [memory] optional default false *	@param ec string [memory] optional default 'url' ('url', 'json') * *	@param url URL [memory] *	@param arg string [memory] optional default '' *	@param type string [memory] optional default 'json' *	@param request string [memory] optional default 'POST' *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.workflow.TemplateApply } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } * *	@param ln boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'firespark' ***/FireSpark.jquery.workflow.ElementTemplate = {	input : function(){		return {			required : ['cntr', 'url'],			optional : { 				loader : FireSpark.jquery.service.LoadAjax,				agent : false,				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0, 				key : 'template', 				tpl : 'tpl-default' ,				cf : false,				confirmmsg : 'Are you sure you want to continue ?',				sel : false,				ec : 'url',				arg : '',				type : 'json',				request : 'POST',				workflowend : { service : FireSpark.jquery.workflow.TemplateApply },				errorflowend :  { service : FireSpark.jquery.service.ElementContent },				ln : false,				status : 'valid',				message : 'firespark'			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.workflow.LoadTemplate,			input : { 				element : 'cntr', 				template : 'tpl', 				data : 'arg', 				confirm : 'cf', 				selector : 'sel', 				encode : 'ec', 				launch : 'ln' ,				animation : 'anm',				duration : 'dur',				delay : 'dly'			},			select : true,			stop : true		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow FormSubmit *	@desc Submits form using ajax or iframe and loads template with response data into div.status in form * *	@param sel form-parent selector string *	@param iframe string [memory] optional default false *	@param error string [memory] optional default span * *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param tpl string [memory] optional default 'tpl-default' * *	@param cf boolean [memory] optional default false *	@param confirmmsg string [memory] optional default 'Are you sure you want to continue ?' *	@param ec string [memory] optional default 'url' ('url', 'json') * *	@param type string [memory] optional default 'json' *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.workflow.TemplateApply } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } * *	@param ln boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'message' ***/FireSpark.jquery.workflow.FormSubmit = {	input : function(){		return {			required : ['sel'],			optional : { 				iframe : false,				error : 'span',				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0, 				key : 'template', 				tpl : 'tpl-default' ,				cf : false,				confirmmsg : 'Are you sure you want to continue ?',				ec : 'url',				type : 'json',				workflowend : { service : FireSpark.jquery.workflow.TemplateApply },				errorflowend : { service : FireSpark.jquery.service.ElementContent },				ln : false,				status : 'valid',				message : 'message'			}		};	},		run : function($memory){		if($memory['iframe']){			var $loader = FireSpark.jquery.service.LoadIframe;		}		else {			var $loader = FireSpark.jquery.service.LoadAjax;		}				return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.FormValidate,			form : $memory['sel'] + ' form'		},{			service : FireSpark.jquery.service.FormRead,			form : $memory['sel'] + ' form'		},{			service : FireSpark.jquery.workflow.LoadTemplate,			input : { 				template : 'tpl', 				confirm : 'cf', 				encode : 'ec', 				launch : 'ln' ,				animation : 'anm',				duration : 'dur',				delay : 'dly'			},			loader : $loader,			element : $memory['sel'] +' div.status',			select : true,			selector : $memory['sel'] + ' input[name=submit]',			agent : $memory['sel'] + ' form'		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow LoadHtml *	@desc Loads HTML content into element * *	@param url URL [memory] *	@param element string [memory] *	@param select boolean [memory] optional default false *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param duration integer [memory] optional default 1000 *	@param delay integer [memory] optional default 0 * *	@return element element [memory] ***/FireSpark.jquery.workflow.LoadHtml = {	input : function(){		return {			required : ['url', 'element'],			optional : { 				select : false, 				loaddata : FireSpark.core.constant.loadmsg,				animation : 'fadein',				duration : 1000,				delay : 0			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.ElementContent,			input : { data : 'loaddata' },			duration : 5		},{			service : FireSpark.jquery.service.LoadAjax,			type : 'html',			args : ['element', 'animation', 'duration', 'delay'],			workflow : [{				service : FireSpark.jquery.service.ElementContent			}],			errorflow : [{				service : FireSpark.jquery.service.ElementContent			}]		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow LoadTemplate *	@desc Loads template with data into element * *	@param loader object [memory] optional default FireSpark.jquery.service.LoadAjax *	@param agent string [memory] optional default false * *	@param element string [memory] *	@param select boolean [memory] optional default false *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param duration integer [memory] optional default 1000 *	@param delay integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param template string [memory] optional default 'tpl-default' * *	@param confirm boolean [memory] optional default false *	@param confirmmsg string [memory] optional default 'Are you sure you want to continue ?' *	@param selector string [memory] optional default false *	@param encode string [memory] optional default 'url' ('url', 'json') * *	@param url URL [memory] *	@param data string [memory] optional default  *	@param type string [memory] optional default 'json' *	@param request string [memory] optional default 'POST' *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.workflow.TemplateApply } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } *	@param stop boolean [memory] optional default false * *	@param launch boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'message' * *	@return element element [memory] ***/FireSpark.jquery.workflow.LoadTemplate = {	input : function(){		return {			required : ['element', 'url'],			optional : { 				loader : FireSpark.jquery.service.LoadAjax,				agent : false,				select : false, 				loaddata : FireSpark.core.constant.loadmsg,				animation : 'fadein',				duration : 1000,				delay : 0, 				key : 'template', 				template : 'tpl-default' ,				confirm : false,				confirmmsg : 'Are you sure you want to continue ?',				selector : false,				encode : 'url',				data : '',				type : 'json',				request : 'POST',				workflowend : { service : FireSpark.jquery.workflow.TemplateApply },				errorflowend :  { service : FireSpark.jquery.service.ElementContent },				stop : false,				launch : false,				status : 'valid',				message : 'message'			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.core.service.LoadConfirm,			input : { value : 'confirmmsg' }		},{			service : FireSpark.jquery.service.DataEncode,			input : { type : 'encode' },			output : { result : 'data' }		},{			service : FireSpark.jquery.service.ElementState,			input : { element : 'selector' },			disabled : true		},{			service : FireSpark.jquery.service.ElementContent,			input : { data : 'loaddata' },			duration : 5		},{			service : $memory['loader'],			args : ['element', 'selector', 'template', 'animation', 'duration', 'delay', 'key', 'launch', 'status', 'message'],			workflow : [{				service : FireSpark.jquery.service.ElementState,				input : { element : 'selector' }			},{				service : FireSpark.jquery.service.LaunchMessage			},				$memory['workflowend']			],			errorflow : [{				service : FireSpark.jquery.service.ElementState,				input : { element : 'selector' }			}, 				$memory['errorflowend']			]		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow ShowTile *	@desc Shows tile content into parent element * *	@param cntr string [memory] optional default '#main-container' *	@param select boolean [memory] optional default true *	@param tile string [memory] optional false *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 500 *	@param dly integer [memory] optional default 0 * *	@return element element [memory] ***/FireSpark.jquery.workflow.ShowTile = {	input : function(){		return {			optional : { 				cntr : '#main-container',				select : true, 				tile : false,				anm : 'fadein',				dur : 500,				dly : 0			}		};	},		run : function($memory){		$memory = Snowblozm.Kernel.execute([{				service : FireSpark.jquery.service.ElementToggle,				input : { 					element : 'cntr', 					content : 'tile',					animation : 'anm',					duration : 'dur',					delay : 'dly'				},				child : '.tile-content'		}], $memory);				$memory['valid'] = true;		return $memory;	},		output : function(){		return ['element'];	}};/** *	@workflow TabTemplate *	@desc Loads template with data into new tab in tabui * *	@param tabui string [message] optional default 'tabuipanel' *	@param title string [message] optional default 'Krishna' * *	@param loader object [memory] optional default FireSpark.jquery.service.LoadAjax *	@param agent string [memory] optional default false * *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param tpl string [memory] optional default 'tpl-default' * *	@param cf boolean [memory] optional default false *	@param confirmmsg string [memory] optional default 'Are you sure you want to continue ?' *	@param sel string [memory] optional default false *	@param ec string [memory] optional default 'url' ('url', 'json') * *	@param url URL [memory] *	@param arg string [memory] optional default '' *	@param type string [memory] optional default 'json' *	@param request string [memory] optional default 'POST' *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.workflow.TemplateApply } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } * *	@param ln boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'firespark' ***/FireSpark.jquery.workflow.TabTemplate = {	input : function(){		return {			required : ['url'],			optional : { 				tabui : 'tabuipanel',				title : 'Krishna',				loader : FireSpark.jquery.service.LoadAjax,				agent : false,				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0, 				key : 'template', 				tpl : 'tpl-default' ,				cf : false,				confirmmsg : 'Are you sure you want to continue ?',				sel : false,				ec : 'url',				arg : '',				type : 'json',				request : 'POST',				workflowend : { service : FireSpark.jquery.workflow.TemplateApply },				errorflowend :  { service : FireSpark.jquery.service.ElementContent },				ln : false,				status : 'valid',				message : 'firespark'			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.ElementTab		},{			service : FireSpark.jquery.workflow.LoadTemplate,			input : { 				template : 'tpl', 				data : 'arg', 				confirm : 'cf', 				selector : 'sel', 				encode : 'ec', 				launch : 'ln' ,				animation : 'anm',				duration : 'dur',				delay : 'dly'			},			stop : true		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow TemplateApply *	@desc Applies template with data * *	@param element string [memory] *	@param select boolean [memory] optional default false *	@param template string [memory] optional default 'tpl-default' *	@param data object [memory] optional default {} *	@param key string [memory] optional default 'template' *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param duration integer [memory] optional default 1000 *	@param delay integer [memory] optional default 0 * *	@return element element [memory] ***/FireSpark.jquery.workflow.TemplateApply = {	input : function(){		return {			required : ['element'],			optional : { 				select : false, 				data : {}, 				key : 'template', 				template : 'tpl-default' ,				animation : 'fadein',				duration : 1000,				delay : 0			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{				service : FireSpark.jquery.service.TemplateRead			},{				service : FireSpark.jquery.service.TemplateApply,				input : { template : 'result' }			},{				service : FireSpark.jquery.service.ElementContent,				input : { data : 'result' }			}], $memory);	},		output : function(){		return ['element'];	}};/**
+/** *	@workflow BindTemplate *	@desc Binds template with data into element * *	@param cntr string [memory] *	@param select boolean [memory] optional default true *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param tpl string [memory] optional default 'tpl-default' *	@param arg string [memory] optional default {} * *	@return element element [memory] ***/FireSpark.jquery.workflow.BindTemplate = {	input : function(){		return {			required : ['cntr'],			optional : { 				select : true, 				anm : 'fadein',				dur : 1000,				dly : 0, 				key : 'template', 				tpl : 'tpl-default' ,				arg : ''			}		};	},		run : function($memory){		$memory = Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.DataEncode,			input : { data : 'arg' },			type : 'json'		},{ 			service : FireSpark.jquery.workflow.TemplateApply,			input : {				element : 'cntr',				template : 'tpl', 				animation : 'anm',				duration : 'dur',				delay : 'dly'			}		}], $memory);				$memory['valid'] = true;		return $memory;	},		output : function(){		return ['element'];	}};/** *	@workflow CookieLogin *	@desc Sign in using Cookie * *	@param key string [message] optional default 'sessionid' *	@param value string [message] *	@param expires integer[message] optional default 1 day *	@param continue string [message] optional default false ***/FireSpark.jquery.workflow.CookieLogin = {	input : function(){		return {			required : ['value'],			optional : { key : 'sessionid', expires : 1, 'continue' : false }		}	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.CookieMake		},{			service : FireSpark.core.service.WindowReload		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow ElementHtml *	@desc Loads HTML content into container * *	@param url URL [memory] *	@param cntr string [memory] *	@param ld string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 ***/FireSpark.jquery.workflow.ElementHtml = {	input : function(){		return {			required : ['url', 'cntr'],			optional : { 				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.workflow.LoadHtml,			input : { element : 'cntr', animation : 'anm', duration : 'dur', delay : 'dly', loaddata : 'ld' },			select : true		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow ElementTemplate *	@desc Loads template with data into container * *	@param cntr string [message] * *	@param loader object [memory] optional default FireSpark.jquery.service.LoadAjax *	@param agent string [memory] optional default false * *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param tpl string [memory] optional default 'tpl-default' * *	@param cf boolean [memory] optional default false *	@param confirmmsg string [memory] optional default 'Are you sure you want to continue ?' *	@param sel string [memory] optional default false *	@param ec string [memory] optional default 'url' ('url', 'json') * *	@param url URL [memory] *	@param arg string [memory] optional default '' *	@param type string [memory] optional default 'json' *	@param request string [memory] optional default 'POST' *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.workflow.TemplateApply } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } * *	@param ln boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'firespark' ***/FireSpark.jquery.workflow.ElementTemplate = {	input : function(){		return {			required : ['cntr', 'url'],			optional : { 				loader : FireSpark.jquery.service.LoadAjax,				agent : false,				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0, 				key : 'template', 				tpl : 'tpl-default' ,				cf : false,				confirmmsg : 'Are you sure you want to continue ?',				sel : false,				ec : 'url',				arg : '',				type : 'json',				request : 'POST',				workflowend : { service : FireSpark.jquery.workflow.TemplateApply },				errorflowend :  { service : FireSpark.jquery.service.ElementContent },				ln : false,				status : 'valid',				message : 'firespark'			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.workflow.LoadTemplate,			input : { 				element : 'cntr', 				template : 'tpl', 				data : 'arg', 				confirm : 'cf', 				selector : 'sel', 				encode : 'ec', 				launch : 'ln' ,				animation : 'anm',				duration : 'dur',				delay : 'dly'			},			select : true,			stop : true		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow FormSubmit *	@desc Submits form using ajax or iframe and loads template with response data into div.status in form * *	@param sel form-parent selector string *	@param iframe string [memory] optional default false *	@param error string [memory] optional default span * *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param tpl string [memory] optional default 'tpl-default' * *	@param cf boolean [memory] optional default false *	@param confirmmsg string [memory] optional default 'Are you sure you want to continue ?' *	@param ec string [memory] optional default 'url' ('url', 'json') * *	@param type string [memory] optional default 'json' *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.workflow.TemplateApply } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } * *	@param ln boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'message' ***/FireSpark.jquery.workflow.FormSubmit = {	input : function(){		return {			required : ['sel'],			optional : { 				iframe : false,				error : 'span',				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0, 				key : 'template', 				tpl : 'tpl-default' ,				cf : false,				confirmmsg : 'Are you sure you want to continue ?',				ec : 'url',				type : 'json',				workflowend : { service : FireSpark.jquery.workflow.TemplateApply },				errorflowend : { service : FireSpark.jquery.service.ElementContent },				ln : false,				status : 'valid',				message : 'message'			}		};	},		run : function($memory){		if($memory['iframe']){			var $loader = FireSpark.jquery.service.LoadIframe;		}		else {			var $loader = FireSpark.jquery.service.LoadAjax;		}				return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.FormValidate,			form : $memory['sel'] + ' form'		},{			service : FireSpark.jquery.service.FormRead,			form : $memory['sel'] + ' form'		},{			service : FireSpark.jquery.workflow.LoadTemplate,			input : { 				template : 'tpl', 				confirm : 'cf', 				encode : 'ec', 				launch : 'ln' ,				animation : 'anm',				duration : 'dur',				delay : 'dly'			},			loader : $loader,			element : $memory['sel'] +' div.status',			select : true,			selector : $memory['sel'] + ' input[name=submit]',			agent : $memory['sel'] + ' form'		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow LoadHtml *	@desc Loads HTML content into element * *	@param url URL [memory] *	@param element string [memory] *	@param select boolean [memory] optional default false *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param duration integer [memory] optional default 1000 *	@param delay integer [memory] optional default 0 * *	@return element element [memory] ***/FireSpark.jquery.workflow.LoadHtml = {	input : function(){		return {			required : ['url', 'element'],			optional : { 				select : false, 				loaddata : FireSpark.core.constant.loadmsg,				animation : 'fadein',				duration : 1000,				delay : 0			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.ElementContent,			input : { data : 'loaddata' },			duration : 5		},{			service : FireSpark.jquery.service.LoadAjax,			type : 'html',			args : ['element', 'animation', 'duration', 'delay'],			workflow : [{				service : FireSpark.jquery.service.ElementContent			}],			errorflow : [{				service : FireSpark.jquery.service.ElementContent			}]		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow LoadTemplate *	@desc Loads template with data into element * *	@param loader object [memory] optional default FireSpark.jquery.service.LoadAjax *	@param agent string [memory] optional default false * *	@param element string [memory] *	@param select boolean [memory] optional default false *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param duration integer [memory] optional default 1000 *	@param delay integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param template string [memory] optional default 'tpl-default' * *	@param confirm boolean [memory] optional default false *	@param confirmmsg string [memory] optional default 'Are you sure you want to continue ?' *	@param selector string [memory] optional default false *	@param encode string [memory] optional default 'url' ('url', 'json') * *	@param url URL [memory] *	@param data string [memory] optional default  *	@param type string [memory] optional default 'json' *	@param request string [memory] optional default 'POST' *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.workflow.TemplateApply } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } *	@param stop boolean [memory] optional default false * *	@param launch boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'message' * *	@return element element [memory] ***/FireSpark.jquery.workflow.LoadTemplate = {	input : function(){		return {			required : ['element', 'url'],			optional : { 				loader : FireSpark.jquery.service.LoadAjax,				agent : false,				select : false, 				loaddata : FireSpark.core.constant.loadmsg,				animation : 'fadein',				duration : 1000,				delay : 0, 				key : 'template', 				template : 'tpl-default' ,				confirm : false,				confirmmsg : 'Are you sure you want to continue ?',				selector : false,				encode : 'url',				data : '',				type : 'json',				request : 'POST',				workflowend : { service : FireSpark.jquery.workflow.TemplateApply },				errorflowend :  { service : FireSpark.jquery.service.ElementContent },				stop : false,				launch : false,				status : 'valid',				message : 'message'			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.core.service.LoadConfirm,			input : { value : 'confirmmsg' }		},{			service : FireSpark.jquery.service.DataEncode,			input : { type : 'encode' },			output : { result : 'data' }		},{			service : FireSpark.jquery.service.ElementState,			input : { element : 'selector' },			disabled : true		},{			service : FireSpark.jquery.service.ElementContent,			input : { data : 'loaddata' },			duration : 5		},{			service : $memory['loader'],			args : ['element', 'selector', 'template', 'animation', 'duration', 'delay', 'key', 'launch', 'status', 'message'],			workflow : [{				service : FireSpark.jquery.service.ElementState,				input : { element : 'selector' }			},{				service : FireSpark.jquery.service.LaunchMessage			},				$memory['workflowend']			],			errorflow : [{				service : FireSpark.jquery.service.ElementState,				input : { element : 'selector' }			}, 				$memory['errorflowend']			]		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow TabTemplate *	@desc Loads template with data into new tab in tabui * *	@param tabui string [message] optional default 'tabuipanel' *	@param title string [message] optional default 'Krishna' * *	@param loader object [memory] optional default FireSpark.jquery.service.LoadAjax *	@param agent string [memory] optional default false * *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param key string [memory] optional default 'template' *	@param tpl string [memory] optional default 'tpl-default' * *	@param cf boolean [memory] optional default false *	@param confirmmsg string [memory] optional default 'Are you sure you want to continue ?' *	@param sel string [memory] optional default false *	@param ec string [memory] optional default 'url' ('url', 'json') * *	@param url URL [memory] *	@param arg string [memory] optional default '' *	@param type string [memory] optional default 'json' *	@param request string [memory] optional default 'POST' *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.workflow.TemplateApply } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } * *	@param ln boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'firespark' ***/FireSpark.jquery.workflow.TabTemplate = {	input : function(){		return {			required : ['url'],			optional : { 				tabui : 'tabuipanel',				title : 'Krishna',				loader : FireSpark.jquery.service.LoadAjax,				agent : false,				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0, 				key : 'template', 				tpl : 'tpl-default' ,				cf : false,				confirmmsg : 'Are you sure you want to continue ?',				sel : false,				ec : 'url',				arg : '',				type : 'json',				request : 'POST',				workflowend : { service : FireSpark.jquery.workflow.TemplateApply },				errorflowend :  { service : FireSpark.jquery.service.ElementContent },				ln : false,				status : 'valid',				message : 'firespark'			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.ElementTab		},{			service : FireSpark.jquery.workflow.LoadTemplate,			input : { 				template : 'tpl', 				data : 'arg', 				confirm : 'cf', 				selector : 'sel', 				encode : 'ec', 				launch : 'ln' ,				animation : 'anm',				duration : 'dur',				delay : 'dly'			},			stop : true		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow TemplateApply *	@desc Applies template with data * *	@param element string [memory] *	@param select boolean [memory] optional default false *	@param template string [memory] optional default 'tpl-default' *	@param data object [memory] optional default {} *	@param key string [memory] optional default 'template' *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param duration integer [memory] optional default 1000 *	@param delay integer [memory] optional default 0 *	@param action string [memory] optional default 'all' * *	@return element element [memory] ***/FireSpark.jquery.workflow.TemplateApply = {	input : function(){		return {			required : ['element'],			optional : { 				select : false, 				data : {}, 				key : 'template', 				template : 'tpl-default' ,				animation : 'fadein',				duration : 1000,				delay : 0,				action : 'all'			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{				service : FireSpark.jquery.service.TemplateRead			},{				service : FireSpark.jquery.service.TemplateApply,				input : { template : 'result' }			},{				service : FireSpark.jquery.service.ElementContent,				input : { data : 'result' }			}], $memory);	},		output : function(){		return ['element'];	}};/** *	@workflow TileInitialize *	@desc Activates container elements using templates for TileUI * *	@param key string [memory] optional default 'ui-global' *	@param id long int [memory] optional default '0' *	@param ins string [memory] optional default '#ui-global-0' *	@param tile string [memory] optional default false * *	@param iframe string [memory] optional default false *	@param agent string [memory] optional default false *	@param root object [memory] optional default false * *	@param url string [memory] optional default '' *	@param data object [memory] optional default '' *	@param type string [memory] optional default 'json' *	@param request string [memory] optional default 'POST' *	@param process boolean [memory] optional default false *	@param mime string [memory] optional default 'application/x-www-form-urlencoded' *	@param args array [args] * *	@param workflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ContainerRender } *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent } *	@param stop boolean [memory] optional default false * *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 1000 *	@param dly integer [memory] optional default 0 * *	@param launch boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'message' * *	@return element element [memory] ***/FireSpark.jquery.workflow.TileInitialize = {	input : function(){		return {			optional : { 				key : 'ui-global', 				id : '0',				ins : 'ui-global-0',				tile : false,				iframe : false,				root : false,				agent : false,				url : '',				data : '', 				type : 'json', 				request : 'POST', 				process : false, 				mime : 'application/x-www-form-urlencoded',				workflowend : { service : FireSpark.jquery.service.ContainerRender },				errorflowend : { service : FireSpark.jquery.service.ElementContent },				loaddata : FireSpark.core.constant.loadmsg,				anm : 'fadein',				dur : 1000,				dly : 0, 				stop : false,				launch : false,				status : 'valid',				message : 'message'			}		};	},		run : function($memory){		return Snowblozm.Kernel.execute([{			service : FireSpark.jquery.service.ContainerInitialize		},{			service : FireSpark.jquery.service.ContainerData,			args : ['key', 'id', 'ins', 'root', 'ln', 'status', 'message', 'tile'],			workflow : [{				service : FireSpark.jquery.service.LaunchMessage,				input : {					ln : 'launch'				}			},				$memory['workflowend'],			],			errorflow : [				$memory['errorflowend']			]		}], $memory);	},		output : function(){		return [];	}};/** *	@workflow TileShow *	@desc Shows tile content into parent element * *	@param ins string [memory] optional default '#ui-global-0' *	@param select boolean [memory] optional default true *	@param tile string [memory] optional false *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout') *	@param dur integer [memory] optional default 500 *	@param dly integer [memory] optional default 0 * *	@return element element [memory] ***/FireSpark.jquery.workflow.TileShow = {	input : function(){		return {			optional : { 				ins : '#ui-global-0',				select : true, 				tile : false,				anm : 'fadein',				dur : 500,				dly : 0			}		};	},		run : function($memory){		$memory = Snowblozm.Kernel.execute([{				service : FireSpark.jquery.service.ElementToggle,				element : $memory['ins'] + '>.bands',				input : { 					content : 'tile',					animation : 'anm',					duration : 'dur',					delay : 'dly'				},				child : '.tile-content'		}], $memory);				$memory['valid'] = true;		return $memory;	},		output : function(){		return ['element'];	}};/**
  *	@template Default
 **/
 FireSpark.jquery.template.Default = $.template('\
 	<span class="{{if valid}}success{{else}}error{{/if}}">${msg}</span>\
+	<span class="hidden">${details}</span>\
 ');
 
 Snowblozm.Registry.save('tpl-default', FireSpark.jquery.template.Default);
+/**
+ *	@template Tiles
+**/
+FireSpark.jquery.template.Tiles = $.template('\
+	<div id="">\
+		<p class="tilehead">${tilehead}</p>\
+		<p>\
+			{{each tiles}}\
+				{{if FireSpark.core.helper.equals(tpl, true)}}\
+					{{tmpl tpl}}\
+				{{else}}\
+				<a href="#showtile:ins=${instance}:tile=${tile}" class="navigate tile ${style}">${name}</a>\
+				{{/if}}\
+			{{/each}}\
+			{{if FireSpark.core.helper.equals(close, true)}}\
+			<a href="#close:ins=${instance}" class="navigate tile close">Close</a>\
+			{{/if}}\
+		</p>\
+	</div>\
+');
+
+Snowblozm.Registry.save('tpl-tiles', FireSpark.jquery.template.Tiles);
+
+/**
+ *	@template Bands
+**/
+FireSpark.jquery.template.Bands = $.template('\
+	{{each tiles}}\
+		<span></span>{{tmpl $value.tiletpl}}\
+	{{/each}}\
+');
+
+Snowblozm.Registry.save('tpl-bands', FireSpark.jquery.template.Bands);
+
+/**
+ *	@template Container
+**/
+FireSpark.jquery.template.Container = $.template('\
+	<div class="tiles"></div>\
+	{{if inline}}<div class="bands"></div>{{/if}}\
+');
+
+Snowblozm.Registry.save('tpl-container', FireSpark.jquery.template.Container);

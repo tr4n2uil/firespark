@@ -6,6 +6,7 @@
  *	@param id long int [memory] optional default '0'
  *
  *	@param iframe string [memory] optional default false
+ *	@param agent string [memory] optional default false
  *	@param root object [memory] optional default false
  *
  *	@param url string [memory] optional default ''
@@ -37,6 +38,7 @@ FireSpark.jquery.service.ContainerData = {
 				id : '0',
 				iframe : false,
 				root : false,
+				agent : false,
 				url : '',
 				data : '', 
 				type : 'json', 
@@ -68,7 +70,7 @@ FireSpark.jquery.service.ContainerData = {
 		
 		if($value['data'] || false){
 			$memory['data'] = $value;
-			return Snowblozm.Kernel.execute($memory['workflowend'], $memory);
+			return Snowblozm.Kernel.run($memory['workflowend'], $memory);
 		}
 		else {
 			return Snowblozm.Kernel.execute([{
@@ -78,7 +80,7 @@ FireSpark.jquery.service.ContainerData = {
 			},{
 				service : $memory['loader'],
 				args : $memory['args'],
-				agent : $memory['root'],
+				agent : $memory['agent'] || $memory['root'],
 				key : $instance,
 				workflow : [{
 					service : FireSpark.jquery.service.DataCache

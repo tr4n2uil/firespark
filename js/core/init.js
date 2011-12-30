@@ -1,4 +1,4 @@
-FireSpark = FireSpark || {};
+var FireSpark = FireSpark || {};
 FireSpark.core = {};
 
 FireSpark.core.service = {};

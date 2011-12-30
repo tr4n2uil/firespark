@@ -4,8 +4,9 @@
  *
  *	@param key string [memory] optional default 'ui-global'
  *	@param id long int [memory] optional default '0'
- *	@param instance string [memory] optional default '#ui-global-0'
+ *	@param ins string [memory] optional default '#ui-global-0'
  *	@param root object [memory] optional default false
+ *	@param tile string [memory] optional default false
  *
  *	@return element element [memory]
  *
@@ -16,8 +17,9 @@ FireSpark.jquery.service.ContainerRender = {
 			optional : { 
 				key : 'ui-global', 
 				id : '0',
-				instance : 'ui-global-0',
+				ins : 'ui-global-0',
 				root : false,
+				tile : false
 			}
 		}
 	},
@@ -31,14 +33,15 @@ FireSpark.jquery.service.ContainerRender = {
 			
 		}
 		else {
+			$value['instance'] = $memory['ins'];
 			$memory = Snowblozm.Kernel.execute([{
 				service : FireSpark.jquery.workflow.TemplateApply,
-				element : $memory['instance'] + '>.tiles',
+				element : $memory['ins'] + '>.tiles',
+				select : true,
 				template : 'tpl-tiles',
-				animation : 'none',
-				input : {
-					action : 'first'
-				}
+				animation : 'fadein',
+				data : $value,
+				action : 'first'
 			}], $memory);
 			
 			if($memory['valid'] || false){
@@ -49,12 +52,14 @@ FireSpark.jquery.service.ContainerRender = {
 		
 		$memory = Snowblozm.Kernel.execute([{
 			service : FireSpark.jquery.workflow.TemplateApply,
-			element : $memory['instance'] + '>.bands',
+			element : $memory['ins'] + '>.bands',
+			select : true,
 			template : 'tpl-bands',
 			animation : 'none',
-			input : {
-				action : 'first'
-			}
+			data : $value,
+			action : 'first'
+		},{
+			service : FireSpark.jquery.workflow.TileShow
 		}], $memory);
 		
 		$memory['valid'] = true;
