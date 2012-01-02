@@ -771,21 +771,22 @@ Snowblozm.Registry.save('tpl-default', FireSpark.jquery.template.Default);
  *	@template Tiles
 **/
 FireSpark.jquery.template.Tiles = $.template('\
-	<div id="">\
-		<p class="tilehead">${tilehead}</p>\
-		<p>\
-			{{each tiles}}\
-				{{if FireSpark.core.helper.equals(tpl, true)}}\
-					{{tmpl tpl}}\
-				{{else}}\
+	<ul class="hover-menu horizontal">\
+		<span class="tilehead">${tilehead}</span>\
+		{{each tiles}}\
+		<li>\
+			{{if FireSpark.core.helper.equals(tpl, true)}}\
+				{{tmpl tpl}}\
+			{{else}}\
 				<a href="#showtile:ins=${instance}:tile=${tile}" class="navigate tile ${style}">${name}</a>\
-				{{/if}}\
-			{{/each}}\
-			{{if FireSpark.core.helper.equals(close, true)}}\
-			<a href="#close:ins=${instance}" class="navigate tile close">Close</a>\
 			{{/if}}\
-		</p>\
-	</div>\
+		</li>\
+		{{/each}}\
+		{{if FireSpark.core.helper.equals(close, true)}}\
+			<li><a href="#close:ins=${instance}" class="navigate tile close">Close</a></li>\
+		{{/if}}\
+		</li>\
+	</ul>\
 ');
 
 Snowblozm.Registry.save('tpl-tiles', FireSpark.jquery.template.Tiles);
