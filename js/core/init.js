@@ -9,3 +9,28 @@ FireSpark.core.constant = {};
 
 FireSpark.core.constant.loadmsg = '<span class="loading">Loading ...</span>';
 FireSpark.core.constant.loaderror = '<span class="error">The requested resource could not be loaded</span>';
+
+FireSpark.core.ajax = {
+	requests : 0,
+	
+	barrier_func : function() {
+		
+	},
+	
+	start : function(){
+		this.requests++;
+	},
+	
+	end : function(){
+		this.requests--;
+		if(this.requests <= 0){
+			this.requests = 0;
+			this.barrier_function();
+		}
+	},
+	
+	barrier : function($bfunc){
+		this.barrier_function = $bfunc;
+	}
+};
+

@@ -69,7 +69,6 @@ FireSpark.jquery.service.ContainerData = {
 		var $value = Snowblozm.Registry.get($instance) || {};
 		
 		if($value['data'] || false){
-			$memory['data'] = $value;
 			return Snowblozm.Kernel.run($memory['workflowend'], $memory);
 		}
 		else {

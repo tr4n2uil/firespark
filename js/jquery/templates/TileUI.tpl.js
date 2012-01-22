@@ -2,14 +2,18 @@
  *	@template Tiles
 **/
 FireSpark.jquery.template.Tiles = $.template('\
-	<ul class="hover-menu horizontal">\
+	<ul class="hover-menu horizontal tls-${key}-${id}">\
 		<span class="tilehead">${tilehead}</span>\
 		{{each tiles}}\
 		<li>\
-			{{if FireSpark.core.helper.equals(tpl, true)}}\
-				{{tmpl tpl}}\
-			{{else}}\
-				<a href="#showtile:ins=${instance}:tile=${tile}" class="navigate tile ${style}">${name}</a>\
+			{{if FireSpark.core.helper.equals(!privileged || (privileged && admin), true)}}\
+				{{if FireSpark.core.helper.equals(tpl, true)}}\
+					{{tmpl tpl}}\
+				{{else urlhash}}\
+					<a href="${urlhash}" class="navigate tile ${style}">${name}</a>\
+				{{else}}\
+					<a href="#showtile:ins=${instance}:tile=${tile}-${id}" class="navigate tile ${style}">${name}</a>\
+				{{/if}}\
 			{{/if}}\
 		</li>\
 		{{/each}}\
@@ -27,7 +31,10 @@ Snowblozm.Registry.save('tpl-tiles', FireSpark.jquery.template.Tiles);
 **/
 FireSpark.jquery.template.Bands = $.template('\
 	{{each tiles}}\
-		<span></span>{{tmpl $value.tiletpl}}\
+		<span></span>\
+		{{if $value.tiletpl}}\
+			{{tmpl $value.tiletpl}}\
+		{{/if}}\
 	{{/each}}\
 ');
 

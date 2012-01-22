@@ -8,7 +8,7 @@
  *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout', 'none')
  *	@param duration integer [memory] optional default 1000
  *	@param delay integer [memory] optional default 0
- *	@param action string [memory] optional default 'all'
+ *	@param action string [memory] optional default 'all' ('all', 'first', 'last', 'remove')
  *
  *	@return element element [memory]
  *
@@ -31,7 +31,7 @@ FireSpark.jquery.service.ElementContent = {
 	run : function($memory){
 		if($memory['select'] || false){
 			var $element = $($memory['element']);
-			if(!$element.length){
+			if(!$element.length && $memory['action'] != 'remove'){
 				$element = $('#main-container');
 			}
 		}
@@ -59,7 +59,7 @@ FireSpark.jquery.service.ElementContent = {
 				$element.append($memory['data']);
 				break;
 				
-			case 'action' :
+			case 'remove' :
 				$element.remove();
 				break;
 				
@@ -68,7 +68,7 @@ FireSpark.jquery.service.ElementContent = {
 		}
 		
 		if($memory['action'] != 'remove'){
-			$element.delay($memory['delay']);
+			$element.stop(true, true).delay($memory['delay']);
 			
 			switch($animation){
 				case 'fadein' :
