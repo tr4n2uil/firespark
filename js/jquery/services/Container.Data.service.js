@@ -21,7 +21,6 @@
  *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent }
  *	@param stop boolean [memory] optional default false
  *
- *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg
  *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
  *	@param dur integer [memory] optional default 1000
  *	@param dly integer [memory] optional default 0
@@ -64,26 +63,25 @@ FireSpark.jquery.service.ContainerData = {
 			var $loader = FireSpark.jquery.service.LoadAjax;
 		}
 		
-		var $config = Snowblozm.Registry.get($memory['key']) || {};
 		var $instance = $memory['key']+'-'+$memory['id'];
-		var $value = Snowblozm.Registry.get($instance) || {};
+		var $value = Snowblozm.Registry.get($instance) || false;
 		
-		if($value['data'] || false){
+		if($value || false){
 			return Snowblozm.Kernel.run($memory['workflowend'], $memory);
 		}
 		else {
 			return Snowblozm.Kernel.execute([{
 				service : FireSpark.jquery.service.ElementContent,
-				input : { data : 'loaddata' },
-				duration : 5
+				element : '#load-status',
+				select : true,
+				animation : 'slidein',
+				data : '<span class="state loading">Loading ...</span>',
+				duration : 15
 			},{
-				service : $memory['loader'],
+				service : $loader,
 				args : $memory['args'],
 				agent : $memory['agent'] || $memory['root'],
-				key : $instance,
-				workflow : [{
-					service : FireSpark.jquery.service.DataCache
-				},
+				workflow : [
 					$memory['workflowend']
 				],
 				errorflow : [

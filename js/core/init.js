@@ -13,7 +13,7 @@ FireSpark.core.constant.loaderror = '<span class="error">The requested resource 
 FireSpark.core.ajax = {
 	requests : 0,
 	
-	barrier_func : function() {
+	barrier_function : function() {
 		
 	},
 	
@@ -26,6 +26,7 @@ FireSpark.core.ajax = {
 		if(this.requests <= 0){
 			this.requests = 0;
 			this.barrier_function();
+			this.barrier_function = function() {}
 		}
 	},
 	

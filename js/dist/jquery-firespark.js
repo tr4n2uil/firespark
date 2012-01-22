@@ -13,7 +13,7 @@ FireSpark.core.constant.loaderror = '<span class="error">The requested resource 
 FireSpark.core.ajax = {
 	requests : 0,
 	
-	barrier_func : function() {
+	barrier_function : function() {
 		
 	},
 	
@@ -26,6 +26,7 @@ FireSpark.core.ajax = {
 		if(this.requests <= 0){
 			this.requests = 0;
 			this.barrier_function();
+			this.barrier_function = function() {}
 		}
 	},
 	
@@ -93,7 +94,6 @@ FireSpark.jquery.template = {};
  *	@param errorflowend Workflow [memory] optional default { service : FireSpark.jquery.service.ElementContent }
  *	@param stop boolean [memory] optional default false
  *
- *	@param loaddata string [memory] optional default FireSpark.core.constant.loadmsg
  *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
  *	@param dur integer [memory] optional default 1000
  *	@param dly integer [memory] optional default 0
@@ -136,26 +136,25 @@ FireSpark.jquery.service.ContainerData = {
 			var $loader = FireSpark.jquery.service.LoadAjax;
 		}
 		
-		var $config = Snowblozm.Registry.get($memory['key']) || {};
 		var $instance = $memory['key']+'-'+$memory['id'];
-		var $value = Snowblozm.Registry.get($instance) || {};
+		var $value = Snowblozm.Registry.get($instance) || false;
 		
-		if($value['data'] || false){
+		if($value || false){
 			return Snowblozm.Kernel.run($memory['workflowend'], $memory);
 		}
 		else {
 			return Snowblozm.Kernel.execute([{
 				service : FireSpark.jquery.service.ElementContent,
-				input : { data : 'loaddata' },
-				duration : 5
+				element : '#load-status',
+				select : true,
+				animation : 'slidein',
+				data : '<span class="state loading">Loading ...</span>',
+				duration : 15
 			},{
-				service : $memory['loader'],
+				service : $loader,
 				args : $memory['args'],
 				agent : $memory['agent'] || $memory['root'],
-				key : $instance,
-				workflow : [{
-					service : FireSpark.jquery.service.DataCache
-				},
+				workflow : [
 					$memory['workflowend']
 				],
 				errorflow : [
@@ -172,7 +171,7 @@ FireSpark.jquery.service.ContainerData = {
 		return [];
 	}
 };
-/** *	@service ContainerInitialize *	@desc Initializes a new Container * *	@param key string [memory] optional default 'ui-global' *	@param id long int [memory] optional default '0'  *	@param instance object [save] with 'key-id' ***/FireSpark.jquery.service.ContainerInitialize = {	input : function(){		return {			optional : { 				key : 'ui-global', 				id : '0' 			}		};	},		run : function($memory){		var $config = Snowblozm.Registry.get($memory['key']);		var $instance = $memory['key']+'-'+$memory['id'];		var $value = Snowblozm.Registry.get($instance) || {};				if($value['ui'] || 0){			$memory['valid'] = false;			return $memory;		} 		else {			$value['id'] = $memory['id'];			$value['instance'] = $instance;						/*switch($config['data']){				case 'global' :					$data = TileUI['global'][($config['key'] || 'data')];					for(var $i in $data){						$value[$i] = $data[$i];					}					$value['data'] = true;					break;									case 'server' :					$value['expiry'] = $config['expiry'];					$value['data'] = $value['data'] || false;					break;									default :					break;			}						$admin = $value['message']['admin'] || false;			$tiles = $config['tiles'];			$value['tiles'] = [];						for(var $i in $tiles){				if($tiles[$i]['privileged'] & !$admin){					continue;				}				$value['tiles'].push($tiles[$i]);			}*/						$value['ui'] = true;		}				Snowblozm.Registry.save($instance, $value);		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
+/**
  *	@service ContainerRender
  *	@desc Used to render container
  *
@@ -184,6 +183,7 @@ FireSpark.jquery.service.ContainerData = {
  *	@param inl boolean [memory] optional default false
  *	@param act string [memory] optional default 'first' ('all', 'first', 'last', 'remove')
  *	@param tile string [memory] optional default false
+ *	@param data object [memory] optional default {}
  *
  *	@return element element [memory]
  *
@@ -199,86 +199,106 @@ FireSpark.jquery.service.ContainerRender = {
 				tpl : '#tpl-def-tls',
 				inl : false,
 				act : 'first',
-				tile : false
+				tile : false,
+				data : {}
 			}
 		}
 	},
 	
 	run : function($memory){		
-		var $config = Snowblozm.Registry.get($memory['key']) || {};
 		var $instance = $memory['key']+'-'+$memory['id'];
-		var $value = Snowblozm.Registry.get($instance) || {};
+		var $value = Snowblozm.Registry.get($instance) || false;
+		
+		if($value || false){
+		} else {
+			$value = $memory['data'];
+		}
 		
 		$value['id'] = $memory['id'];
 		$value['key'] = $memory['key'];
 		$value['instance'] = $memory['ins'];
 		
-		var $data = $value['data'];
-		for(var $i in $data){
-			$value[$i] = $data[$i];
+		if($value['valid'] || false){
+		} else {
+			return Snowblozm.Kernel.run({
+				service : FireSpark.jquery.service.ElementContent,
+				element : '#load-status',
+				select : true,
+				animation : 'slidein',
+				data : '<span class="error">'+$value['msg']+'</span><span class="hidden">'+$value['details']+'</span>',
+				duration : 500
+			}, {});
 		}
-		$value['data'] = true;
 		
-		if($memory['inl'] || false){
-			// To do
-		}
-		else {
+		var $render = function(){
+			$('#load-status').html('<span class="state">Initializing ...</span>').delay(500).slideUp(1500);
+				
+			if($memory['inl'] || false){
+				// To do
+			}
+			else {
+				$memory = Snowblozm.Kernel.execute([{
+					service : FireSpark.jquery.service.ElementContent,
+					element : '.tls-' + $instance,
+					select : true,
+					action : 'remove'
+				},{
+					service : FireSpark.jquery.workflow.TemplateApply,
+					input : { action : 'act' },
+					element : $memory['ins'] + '>.tiles',
+					select : true,
+					animation : 'fadein',
+					template : $memory['tpl'] + '-tls',
+					data : $value,
+				}], $memory);
+				
+				if($memory['valid'] || false){
+				} else {
+					return $memory;
+				}
+			}
+				
 			$memory = Snowblozm.Kernel.execute([{
 				service : FireSpark.jquery.service.ElementContent,
-				element : '.tls-'+$instance,
+				element : '.tlc-' + $instance,
 				select : true,
 				action : 'remove'
 			},{
 				service : FireSpark.jquery.workflow.TemplateApply,
 				input : { action : 'act' },
-				element : $memory['ins'] + '>.tiles',
-				select : true,
-				animation : 'fadein',
-				template : $memory['tpl'] + '-tls',
-				data : $value,
-			}], $memory);
-			
-			if($memory['valid'] || false){
-			} else {
-				return $memory;
-			}
-		}
-		
-		/*$tiles = $value['tiles'];
-		for(var $i in $tiles){
-			$tile = $tiles[$i];
-			$memory = Snowblozm.Kernel.run({
-				service : FireSpark.jquery.workflow.TemplateApply,
 				element : $memory['ins'] + '>.bands',
 				select : true,
-				template : $tile['tiletpl'],
+				template : $memory['tpl'] + '-tcs',
 				animation : 'none',
-				data : $value,
-				action : $value['action'] || 'first'
-			}, $memory);
+				data : $value
+			},{
+				service : FireSpark.jquery.workflow.TileShow
+			}], $memory);
 			
-			if($memory['valid'] || false){
-			} else return $memory;
-		}*/
-			
-		$memory = Snowblozm.Kernel.execute([{
-			service : FireSpark.jquery.service.ElementContent,
-			element : '.tlc-'+$instance,
-			select : true,
-			action : 'remove'
-		},{
-			service : FireSpark.jquery.workflow.TemplateApply,
-			input : { action : 'act' },
-			element : $memory['ins'] + '>.bands',
-			select : true,
-			template : $memory['tpl'] + '-tcs',
-			animation : 'none',
-			data : $value
-		},{
-			service : FireSpark.jquery.workflow.TileShow
-		}], $memory);
+			Snowblozm.Registry.save($instance, $value);
+		}
 		
-		Snowblozm.Registry.save($instance, $value);
+		if($value['ui'] || false){
+			$templates  = $value['ui']['templates'] || {};
+			
+			FireSpark.core.ajax.barrier($render);
+			$barrier = false;
+			
+			for(var $i in $templates){
+				if(Snowblozm.Registry.get($templates[$i]) || false){
+				} else {
+					$barrier = true;
+					Snowblozm.Registry.save($templates[$i], true);
+					Snowblozm.Kernel.launch('#htmlload:url='+$templates[$i]+':cntr=#ui-templates:act=last:ld=<span></span>:dur=5');
+				}
+			}
+			
+			if(!$barrier) $render();
+		}
+		else {
+			$render();
+		}
+		
 		$memory['valid'] = true;
 		return $memory;
 	},
