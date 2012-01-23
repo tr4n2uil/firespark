@@ -105,6 +105,7 @@ FireSpark.jquery.service.ContainerRender = {
 			Snowblozm.Registry.save($instance, $value);
 		}
 		
+		$value['ui'] = $value['message']['ui'];
 		if($value['ui'] || false){
 			$templates  = $value['ui']['templates'] || {};
 			

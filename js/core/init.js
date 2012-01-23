@@ -10,6 +10,9 @@ FireSpark.core.constant = {};
 FireSpark.core.constant.loadmsg = '<span class="loading">Loading ...</span>';
 FireSpark.core.constant.loaderror = '<span class="error">The requested resource could not be loaded</span>';
 
+/**
+ *	@component AjaxBarrier
+**/
 FireSpark.core.ajax = {
 	requests : 0,
 	
