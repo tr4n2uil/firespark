@@ -12,13 +12,13 @@ FireSpark.jquery.template.Tiles = $.template('\
 				{{else urlhash}}\
 					<a href="${urlhash}" class="navigate tile ${style}">${name}</a>\
 				{{else}}\
-					<a href="#showtile:ins=${instance}:tile=${tile}-${id}" class="navigate tile ${style}">${name}</a>\
+					<a href="#/showtile/ins/${instance}/tile/${tile}-${id}" class="navigate tile ${style}">${name}</a>\
 				{{/if}}\
 			{{/if}}\
 		</li>\
 		{{/each}}\
 		{{if FireSpark.core.helper.equals(close, true)}}\
-			<li><a href="#close:ins=${instance}" class="navigate tile close">Close</a></li>\
+			<li><a href="#/close/ins/${instance}" class="navigate tile close">Close</a></li>\
 		{{/if}}\
 		</li>\
 	</ul>\

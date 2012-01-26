@@ -11,6 +11,9 @@
  *	@param act string [memory] optional default 'first' ('all', 'first', 'last', 'remove')
  *	@param tile string [memory] optional default false
  *	@param data object [memory] optional default {}
+ *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
+ *	@param dur integer [memory] optional default 1000
+ *	@param dly integer [memory] optional default 0
  *
  *	@return element element [memory]
  *
@@ -27,7 +30,10 @@ FireSpark.jquery.service.ContainerRender = {
 				inl : false,
 				act : 'first',
 				tile : false,
-				data : {}
+				data : {},
+				anm : 'fadein',
+				dur : 1000,
+				dly : 0,
 			}
 		}
 	},
@@ -71,7 +77,7 @@ FireSpark.jquery.service.ContainerRender = {
 					action : 'remove'
 				},{
 					service : FireSpark.jquery.workflow.TemplateApply,
-					input : { action : 'act' },
+					input : { action : 'act', animation : 'anm', duration : 'dur', delay : 'dly' },
 					element : $memory['ins'] + '>.tiles',
 					select : true,
 					animation : 'fadein',
@@ -92,7 +98,7 @@ FireSpark.jquery.service.ContainerRender = {
 				action : 'remove'
 			},{
 				service : FireSpark.jquery.workflow.TemplateApply,
-				input : { action : 'act' },
+				input : { action : 'act', animation : 'anm', duration : 'dur', delay : 'dly' },
 				element : $memory['ins'] + '>.bands',
 				select : true,
 				template : $memory['tpl'] + '-tcs',
@@ -106,8 +112,10 @@ FireSpark.jquery.service.ContainerRender = {
 		}
 		
 		$value['ui'] = $value['message']['ui'];
+		
 		if($value['ui'] || false){
 			$templates  = $value['ui']['templates'] || {};
+			$memory['tpl'] = $value['ui']['tpl'];
 			
 			FireSpark.core.ajax.barrier($render);
 			$barrier = false;

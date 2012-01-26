@@ -7,3 +7,4 @@ FireSpark.jquery.helper = {};
 FireSpark.jquery.constant = {};
 
 FireSpark.jquery.template = {};
+

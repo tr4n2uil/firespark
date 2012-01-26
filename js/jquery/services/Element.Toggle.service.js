@@ -44,6 +44,9 @@ FireSpark.jquery.service.ElementToggle = {
 		if($memory['content'] || false){
 			$element = $element.children($memory['content']);
 		}
+		else {
+			$element = $element.children().eq(0);
+		}
 		
 		var $animation = $memory['animation'];
 		var $duration = $memory['duration'];
