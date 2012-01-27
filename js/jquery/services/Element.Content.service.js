@@ -53,10 +53,12 @@ FireSpark.jquery.service.ElementContent = {
 			
 			case 'first' :
 				$element.prepend($memory['data']);
+				$element.trigger('load');
 				break;
 			
 			case 'last' :
 				$element.append($memory['data']);
+				$element.trigger('load');
 				break;
 				
 			case 'remove' :
