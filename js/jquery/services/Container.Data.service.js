@@ -76,7 +76,7 @@ FireSpark.jquery.service.ContainerData = {
 				select : true,
 				animation : 'slidein',
 				data : '<span class="state loading">Loading ...</span>',
-				duration : 15
+				duration : 500
 			},{
 				service : $loader,
 				args : $memory['args'],
