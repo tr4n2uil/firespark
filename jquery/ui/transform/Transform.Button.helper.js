@@ -1,0 +1,1 @@
+/** *	@helper TransformButton * *	@param element ***/FireSpark.ui.helper.transformButton = function($element, $config){	$element.button();	return $element;}
