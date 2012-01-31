@@ -57,7 +57,7 @@ FireSpark.ui.service.ContainerRender = {
 		} else {
 			Snowblozm.Registry.save($instance, false);
 			return Snowblozm.Kernel.run({
-				service : FireSpark.jquery.service.ElementContent,
+				service : FireSpark.ui.service.ElementContent,
 				element : '#load-status',
 				select : true,
 				animation : 'slidein',
@@ -94,12 +94,12 @@ FireSpark.ui.service.ContainerRender = {
 			}
 			else {
 				$memory = Snowblozm.Kernel.execute([{
-					service : FireSpark.jquery.service.ElementContent,
+					service : FireSpark.ui.service.ElementContent,
 					element : '.tls-' + $instance,
 					select : true,
 					action : 'remove'
 				},{
-					service : FireSpark.jquery.workflow.TemplateApply,
+					service : FireSpark.ui.workflow.TemplateApply,
 					input : { action : 'act', animation : 'anm', duration : 'dur', delay : 'dly' },
 					element : $memory['ins'] + '>.tiles',
 					select : true,
@@ -115,12 +115,12 @@ FireSpark.ui.service.ContainerRender = {
 			}
 			
 			$workflow = [{
-				service : FireSpark.jquery.service.ElementContent,
+				service : FireSpark.ui.service.ElementContent,
 				element : '.tlc-' + $instance,
 				select : true,
 				action : 'remove'
 			},{
-				service : FireSpark.jquery.workflow.TemplateApply,
+				service : FireSpark.ui.workflow.TemplateApply,
 				input : { action : 'act', animation : 'anm', duration : 'dur', delay : 'dly' },
 				element : $memory['ins'] + '>.bands',
 				select : true,
@@ -133,7 +133,7 @@ FireSpark.ui.service.ContainerRender = {
 			}
 			else {
 				$workflow.push({
-					service : FireSpark.jquery.workflow.TileShow
+					service : FireSpark.ui.workflow.TileShow
 				});
 			}
 				
@@ -157,23 +157,23 @@ FireSpark.ui.service.ContainerRender = {
 					$barrier = true;
 					
 					Snowblozm.Kernel.execute([{
-						service : FireSpark.jquery.service.RegistrySave,
+						service : FireSpark.core.service.DataRegistry,
 						key : $templates[$i],
 						value : true
 					},{
-						service : FireSpark.jquery.service.LoadAjax,
+						service : FireSpark.core.service.LoadAjax,
 						url : $templates[$i],
 						type : 'html',
 						request : 'GET',
 						workflow : [{
-							service : FireSpark.jquery.service.ElementContent,
+							service : FireSpark.ui.service.ElementContent,
 							element : '#ui-templates',
 							select : true,
 							action : 'last',
 							duration : 5
 						}],
 						errorflow : [{
-							service : FireSpark.jquery.service.RegistrySave,
+							service : FireSpark.core.service.DataRegistry,
 							key : $templates[$i]
 						}]
 					}], {});

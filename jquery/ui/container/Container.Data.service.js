@@ -44,8 +44,8 @@ FireSpark.ui.service.ContainerData = {
 				request : 'POST', 
 				process : false, 
 				mime : 'application/x-www-form-urlencoded' ,
-				workflowend : { service : FireSpark.jquery.service.ContainerRender },
-				errorflowend : { service : FireSpark.jquery.service.ElementContent },
+				workflowend : { service : FireSpark.ui.service.ContainerRender },
+				errorflowend : { service : FireSpark.ui.service.ElementContent },
 				loaddata : FireSpark.core.constant.loadmsg,
 				anm : 'fadein',
 				dur : 1000,
@@ -57,10 +57,10 @@ FireSpark.ui.service.ContainerData = {
 	
 	run : function($memory){
 		if($memory['iframe']){
-			var $loader = FireSpark.jquery.service.LoadIframe;
+			var $loader = FireSpark.core.service.LoadIframe;
 		}
 		else {
-			var $loader = FireSpark.jquery.service.LoadAjax;
+			var $loader = FireSpark.core.service.LoadAjax;
 		}
 		
 		var $instance = $memory['key']+'-'+$memory['id'];
@@ -71,7 +71,7 @@ FireSpark.ui.service.ContainerData = {
 		}
 		else {
 			return Snowblozm.Kernel.execute([{
-				service : FireSpark.jquery.service.ElementContent,
+				service : FireSpark.ui.service.ElementContent,
 				element : '#load-status',
 				select : true,
 				animation : 'slidein',
