@@ -2,41 +2,35 @@
  *	@service TemplateRead
  *	@desc Reads template definition into memory
  *
- *	@param data object [memory] optional default {}
- *	@param key string [memory] optional default 'template'
  *	@param template string [memory] optional default 'tpl-default' (FireSpark.jquery.template.Default)
  *
  *	@param result Template [memory]
- *	@param data object [memory]
  *
 **/
 FireSpark.ui.service.TemplateRead = {
 	input : function(){
 		return {
-			optional : { data : {}, key : 'template', template : 'tpl-default' }
+			optional : { template : 'tpl-default' }
 		};
 	},
 	
 	run : function($memory){
-		if($memory['data'][$memory['key']]){
-			$memory['result'] = $.template($memory['data'][$memory['key']]);
-		}
-		else if ($memory['data']['message'] && $memory['data']['message'][$memory['key']]){
-			$memory['result'] = $.template($memory['data']['message'][$memory['key']]);
-			$memory['data']['content'] = $memory['data']['message']['content'] || false;
-		}
-		else if($memory['template'].charAt(0) == '#'){
-			$memory['result'] = $.template($memory['template']);
-		}
-		else {
-			$memory['result'] = Snowblozm.Registry.get($memory['template']);
-		}
+		$tpl = $memory['template'];
+		$template = Snowblozm.Registry.get($tpl);
 		
-		$memory['valid'] = true;
+		if(!$template && $tpl.charAt(0) == '#'){
+			$template = $.template($tpl);
+			if($template){
+				Snowblozm.Registry.save($tpl, $template);
+			}
+		}
+	
+		$memory['result'] = $template;
+		$memory['valid'] = ($template || false) ? true : false;
 		return $memory;
 	},
 	
 	output : function(){
-		return ['result', 'data'];
+		return ['result'];
 	}
 };
