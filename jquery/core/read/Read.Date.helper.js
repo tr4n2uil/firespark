@@ -1,0 +1,1 @@
+/** *	@helper ReadDate * *	@param time ***/FireSpark.core.helper.readDate = function(time){	var d = new Date(time);	return d.toDateString();}

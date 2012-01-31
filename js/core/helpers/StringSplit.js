@@ -1,0 +1,1 @@
+/** *	@helper DataSplit * *	@param data *	@param separator optional default : ***/FireSpark.core.helper.dataSplit = function($data, $separator){	$separator = $separator || ':';	return $data.split($separator);}

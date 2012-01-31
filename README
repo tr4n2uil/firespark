@@ -3,10 +3,14 @@ Service Computing Platform Presentation Services
 
 Vibhaj Rajan <vibhaj8@gmail.com>
 
-JavaScript services developed in support of :
+JavaScript Foundation services developed in support of :
 	Google Summer of Code 2011
 	DSpace RESTClient
 	https://wiki.duraspace.org/display/GSOC/DSpace+ClientUI+built+on+RESTful+API+-+GSoC+2011
+	
+jQuery SmartInterface services developed in support of :
+	OrbitNote Open Collaboration Services
+	http://orbitnote.com
 
 Acknowledgements
 	jQuery Templates 
