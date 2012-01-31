@@ -1,1 +1,0 @@
-/** *	@helper ShortString * *	@param data ***/FireSpark.core.helper.shortString = function($data, $size){	var $maxlen = $size || 15;	var $len = $maxlen - 5;	return $data.length < $maxlen ? $data : $data.substr(0, $len) + ' ...';}
