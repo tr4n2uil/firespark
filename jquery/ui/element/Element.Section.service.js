@@ -1,5 +1,5 @@
 /**
- *	@service ElementToggle
+ *	@service ElementSection
  *	@desc Toggles element with another content and animates it and returns element in memory
  *
  *	@param element string [memory]
@@ -13,7 +13,7 @@
  *	@return element element [memory]
  *
 **/
-FireSpark.ui.service.ElementToggle = {
+FireSpark.ui.service.ElementSection = {
 	input : function(){
 		return {
 			required : ['element'],
@@ -29,7 +29,7 @@ FireSpark.ui.service.ElementToggle = {
 	},
 	
 	run : function($memory){
-		if($memory['select'] || false){
+		if($memory['select']){
 			var $element = $($memory['element']);
 			if(!$element.length){
 				$element = $('#main-container');
@@ -41,7 +41,7 @@ FireSpark.ui.service.ElementToggle = {
 		
 		$element.children($memory['child']).hide();
 		
-		if($memory['content'] || false){
+		if($memory['content']){
 			$element = $element.children($memory['content']);
 		}
 		else {

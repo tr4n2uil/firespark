@@ -29,7 +29,7 @@ FireSpark.ui.service.ElementContent = {
 	},
 	
 	run : function($memory){
-		if($memory['select'] || false){
+		if($memory['select']){
 			var $element = $($memory['element']);
 			if(!$element.length && $memory['action'] != 'remove'){
 				$element = $('#main-container');
@@ -42,11 +42,12 @@ FireSpark.ui.service.ElementContent = {
 		var $animation = $memory['animation'];
 		var $duration = $memory['duration'];
 		
+		if($animation == 'fadein' || $animation == 'slidein'){
+			$element.hide();
+		}
+		
 		switch($memory['action']){
 			case 'all' :
-				if($animation == 'fadein' || $animation == 'slidein'){
-					$element.hide();
-				}
 				$element.html($memory['data']);
 				$element.trigger('load');
 				break;
