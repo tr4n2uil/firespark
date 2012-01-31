@@ -1,1 +1,1 @@
-/** *	@helper DataEquals  * *	@param value1 *	@param value2 ***/FireSpark.core.helper.dataEquals = function(value1, value2){	return value1==value2;}
+/** *	@helper DataEquals  * *	@param value1 *	@param value2 ***/FireSpark.core.helper.dataEquals = function($value1, $value2){	return $value1 == $value2;}
