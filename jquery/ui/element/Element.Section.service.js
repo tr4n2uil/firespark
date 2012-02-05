@@ -45,7 +45,7 @@ FireSpark.ui.service.ElementSection = {
 			$element = $element.children($memory['content']);
 		}
 		else {
-			$element = $element.children().eq(0);
+			$element = $element.children($memory['child']).eq(0);
 		}
 		
 		var $animation = $memory['animation'];

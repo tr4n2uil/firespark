@@ -192,6 +192,58 @@ FireSpark.jquery.service.ContainerData = {
 	}
 };
 /**
+ *	@service ContainerRemove
+ *	@desc Used to remove container
+ *
+ *	@param key string [memory] optional default 'ui-global'
+ *	@param id long int [memory] optional default '0'
+ *	@param ins string [memory] optional default '#ui-global-0'
+ *	@param inl boolean [memory] optional default false
+ *
+**/
+FireSpark.jquery.service.ContainerRemove = {
+	input : function(){
+		return {
+			optional : { 
+				key : 'ui-global', 
+				id : '0',
+				ins : '#ui-global-0',
+				inl : false
+			}
+		}
+	},
+	
+	run : function($memory){		
+		var $instance = $memory['key']+'-'+$memory['id'];
+		
+		if($memory['inl'] || false){
+			// To do
+		}
+		else {
+			$memory = Snowblozm.Kernel.execute([{
+				service : FireSpark.jquery.service.ElementContent,
+				element : '.tls-' + $instance,
+				select : true,
+				action : 'remove'
+			},{
+				service : FireSpark.jquery.service.ElementContent,
+				element : '.tlc-' + $instance,
+				select : true,
+				action : 'remove'
+			},{
+				service : FireSpark.jquery.workflow.TileShow
+			}], $memory);
+		}
+		
+		$memory['valid'] = false;
+		return $memory;
+	},
+	
+	output : function(){
+		return [];
+	}
+};
+/**
  *	@service ContainerRender
  *	@desc Used to render container
  *
@@ -661,7 +713,7 @@ FireSpark.jquery.service.ElementToggle = {
 			$element = $element.children($memory['content']);
 		}
 		else {
-			$element = $element.children().eq(0);
+			$element = $element.children($memory['child']).eq(0);
 		}
 		
 		var $animation = $memory['animation'];
@@ -971,7 +1023,10 @@ Snowblozm.Registry.save('tpl-default', FireSpark.jquery.template.Default);
 **/
 FireSpark.jquery.template.Tiles = $.template('\
 	<ul class="hover-menu horizontal tls-${key}-${id}">\
-		<span class="tilehead">${tilehead}</span>\
+		<span class="tilehead">\
+			${tilehead}\
+			<a class="launch close hover" href="#/tileclose/key/${key}/id/${id}/ins/${instance}"></a>\
+		</span>\
 		{{each tiles}}\
 		<li>\
 			{{if FireSpark.core.helper.equals(!privileged || (privileged && admin), true)}}\

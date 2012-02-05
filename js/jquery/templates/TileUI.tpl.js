@@ -3,7 +3,10 @@
 **/
 FireSpark.jquery.template.Tiles = $.template('\
 	<ul class="hover-menu horizontal tls-${key}-${id}">\
-		<span class="tilehead">${tilehead}</span>\
+		<span class="tilehead">\
+			${tilehead}\
+			<a class="launch close hover" href="#/tileclose/key/${key}/id/${id}/ins/${instance}"></a>\
+		</span>\
 		{{each tiles}}\
 		<li>\
 			{{if FireSpark.core.helper.equals(!privileged || (privileged && admin), true)}}\
