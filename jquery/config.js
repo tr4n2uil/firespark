@@ -1,3 +1,6 @@
+/**
+ *	@config FireSpark.core
+**/
 FireSpark.core.constant = {
 	validations : {
 		required : {
@@ -13,7 +16,13 @@ FireSpark.core.constant = {
 			helper : FireSpark.core.helper.CheckMatch
 		}
 	},
-	validation_status : 'span',
+	validation_status : 'span'
+}
+
+/**
+ *	@config FireSpark.ui
+**/
+FireSpark.ui.constant = {
 	transforms : {
 		uibutton : {
 			cls : '.uibutton',

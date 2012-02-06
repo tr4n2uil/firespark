@@ -332,7 +332,7 @@ FireSpark.jquery.service.ContainerRender = {
 				}		
 			}		
 	
-			$('#load-status').html('<span class="state">Initializing ...</span>').stop(true, true).hide().slideDown(500).delay(500).slideUp(1500);
+			$('#load-status').html('<span class="state">Initializing ...</span>').stop(true, true).hide().slideDown(500).delay(500).slideUp(500);
 				
 			if($memory['inl'] || false){
 				// To do
@@ -394,7 +394,6 @@ FireSpark.jquery.service.ContainerRender = {
 			
 			FireSpark.core.ajax.barrier($render);
 			$barrier = false;
-			$('#load-status').html('<span class="state loading">Loading ...</span>').stop(true, true).slideDown(500);
 			
 			for(var $i in $templates){
 				if(Snowblozm.Registry.get($templates[$i]) || false){
@@ -425,7 +424,11 @@ FireSpark.jquery.service.ContainerRender = {
 				}
 			}
 			
-			if(!$barrier) $render();
+			if($barrier){
+				$('#load-status').html('<span class="state loading">Loading ...</span>').stop(true, true).slideDown(500);
+			} else {
+				$render();
+			}
 		}
 		else {
 			$render();
@@ -1026,7 +1029,7 @@ FireSpark.jquery.template.Tiles = $.template('\
 		<span class="tilehead">\
 			${tilehead}\
 			{{if FireSpark.core.helper.equals(close, true)}}\
-				<a class="launch close hover" href="#/tileclose/key/${key}/id/${id}/ins/${instance}"></a>\
+				<a class="launch close hover" href="#/tileclose/key/${key}/id/${id}/ins/${instance}" title="Close"></a>\
 			{{/if}}\
 		</span>\
 		{{each tiles}}\
