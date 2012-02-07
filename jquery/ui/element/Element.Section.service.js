@@ -12,6 +12,8 @@
  *
  *	@return element element [memory]
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.ui.service.ElementSection = {
 	input : function(){

@@ -7,6 +7,8 @@
  *
  *	@return result html [memory]
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.ui.service.TemplateApply = {
 	input : function(){

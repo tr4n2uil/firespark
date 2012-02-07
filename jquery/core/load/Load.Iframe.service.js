@@ -11,6 +11,8 @@
  *	@return data string [memory]
  *	@return error string [memory] optional
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.jquery.service.LoadIframe = {
 	input : function(){

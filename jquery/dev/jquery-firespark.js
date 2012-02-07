@@ -1,3 +1,6 @@
+/**
+ * @initialize FireSpark
+**/
 FireSpark = {
 	core : {
 		service : {},
@@ -20,7 +23,7 @@ FireSpark = {
 	}
 };
 
-/** *	@helper CheckEmail * *	@param index *	@param element ***/FireSpark.core.helper.CheckEmail = (function(){	var $emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;	return function($index, $el){		if(!$emailRegex.test($(this).val())){			FireSpark.core.service.CheckForm.result = false;			FireSpark.core.helper.checkFail($(this), FireSpark.core.constant.validation_status + ' .error');			return false;		}	}})();/** *	@helper CheckFail * *	@param element *	@param selector ***/FireSpark.core.helper.checkFail = function($el, $sel){	return $el.next($sel).stop(true, true).slideDown(1000).delay(5000).fadeOut(1000);}/** *	@service CheckForm *	@desc Validates form input values (required and email) using style class * *	@param form string [memory] *	@param validations array [memory] optional default FireSpark.core.constant.validations *	@param error string [memory] optional default span ***/FireSpark.core.service.CheckForm = {	result : true,		input : function(){		return {			required : ['form'],			optional : { error : 'span', validations : FireSpark.core.constant.validations }		};	},		run : function($memory){		FireSpark.core.service.CheckForm.result = true;		FireSpark.core.constant.validation_status = $memory['error'];				$validations = $memory['validations'];				for(var $i in $validation){			$check = $validation[$i];			$($memory['form'] + ' ' + $check['cls']).each($check['helper']);			if(!FireSpark.core.service.CheckForm.result)				break;		}				$memory['valid'] = FireSpark.core.service.CheckForm.result;		return $memory;	},		output : function(){		return [];	}};/** *	@helper CheckMatch * *	@param index *	@param element ***/FireSpark.core.helper.CheckMatch = (function(){	var $value = false;	return function($index, $el){		if($index && $value && $(this).val()!=$value ){			FireSpark.core.service.CheckForm.result = false;			FireSpark.core.helper.checkFail($(this), FireSpark.core.constant.validation_status + ' .error');			return false;		}				$value = $(this).val();	}})();/** *	@helper CheckRequired * *	@param index *	@param element ***/FireSpark.core.helper.CheckRequired = (function(){	return function($index, $el){		if($(this).val() == ''){			FireSpark.core.service.CheckForm.result = false;			FireSpark.core.helper.checkFail($(this), FireSpark.core.constant.validation_status + ' .error');			return false;		}	}})();/** *	@service DataCookie *	@desc Creates a new Cookie * *	@param key string [message] *	@param value string [message] optional default null *	@param expires integer[message] default 1 day *	@param path string [memory] optional default '/' ***/FireSpark.core.service.DataCookie = {	input : function(){		return {			required : ['key'],			optional : { expires : 1, value : null, path : '/' }		};	},		run : function($memory){		$.cookie($memory['key'], null, {			path: $memory['path']		});				$.cookie($memory['key'], $memory['value'], {			expires : $memory['expires'],			path: $memory['path']		});				$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service DataEncode *	@desc Encodes data from url-encoded other formats * *	@param type string [memory] optional default 'url' ('url', 'json', 'rest-id') *	@param data string [memory] optional default false *	@param url string [memory] optional default false * *	@return data object [memory] *	@return result string [memory] *	@return mime string [memory] *	@return url string [memory] ***/FireSpark.core.service.DataEncode = {	input : function(){		return {			optional : { type : 'url', data : false, url : '' }		}	},		run : function($memory){		var $data = $memory['data'];		var $type = $memory['type'];		var $mime =  'application/x-www-form-urlencoded';				if($data !== false && $data != ''){			$data = $data.replace(/\+/g, '%20');			if($type != 'url'){				var $params = $data.split('&');				var $result = {};				for(var $i=0, $len=$params.length; $i<$len; $i++){					var $prm = ($params[$i]).split('=');					$result[$prm[0]] = unescape($prm[1]);				}				$memory['data'] = $data = $result;			}						switch($type){				case 'json' :					$data = JSON.stringify($data);					$mime =  'application/json';					break;								case 'rest-id' :					$memory['url'] = $memory['url'] + '/' + $data['id'];									case 'url' :				default :					break;			}		}				$memory['result'] = $data;		$memory['mime'] = $mime;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['data', 'result', 'mime', 'url'];	}};/** *	@helper DataEquals  * *	@param value1 *	@param value2 ***/FireSpark.core.helper.dataEquals = function($value1, $value2){	return $value1 == $value2;}/** *	@service DataRegistry *	@desc Saves a new Reference * *	@param key string [message] *	@param value object [message] optional default false * *	@return value object [memory] ***/FireSpark.core.service.DataRegistry = {	input : function(){		return {			required : ['key'],			optional : { value : false }		};	},		run : function($memory){		if($memory['value'] === false){			$memory['value'] = Snowblozm.Registry.get($memory['key']);		}		else {			Snowblozm.Registry.save($memory['key'], $memory['value']);		}				$memory['valid'] = true;		return $memory;	},		output : function(){		return ['value'];	}};/** *	@helper DataShort * *	@param data ***/FireSpark.core.helper.dataShort = function($data, $size, $short){	var $maxlen = $size || 15;	var $len = $maxlen - 5;	return $short ? ($data.length < $maxlen ? $data : $data.substr(0, $len) + ' ...') : $data;}/** *	@helper DataSplit * *	@param data *	@param separator optional default : ***/FireSpark.core.helper.dataSplit = function($data, $separator){	$separator = $separator || ':';	return $data.split($separator);}/** *	@service LaunchHash *	@desc Used to launch hash navigator ***/FireSpark.jquery.service.LaunchHash = {	idle : true,		current : '',		input : function(){		return { };	},		run : function($memory){		if(FireSpark.jquery.service.LaunchHash.idle && FireSpark.jquery.service.LaunchHash.current != window.location.hash){			FireSpark.jquery.service.LaunchHash.current = window.location.hash;			Snowblozm.Kernel.launch(FireSpark.jquery.service.LaunchHash.current);		}				$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service LaunchMessage *	@desc Processes data to run workflows * *	@param data object [memory] optional default {} *	@param launch boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'message' ***/FireSpark.core.service.LaunchMessage = {	input : function(){		return {			optional : { 				data : {}, 				launch : false, 				status : 'valid', 				message : 'message' 			}		};	},		run : function($memory){		if($memory['launch']){			var $data = $memory['data'] || {};			if($data[$memory['status']] || false){				var $key = $memory['message'];				var $message = $data[$key] || false;				if($message){					$message['service'] = Snowblozm.Registry.load($memory['launch']);					return Snowblozm.Kernel.run($message, {});				}			}		}			$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service LaunchNavigator *	@desc Processes data to launch navigator * *	@param data array [memory] optional default {} *	@param escaped boolean [memory] optional default false *	@param launch boolean [memory] optional default false ***/FireSpark.core.service.LaunchNavigator = {	input : function(){		return {			optional : { data : [], launch : false, escaped : false }		};	},		run : function($memory){		if($memory['launch']){			$data = $memory['data'];			for(var $i in $data){				Snowblozm.Kernel.launch($data[$i], $memory['escaped']);			}		}				$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service LaunchTrigger *	@desc Initializes navigator launch triggers * *	@param selector string [memory] *	@param event string [memory] optional default 'click' *	@param attribute string [memory] *	@param escaped boolean [memory] optional default false *	@param hash boolean [memory] optional default false ***/FireSpark.core.service.LaunchTrigger = {	input : function(){		return {			required : ['selector', 'attribute'],			optional : { 				event : 'click', 				escaped : false, 				hash : false, 				pathname : false 			}		};	},		run : function($memory){		$($memory['selector']).live($memory['event'], function(){			FireSpark.jquery.service.LaunchHash.idle = false;						var $navigator = $root.attr($memory['attribute']);						if($memory['attribute'] == 'href'){				$navigator = unescape($navigator);			}						$result = Snowblozm.Kernel.launch($navigator, $memory['escaped'], $(this));						if($memory['hash']){				FireSpark.jquery.service.LaunchHash.current = window.location.hash = $navigator;			}						FireSpark.jquery.service.LaunchHash.idle = true;			return $result;		});				$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
+/** *	@helper CheckEmail * *	@param index *	@param element * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.CheckEmail = (function(){	var $emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;	return function($index, $el){		if(!$emailRegex.test($(this).val())){			FireSpark.core.service.CheckForm.result = false;			FireSpark.core.helper.checkFail($(this), FireSpark.core.constant.validation_status + ' .error');			return false;		}	}})();/** *	@helper CheckFail * *	@param element *	@param selector * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.checkFail = function($el, $sel){	return $el.next($sel).stop(true, true).slideDown(1000).delay(5000).fadeOut(1000);}/** *	@service CheckForm *	@desc Validates form input values (required and email) using style class * *	@param form string [memory] *	@param validations array [memory] optional default FireSpark.core.constant.validations *	@param error string [memory] optional default span * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.CheckForm = {	result : true,		input : function(){		return {			required : ['form'],			optional : { error : 'span', validations : FireSpark.core.constant.validations }		};	},		run : function($memory){		FireSpark.core.service.CheckForm.result = true;		FireSpark.core.constant.validation_status = $memory['error'];				$validations = $memory['validations'];				for(var $i in $validation){			$check = $validation[$i];			$($memory['form'] + ' ' + $check['cls']).each($check['helper']);			if(!FireSpark.core.service.CheckForm.result)				break;		}				$memory['valid'] = FireSpark.core.service.CheckForm.result;		return $memory;	},		output : function(){		return [];	}};/** *	@helper CheckMatch * *	@param index *	@param element * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.CheckMatch = (function(){	var $value = false;	return function($index, $el){		if($index && $value && $(this).val()!=$value ){			FireSpark.core.service.CheckForm.result = false;			FireSpark.core.helper.checkFail($(this), FireSpark.core.constant.validation_status + ' .error');			return false;		}				$value = $(this).val();	}})();/** *	@helper CheckRequired * *	@param index *	@param element * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.CheckRequired = (function(){	return function($index, $el){		if($(this).val() == ''){			FireSpark.core.service.CheckForm.result = false;			FireSpark.core.helper.checkFail($(this), FireSpark.core.constant.validation_status + ' .error');			return false;		}	}})();/** *	@service DataCookie *	@desc Creates a new Cookie * *	@param key string [message] *	@param value string [message] optional default null *	@param expires integer[message] default 1 day *	@param path string [memory] optional default '/' * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.DataCookie = {	input : function(){		return {			required : ['key'],			optional : { expires : 1, value : null, path : '/' }		};	},		run : function($memory){		$.cookie($memory['key'], null, {			path: $memory['path']		});				$.cookie($memory['key'], $memory['value'], {			expires : $memory['expires'],			path: $memory['path']		});				$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service DataEncode *	@desc Encodes data from url-encoded other formats * *	@param type string [memory] optional default 'url' ('url', 'json', 'rest-id') *	@param data string [memory] optional default false *	@param url string [memory] optional default false * *	@return data object [memory] *	@return result string [memory] *	@return mime string [memory] *	@return url string [memory] * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.DataEncode = {	input : function(){		return {			optional : { type : 'url', data : false, url : '' }		}	},		run : function($memory){		var $data = $memory['data'];		var $type = $memory['type'];		var $mime =  'application/x-www-form-urlencoded';				if($data !== false && $data != ''){			$data = $data.replace(/\+/g, '%20');			if($type != 'url'){				var $params = $data.split('&');				var $result = {};				for(var $i=0, $len=$params.length; $i<$len; $i++){					var $prm = ($params[$i]).split('=');					$result[$prm[0]] = unescape($prm[1]);				}				$memory['data'] = $data = $result;			}						switch($type){				case 'json' :					$data = JSON.stringify($data);					$mime =  'application/json';					break;								case 'rest-id' :					$memory['url'] = $memory['url'] + '/' + $data['id'];									case 'url' :				default :					break;			}		}				$memory['result'] = $data;		$memory['mime'] = $mime;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['data', 'result', 'mime', 'url'];	}};/** *	@helper DataEquals  * *	@param value1 *	@param value2 * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.dataEquals = function($value1, $value2){	return $value1 == $value2;}/** *	@service DataRegistry *	@desc Saves a new Reference * *	@param key string [memory] *	@param value object [memory] optional default false *	@param expiry integer [memory] optional default false * *	@return value object [memory] * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.DataRegistry = {	input : function(){		return {			required : ['key'],			optional : { value : false, expiry : false }		};	},		run : function($memory){		if($memory['value'] === false){			$memory['value'] = Snowblozm.Registry.get($memory['key']);		}		else {			Snowblozm.Registry.save($memory['key'], $memory['value']);		}				$memory['valid'] = true;		return $memory;	},		output : function(){		return ['value'];	}};/** *	@helper DataShort * *	@param data * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.dataShort = function($data, $size, $short){	var $maxlen = $size || 15;	var $len = $maxlen - 5;	return $short ? ($data.length < $maxlen ? $data : $data.substr(0, $len) + ' ...') : $data;}/** *	@helper DataSplit * *	@param data *	@param separator optional default : * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.dataSplit = function($data, $separator){	$separator = $separator || ':';	return $data.split($separator);}/** *	@service LaunchHash *	@desc Used to launch hash navigator * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.jquery.service.LaunchHash = {	idle : true,		current : '',		input : function(){		return { };	},		run : function($memory){		if(FireSpark.jquery.service.LaunchHash.idle && FireSpark.jquery.service.LaunchHash.current != window.location.hash){			FireSpark.jquery.service.LaunchHash.current = window.location.hash;			Snowblozm.Kernel.launch(FireSpark.jquery.service.LaunchHash.current);		}				$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service LaunchMessage *	@desc Processes data to run workflows * *	@param data object [memory] optional default {} *	@param launch boolean [memory] optional default false *	@param status string [memory] optional default 'valid' *	@param message string [memory] optional default 'message' * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.LaunchMessage = {	input : function(){		return {			optional : { 				data : {}, 				launch : false, 				status : 'valid', 				message : 'message' 			}		};	},		run : function($memory){		if($memory['launch']){			var $data = $memory['data'] || {};			if($data[$memory['status']] || false){				var $key = $memory['message'];				var $message = $data[$key] || false;				if($message){					$message['service'] = Snowblozm.Registry.load($memory['launch']);					return Snowblozm.Kernel.run($message, {});				}			}		}			$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service LaunchNavigator *	@desc Processes data to launch navigator * *	@param data array [memory] optional default {} *	@param escaped boolean [memory] optional default false *	@param launch boolean [memory] optional default false * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.LaunchNavigator = {	input : function(){		return {			optional : { data : [], launch : false, escaped : false }		};	},		run : function($memory){		if($memory['launch']){			$data = $memory['data'];			for(var $i in $data){				Snowblozm.Kernel.launch($data[$i], $memory['escaped']);			}		}				$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@service LaunchTrigger *	@desc Initializes navigator launch triggers * *	@param selector string [memory] *	@param event string [memory] optional default 'click' *	@param attribute string [memory] *	@param escaped boolean [memory] optional default false *	@param hash boolean [memory] optional default false * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.LaunchTrigger = {	input : function(){		return {			required : ['selector', 'attribute'],			optional : { 				event : 'click', 				escaped : false, 				hash : false, 				pathname : false 			}		};	},		run : function($memory){		$($memory['selector']).live($memory['event'], function(){			FireSpark.jquery.service.LaunchHash.idle = false;						var $navigator = $root.attr($memory['attribute']);						if($memory['attribute'] == 'href'){				$navigator = unescape($navigator);			}						$result = Snowblozm.Kernel.launch($navigator, $memory['escaped'], $(this));						if($memory['hash']){				FireSpark.jquery.service.LaunchHash.current = window.location.hash = $navigator;			}						FireSpark.jquery.service.LaunchHash.idle = true;			return $result;		});				$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
  *	@service LoadAjax
  *	@desc Uses AJAX to load data from server
  *
@@ -37,6 +40,8 @@ FireSpark = {
  *
  *	@return data string [memory]
  *	@return error string [memory] optional
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
 FireSpark.jquery.service.LoadAjax = {
@@ -107,7 +112,7 @@ FireSpark.jquery.service.LoadAjax = {
 		return [];
 	}
 };
-/** *	@helper LoadBarrier *	@desc Used to load barrier ***/FireSpark.jquery.helper.LoadBarrier = {	requests : 0,		barrier_function : false,		start : function(){		this.requests++;	},		end : function(){		this.requests--;				if(this.requests <= 0){			this.requests = 0;						if(this.barrier_function){				this.barrier_function();			}						this.barrier_function = false;		}	},		barrier : function($barrier_function){		this.barrier_function = $barrier_function;	}};/** *	@service LoadBarrier *	@desc Sets barrier workflow * *	@param barrier array [memory] optional default false * *	@return barrier array [memory] default false ***/FireSpark.core.service.LoadBarrier = {	input : function(){		return {			optional : { barrier : false }		};	},		run : function($memory){		if($memory['barrier']){			FireSpark.jquery.helper.LoadBarrier.barrier(function(){				Snowblozm.Kernel.execute($memory['barrier'], $memory);			});		}				$memory['barrier'] = false;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['barrier'];	}};/**
+/** *	@helper LoadBarrier *	@desc Used to load barrier * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.jquery.helper.LoadBarrier = {	requests : 0,		barrier_function : false,		start : function(){		this.requests++;	},		end : function(){		this.requests--;				if(this.requests <= 0){			this.requests = 0;						if(this.barrier_function){				this.barrier_function();			}						this.barrier_function = false;		}	},		barrier : function($barrier_function){		this.barrier_function = $barrier_function;	}};/** *	@service LoadBarrier *	@desc Sets barrier workflow * *	@param barrier array [memory] optional default false * *	@return barrier array [memory] default false * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.LoadBarrier = {	input : function(){		return {			optional : { barrier : false }		};	},		run : function($memory){		if($memory['barrier']){			FireSpark.jquery.helper.LoadBarrier.barrier(function(){				Snowblozm.Kernel.execute($memory['barrier'], $memory);			});		}				$memory['barrier'] = false;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['barrier'];	}};/**
  *	@service LoadIframe
  *	@desc Uses IFRAME to load data from server
  *
@@ -119,6 +124,8 @@ FireSpark.jquery.service.LoadAjax = {
  *
  *	@return data string [memory]
  *	@return error string [memory] optional
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
 FireSpark.jquery.service.LoadIframe = {
@@ -216,8 +223,12 @@ FireSpark.jquery.service.LoadIframe = {
 		return [];
 	}
 };
-/** *	@service ReadData *	@desc Serializes div into url-encoded data and reads form submit parameters * *	@param cntr string [memory] *	@param cls string [memory] optional default 'data' * *	@return data object [memory] ***/FireSpark.core.service.ReadData = {	input : function(){		return {			required : ['cntr'],			optional : { cls : 'data' }		};	},		run : function($memory){		var $d = new Date();		var $params = '_ts=' +  $d.getTime();				var serialize = function($index, $el){			if($(this).attr('name') || false){				$params = $params + '&' + $(this).attr('name') + '=' +  $(this).val();			}		}		$($memory['cntr'] + ' .' + $memory['cls']).each(serialize);				$memory['data'] = $params;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['data'];	}};/** *	@helper ReadDate * *	@param time ***/FireSpark.core.helper.readDate = function($time){	var $d = new Date($time);	return $d.toDateString();}/**
+/** *	@service ReadData *	@desc Serializes div into url-encoded data and reads form submit parameters * *	@param cntr string [memory] *	@param cls string [memory] optional default 'data' * *	@return data object [memory] * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.ReadData = {	input : function(){		return {			required : ['cntr'],			optional : { cls : 'data' }		};	},		run : function($memory){		var $d = new Date();		var $params = '_ts=' +  $d.getTime();				var serialize = function($index, $el){			if($(this).attr('name') || false){				$params = $params + '&' + $(this).attr('name') + '=' +  $(this).val();			}		}		$($memory['cntr'] + ' .' + $memory['cls']).each(serialize);				$memory['data'] = $params;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['data'];	}};/** *	@helper ReadDate * *	@param time * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.readDate = function($time){	var $d = new Date($time);	return $d.toDateString();}/**
  *	@helper readFileSize
+ *
+ *	@param size
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
 FireSpark.core.helper.readFileSize = function(size){
@@ -228,8 +239,13 @@ FireSpark.core.helper.readFileSize = function(size){
 	}
 	return kb.toFixed(2) + ' KB';
 }
-/** *	@service ReadForm *	@desc Serializes form into url-encoded data and reads form submit parameters * *	@param form string [memory] * *	@return url string [memory] *	@return request string [memory] *	@return data object [memory] ***/FireSpark.core.service.ReadForm = {	input : function(){		return {			required : ['form']		};	},		run : function($memory){		var $form = $($memory['form']);				$memory['url'] = $form.attr('action');		$memory['request'] = $form.attr('method').toUpperCase();				var $params = $form.serialize();		var $d= new Date();		$params = $params + '&_ts=' +  $d.getTime();		$memory['data'] = $params;				$memory['valid'] = true;		return $memory;	},		output : function(){		return ['url', 'request', 'data'];	}};/**
+/** *	@service ReadForm *	@desc Serializes form into url-encoded data and reads form submit parameters * *	@param form string [memory] * *	@return url string [memory] *	@return request string [memory] *	@return data object [memory] * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.ReadForm = {	input : function(){		return {			required : ['form']		};	},		run : function($memory){		var $form = $($memory['form']);				$memory['url'] = $form.attr('action');		$memory['request'] = $form.attr('method').toUpperCase();				var $params = $form.serialize();		var $d= new Date();		$params = $params + '&_ts=' +  $d.getTime();		$memory['data'] = $params;				$memory['valid'] = true;		return $memory;	},		output : function(){		return ['url', 'request', 'data'];	}};/**
  *	@helper readGender 
+ *
+ *	@param ch gender character
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.core.helper.readGender = function($ch){
 	switch($ch){
@@ -243,7 +259,7 @@ FireSpark.core.helper.readGender = function($ch){
 			break;
 	}
 }
-/** *	@service WindowConfirm *	@desc Confirms whether to continue  * *	@param confirm boolean [memory] optional default false *	@param value string [memory] ***/FireSpark.core.service.WindowConfirm = {	input : function(){		return {			required : ['value'],			optional : { confirm : false }		}	},		run : function($memory){		if($memory['confirm']){			$memory['valid'] = confirm($memory['value']);			return $memory;		}		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@helper WindowFrame * *	@param name ***/FireSpark.core.helper.windowFrame = function(name){	for (var i = 0; i < frames.length; i++){		if (frames[i].name == name)			return frames[i];	}		return false;}/** *	@service WindowReload *	@desc Reloads the window * *	@param continue string [message] optional default false ***/FireSpark.core.service.WindowReload = {	input : function(){		return {			'optional' : { 'continue' : false }		};	},		run : function($memory){		window.location.hash = '';		if($memory['continue']){			window.location = $memory['continue'];		}		else {			window.location.reload();		}		$memory['valid'] = false;		return $memory;	},		output : function(){		return [];	}};/**
+/** *	@service WindowConfirm *	@desc Confirms whether to continue  * *	@param confirm boolean [memory] optional default false *	@param value string [memory] * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.WindowConfirm = {	input : function(){		return {			required : ['value'],			optional : { confirm : false }		}	},		run : function($memory){		if($memory['confirm']){			$memory['valid'] = confirm($memory['value']);			return $memory;		}		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/** *	@helper WindowFrame * *	@param name * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.windowFrame = function(name){	for (var i = 0; i < frames.length; i++){		if (frames[i].name == name)			return frames[i];	}		return false;}/** *	@service WindowReload *	@desc Reloads the window * *	@param continue string [message] optional default false * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.WindowReload = {	input : function(){		return {			'optional' : { 'continue' : false }		};	},		run : function($memory){		window.location.hash = '';		if($memory['continue']){			window.location = $memory['continue'];		}		else {			window.location.reload();		}		$memory['valid'] = false;		return $memory;	},		output : function(){		return [];	}};/**
  *	@service ContainerData
  *	@desc Used to prepare container data
  *
@@ -272,6 +288,8 @@ FireSpark.core.helper.readGender = function($ch){
  *
  *	@return data string [memory]
  *	@return error string [memory] optional
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
 FireSpark.ui.service.ContainerData = {
@@ -352,6 +370,8 @@ FireSpark.ui.service.ContainerData = {
  *	@param ins string [memory] optional default '#ui-global-0'
  *	@param inl boolean [memory] optional default false
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.jquery.service.ContainerRemove = {
 	input : function(){
@@ -415,8 +435,10 @@ FireSpark.jquery.service.ContainerRemove = {
  *
  *	@return element element [memory]
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
-FireSpark.ui.service.ContainerRender = {
+FireSpark.jquery.service.ContainerRender = {
 	input : function(){
 		return {
 			optional : { 
@@ -454,7 +476,7 @@ FireSpark.ui.service.ContainerRender = {
 		} else {
 			Snowblozm.Registry.save($instance, false);
 			return Snowblozm.Kernel.run({
-				service : FireSpark.ui.service.ElementContent,
+				service : FireSpark.jquery.service.ElementContent,
 				element : '#load-status',
 				select : true,
 				animation : 'slidein',
@@ -484,19 +506,19 @@ FireSpark.ui.service.ContainerRender = {
 				}		
 			}		
 	
-			$('#load-status').html('<span class="state">Initializing ...</span>').stop(true, true).hide().slideDown(500).delay(500).slideUp(1500);
+			$('#load-status').html('<span class="state">Initializing ...</span>').stop(true, true).hide().slideDown(500).delay(500).slideUp(500);
 				
 			if($memory['inl'] || false){
 				// To do
 			}
 			else {
 				$memory = Snowblozm.Kernel.execute([{
-					service : FireSpark.ui.service.ElementContent,
+					service : FireSpark.jquery.service.ElementContent,
 					element : '.tls-' + $instance,
 					select : true,
 					action : 'remove'
 				},{
-					service : FireSpark.ui.workflow.TemplateApply,
+					service : FireSpark.jquery.workflow.TemplateApply,
 					input : { action : 'act', animation : 'anm', duration : 'dur', delay : 'dly' },
 					element : $memory['ins'] + '>.tiles',
 					select : true,
@@ -512,12 +534,12 @@ FireSpark.ui.service.ContainerRender = {
 			}
 			
 			$workflow = [{
-				service : FireSpark.ui.service.ElementContent,
+				service : FireSpark.jquery.service.ElementContent,
 				element : '.tlc-' + $instance,
 				select : true,
 				action : 'remove'
 			},{
-				service : FireSpark.ui.workflow.TemplateApply,
+				service : FireSpark.jquery.workflow.TemplateApply,
 				input : { action : 'act', animation : 'anm', duration : 'dur', delay : 'dly' },
 				element : $memory['ins'] + '>.bands',
 				select : true,
@@ -530,7 +552,7 @@ FireSpark.ui.service.ContainerRender = {
 			}
 			else {
 				$workflow.push({
-					service : FireSpark.ui.workflow.TileShow
+					service : FireSpark.jquery.workflow.TileShow
 				});
 			}
 				
@@ -546,7 +568,6 @@ FireSpark.ui.service.ContainerRender = {
 			
 			FireSpark.core.ajax.barrier($render);
 			$barrier = false;
-			$('#load-status').html('<span class="state loading">Loading ...</span>').stop(true, true).slideDown(500);
 			
 			for(var $i in $templates){
 				if(Snowblozm.Registry.get($templates[$i]) || false){
@@ -554,30 +575,34 @@ FireSpark.ui.service.ContainerRender = {
 					$barrier = true;
 					
 					Snowblozm.Kernel.execute([{
-						service : FireSpark.core.service.DataRegistry,
+						service : FireSpark.jquery.service.RegistrySave,
 						key : $templates[$i],
 						value : true
 					},{
-						service : FireSpark.core.service.LoadAjax,
+						service : FireSpark.jquery.service.LoadAjax,
 						url : $templates[$i],
 						type : 'html',
 						request : 'GET',
 						workflow : [{
-							service : FireSpark.ui.service.ElementContent,
+							service : FireSpark.jquery.service.ElementContent,
 							element : '#ui-templates',
 							select : true,
 							action : 'last',
 							duration : 5
 						}],
 						errorflow : [{
-							service : FireSpark.core.service.DataRegistry,
+							service : FireSpark.jquery.service.RegistrySave,
 							key : $templates[$i]
 						}]
 					}], {});
 				}
 			}
 			
-			if(!$barrier) $render();
+			if($barrier){
+				$('#load-status').html('<span class="state loading">Loading ...</span>').stop(true, true).slideDown(500);
+			} else {
+				$render();
+			}
 		}
 		else {
 			$render();
@@ -604,6 +629,8 @@ FireSpark.ui.service.ContainerRender = {
  *	@param action string [memory] optional default 'all' ('all', 'first', 'last', 'remove')
  *
  *	@return element element [memory]
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
 FireSpark.ui.service.ElementContent = {
@@ -710,6 +737,8 @@ FireSpark.ui.service.ElementContent = {
  *
  *	@return element element [memory]
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.ui.service.ElementSection = {
 	input : function(){
@@ -773,7 +802,7 @@ FireSpark.ui.service.ElementSection = {
 		return ['element'];
 	}
 };
-/** *	@service ElementState *	@desc Enables and disables element * *	@param element string [memory] optional default false *	@param disabled boolean [memory] optional default false ***/FireSpark.ui.service.ElementState = {	input : function(){		return {			optional : { element : false, disabled : false }		};	},		run : function($memory){		if($memory['element']){			if($memory['disabled']){				$($memory['element']).attr('disabled', true);			}			else {				$($memory['element']).removeAttr('disabled');			}		}		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
+/** *	@service ElementState *	@desc Enables and disables element * *	@param element string [memory] optional default false *	@param disabled boolean [memory] optional default false * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.ui.service.ElementState = {	input : function(){		return {			optional : { element : false, disabled : false }		};	},		run : function($memory){		if($memory['element']){			if($memory['disabled']){				$($memory['element']).attr('disabled', true);			}			else {				$($memory['element']).removeAttr('disabled');			}		}		$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
  *	@service ElementTab
  *	@desc Creates a new tab and returns the element
  *
@@ -783,6 +812,8 @@ FireSpark.ui.service.ElementSection = {
  *  @param taburl string [memory] optional default false
  *
  *	@return element Element [memory]
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
 FireSpark.ui.service.ElementTab = {
@@ -813,6 +844,8 @@ FireSpark.ui.service.ElementTab = {
  *
  *	@return result html [memory]
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.ui.service.TemplateApply = {
 	input : function(){
@@ -839,6 +872,8 @@ FireSpark.ui.service.TemplateApply = {
  *	@param template string [memory] optional default 'tpl-default' (FireSpark.jquery.template.Default)
  *
  *	@param result Template [memory]
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
 FireSpark.ui.service.TemplateRead = {
@@ -868,7 +903,203 @@ FireSpark.ui.service.TemplateRead = {
 		return ['result'];
 	}
 };
-/** *	@helper TransformButton * *	@param element ***/FireSpark.ui.helper.transformButton = function($element, $config){	$element.button();	return $element;}/** *	@helper TransformCKEditor * *	@param element ***/FireSpark.ui.helper.transformCKEditor = function($element, $config){	var $temp = $element;			$element.each(function($index, $el){		var $name = $temp.attr('id') || $temp.attr('name');		var $instance = CKEDITOR.instances[$name] || false;		if($instance){			try {				CKEDITOR.remove($instance);			}			catch(e) {}			delete $instance;		}		$temp = $temp.slice(1);	});		$element.ckeditor();	return $element;}/** *	@helper TransformTabpanel * *	@param element ***/FireSpark.ui.helper.transformTabpanel = function($element, $config){	$element.hide();		var $tab = new Array();	var $index = $config['indexstart'];		var $options = {		cache : $config['cache'],		collapsible : $config['collapsible'],		event : $config['event'],		tabTemplate: "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",		add: function($event, $ui) {			$tab[$index] = $($ui.panel);		}	};		if($config['tablink']){		$options.load = function($event, $ui) {			$('a', $ui.panel).click(function() {				$($ui.panel).load(this.href);				return false;			});		}	}		var $tabpanel = $element.tabs($options);	$element.fadeIn(1000);		$('.ui-icon-close').live( "click", function() {		var $indx = $("li", $tabpanel).index($(this).parent());		$tabpanel.tabs( "remove", $indx );	});	$index--;		Snowblozm.Registry.save($config['savekey'], {		add : function($tabtitle, $autoload, $taburl){			$index++;			var $url = '#ui-tab-' + $index;			if($autoload || false){				$url = $taburl;			}			$tabpanel.tabs('add', $url, $tabtitle);			$tabpanel.tabs('select', '#ui-tab-' + $index);			return $tab[$index];		}	});	return $element;}/** *	@service TransformTrigger *	@desc Initializes transform triggers * *	@param transforms array [memory] optional default FireSpark.core.constant.transforms ***/FireSpark.ui.service.TransformTrigger = {	input : function(){		return {			optional : { 'transform' : FireSpark.ui.constant.transforms }		};	},		run : function($memory){		$transforms = $memory['transforms'];				for(var $i in $transforms){			$tx = $tranform[$i];			$($tx['cls']).live('load', function(){				$helper = $tx['helper'];				$helper($(this), $tx['config']);			});		}			$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
+/** *	@helper TransformButton * *	@param element * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.ui.helper.transformButton = function($element, $config){	$element.button();	return $element;}/** *	@helper TransformCKEditor * *	@param element * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.ui.helper.transformCKEditor = function($element, $config){	var $temp = $element;			$element.each(function($index, $el){		var $name = $temp.attr('id') || $temp.attr('name');		var $instance = CKEDITOR.instances[$name] || false;		if($instance){			try {				CKEDITOR.remove($instance);			}			catch(e) {}			delete $instance;		}		$temp = $temp.slice(1);	});		$element.ckeditor();	return $element;}/** *	@helper TransformTabpanel * *	@param element * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.ui.helper.transformTabpanel = function($element, $config){	$element.hide();		var $tab = new Array();	var $index = $config['indexstart'];		var $options = {		cache : $config['cache'],		collapsible : $config['collapsible'],		event : $config['event'],		tabTemplate: "<li><a href='#{href}'>#{label}</a> <span class='ui-icon ui-icon-close'>Remove Tab</span></li>",		add: function($event, $ui) {			$tab[$index] = $($ui.panel);		}	};		if($config['tablink']){		$options.load = function($event, $ui) {			$('a', $ui.panel).click(function() {				$($ui.panel).load(this.href);				return false;			});		}	}		var $tabpanel = $element.tabs($options);	$element.fadeIn(1000);		$('.ui-icon-close').live( "click", function() {		var $indx = $("li", $tabpanel).index($(this).parent());		$tabpanel.tabs( "remove", $indx );	});	$index--;		Snowblozm.Registry.save($config['savekey'], {		add : function($tabtitle, $autoload, $taburl){			$index++;			var $url = '#ui-tab-' + $index;			if($autoload || false){				$url = $taburl;			}			$tabpanel.tabs('add', $url, $tabtitle);			$tabpanel.tabs('select', '#ui-tab-' + $index);			return $tab[$index];		}	});	return $element;}/** *	@service TransformTrigger *	@desc Initializes transform triggers * *	@param transforms array [memory] optional default FireSpark.core.constant.transforms * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.ui.service.TransformTrigger = {	input : function(){		return {			optional : { 'transform' : FireSpark.ui.constant.transforms }		};	},		run : function($memory){		$transforms = $memory['transforms'];				for(var $i in $transforms){			$tx = $tranform[$i];			$($tx['cls']).live('load', function(){				$helper = $tx['helper'];				$helper($(this), $tx['config']);			});		}			$memory['valid'] = true;		return $memory;	},		output : function(){		return [];	}};/**
+ *	@service DataImport
+ *	@desc Uses AJAX and IFRAME to load data from server and saves in pool
+ *
+ *	@param imports array [memory]
+ *	@param workflow Workflow [memory]
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
+**/
+FireSpark.smart.service.DataImport = {
+	input : function(){
+		return {
+			required : ['imports', 'workflow']
+		}
+	},
+	
+	run : function($memory){
+		/**
+		 *	Set barrier
+		**/
+		$workflow = $memory['workflow'];
+		$imports = $memory['imports'];
+		
+		FireSpark.core.helper.LoadBarrier.barrier(function(){
+			$flag = false;
+			for(var $i in $imports){
+				if(Snowblozm.Registry.get($imports[$i]) || false){
+				} else {
+					$flag = true;
+					break;
+				}
+			}
+				
+			if($flag || false){
+				FireSpark.smart.helper.dataState(FireSpark.smart.constant.loaderror);
+				return { valid : false };
+			}
+			
+			Snowblozm.Kernel.execute($workflow, $memory);
+		});
+		
+		/**
+		 *	Load imports
+		**/
+		$barrier = false;
+		
+		for(var $i in $imports){
+			$key = 'FIRESPARK_IMPORT_' + $imports[$i];
+			
+			if(Snowblozm.Registry.get($key) || false){
+			} else {
+				$barrier = true;
+				
+				Snowblozm.Kernel.execute([,{
+					service : FireSpark.core.service.LoadAjax,
+					url : $imports[$i],
+					type : 'html',
+					request : 'GET',
+					workflow : [{
+						service : FireSpark.ui.service.ElementContent,
+						element : FireSpark.smart.constant.importdiv,
+						select : true,
+						action : 'last',
+						duration : 5
+					},{
+						service : FireSpark.core.service.DataRegistry,
+						key : $key,
+						value : true
+					}]
+				}], {});
+			}
+		}
+		
+		/**
+		 *	Finalize barrier
+		**/
+		if($barrier){
+			FireSpark.smart.helper.dataState(FireSpark.smart.constant.loadstatus);
+			return { valid : false };
+		} else {
+			return Snowblozm.Kernel.execute($workflow, $memory);
+		}
+	},
+	
+	output : function(){
+		return [];
+	}
+};
+/**
+ *	@service DataLoad
+ *	@desc Uses AJAX and IFRAME to load data from server and saves in pool
+ *
+ *	@param url string [memory]
+ *	@param data object [memory] optional default ''
+ *	@param type string [memory] optional default 'json'
+ *	@param request string [memory] optional default 'POST'
+ *	@param process boolean [memory] optional default false
+ *	@param mime string [memory] optional default 'application/x-www-form-urlencoded'
+ *
+ *	@param workflow Workflow [memory]
+ *	@param errorflow	Workflow [memory] optional default false
+ *	@param stop boolean [memory] optional default false
+ *
+ *	@param force boolean [memory] optional default FireSpark.smart.constant.poolforce
+ *	@param cache boolean [memory] optional default false
+ *	@param expiry integer [memory] optional default FireSpark.smart.constant.poolexpiry
+ *
+ *	@param iframe string [memory] optional default false
+ *	@param agent string [memory] optional default root
+ *	@param root element [memory] optional default false
+ *
+ *	@return data string [memory]
+ *	@return error string [memory] optional
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
+**/
+FireSpark.smart.service.DataLoad = {
+	input : function(){
+		return {
+			required : ['url', 'workflow'],
+			optional : { 
+				data : '', 
+				type : 'json', 
+				request : 'POST', 
+				process : false, 
+				mime : 'application/x-www-form-urlencoded' ,
+				errorflow : false,
+				stop : false,
+				cache : true,
+				expiry : FireSpark.smart.constant.poolexpiry,
+				force : FireSpark.smart.constant.poolforce,
+				iframe : false,
+				agent : false,
+				root : false
+			}
+		}
+	},
+	
+	run : function($memory){
+		/**
+		 *	Check AJAX
+		**/
+		if($memory['iframe']){
+			$memory['agent'] = $memory['agent'] ? $memory['agent'] : $memory['root'];
+			
+			return Snowblozm.Kernel.run({
+				service : FireSpark.jquery.service.LoadIframe,
+				args : $memory['args']
+			}, $memory);
+		}
+		else if($memory['force'] === false){
+			/**
+			 *	Check pool
+			**/
+			$key = 'FIRESPARK_SI_DATA_URL_' + $memory['url'] + '_DATA_' + $memory['data'] + '_TYPE_' + $memory['type'] + '_REQUEST_' + $memory['request'];
+			$data = Snowblozm.Registry.get($key);
+			
+			if($data){
+				if($data['valid'] || false){
+					$memory['data'] = $data;
+					
+					/**
+					 *	Run the workflow
+					**/
+					return Snowblozm.Kernel.execute($memory['workflow'], $memory);
+				}
+			}
+		}
+		
+		$workflow = $memory['workflow'];
+		
+		if($memory['cache']){
+			$workflow.shift({
+				service : FireSpark.core.service.DataRegistry,
+				input : { value : 'data' },
+				key : $key,
+				expiry : $memory['expiry']
+			});
+		}
+		
+		/**
+		 *	Load AJAX
+		**/
+		return Snowblozm.Kernel.run({
+			service : FireSpark.jquery.service.LoadAjax,
+			args : $memory['args'],
+			workflow : $workflow
+		}, $memory);
+	},
+	
+	output : function(){
+		return [];
+	}
+};
+/** *	@helper DataState * *	@param state * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.smart.helper.dataState = function($html){	$(FireSpark.smart.constant.statusdiv).html($html).stop(true, true).hide().slideDown(500).delay(1500).slideUp(1500);}/**
  *	@config FireSpark.core
 **/
 FireSpark.core.constant = {
@@ -918,5 +1149,18 @@ FireSpark.ui.constant = {
 			}
 		}
 	}
+};
+
+/**
+ *	@config FireSpark.smart
+**/
+FireSpark.smart.constant = {
+	statusdiv : '#load-status',
+	loaderror : '<span class="error">Error Loading Data</span>',
+	loadstatus : '<span class="state loading">Loading ...</span>',
+	importdiv : '#ui-imports',
+	maindiv : '#ui-global-0',
+	poolexpiry : 150,
+	poolforce : false
 };
 

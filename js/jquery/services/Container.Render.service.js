@@ -18,6 +18,8 @@
  *
  *	@return element element [memory]
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.jquery.service.ContainerRender = {
 	input : function(){

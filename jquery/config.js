@@ -50,3 +50,16 @@ FireSpark.ui.constant = {
 	}
 };
 
+/**
+ *	@config FireSpark.smart
+**/
+FireSpark.smart.constant = {
+	statusdiv : '#load-status',
+	loaderror : '<span class="error">Error Loading Data</span>',
+	loadstatus : '<span class="state loading">Loading ...</span>',
+	importdiv : '#ui-imports',
+	maindiv : '#ui-global-0',
+	poolexpiry : 150,
+	poolforce : false
+};
+

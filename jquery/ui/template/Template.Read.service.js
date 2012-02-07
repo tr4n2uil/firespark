@@ -6,6 +6,8 @@
  *
  *	@param result Template [memory]
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.ui.service.TemplateRead = {
 	input : function(){

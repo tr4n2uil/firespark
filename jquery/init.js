@@ -1,3 +1,6 @@
+/**
+ * @initialize FireSpark
+**/
 FireSpark = {
 	core : {
 		service : {},

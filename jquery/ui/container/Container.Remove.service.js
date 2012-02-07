@@ -7,6 +7,8 @@
  *	@param ins string [memory] optional default '#ui-global-0'
  *	@param inl boolean [memory] optional default false
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.jquery.service.ContainerRemove = {
 	input : function(){

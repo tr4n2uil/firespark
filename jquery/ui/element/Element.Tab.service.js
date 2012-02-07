@@ -9,6 +9,8 @@
  *
  *	@return element Element [memory]
  *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.ui.service.ElementTab = {
 	input : function(){

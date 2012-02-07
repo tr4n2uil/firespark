@@ -1,6 +1,10 @@
 /**
  *	@helper readFileSize
  *
+ *	@param size
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
+ *
 **/
 FireSpark.core.helper.readFileSize = function(size){
 	var kb = size/1024.0;

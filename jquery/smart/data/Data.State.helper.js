@@ -1,0 +1,1 @@
+/** *	@helper DataState * *	@param state * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.smart.helper.dataState = function($html){	$(FireSpark.smart.constant.statusdiv).html($html).stop(true, true).hide().slideDown(500).delay(1500).slideUp(1500);}
