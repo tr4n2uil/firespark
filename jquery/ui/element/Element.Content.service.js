@@ -8,7 +8,7 @@
  *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout', 'none')
  *	@param duration integer [memory] optional default 1000
  *	@param delay integer [memory] optional default 0
- *	@param action string [memory] optional default 'all' ('all', 'first', 'last', 'remove')
+ *	@param action string [memory] optional default 'all' ('all', 'first', 'last', 'remove', 'hide', 'show')
  *
  *	@return element element [memory]
  *
@@ -34,7 +34,7 @@ FireSpark.ui.service.ElementContent = {
 		if($memory['select']){
 			var $element = $($memory['element']);
 			if(!$element.length && $memory['action'] != 'remove'){
-				$element = $('#main-container');
+				$element = $(FireSpark.ui.constant.maindiv);
 			}
 		}
 		else {

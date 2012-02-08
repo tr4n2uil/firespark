@@ -47,7 +47,8 @@ FireSpark.ui.constant = {
 				indexstart : 0 
 			}
 		}
-	}
+	},
+	maindiv : '#ui-global-0'
 };
 
 /**
@@ -57,8 +58,9 @@ FireSpark.smart.constant = {
 	statusdiv : '#load-status',
 	loaderror : '<span class="error">Error Loading Data</span>',
 	loadstatus : '<span class="state loading">Loading ...</span>',
+	loadmsg : '<span class="loading">Loading ...</span>',
+	cnfmsg : 'Are you sure you want to continue ?',
 	importdiv : '#ui-imports',
-	maindiv : '#ui-global-0',
 	poolexpiry : 150,
 	poolforce : false
 };
