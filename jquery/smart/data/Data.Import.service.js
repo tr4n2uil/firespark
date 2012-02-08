@@ -1,6 +1,6 @@
 /**
  *	@service DataImport
- *	@desc Uses AJAX and IFRAME to load data from server and saves in pool
+ *	@desc Uses AJAX to load content from server and saves in dom
  *
  *	@param imports array [memory]
  *	@param workflow Workflow [memory]
