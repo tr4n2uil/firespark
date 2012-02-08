@@ -61,9 +61,13 @@ FireSpark.smart.constant = {
 	loadmsg : '<span class="loading">Loading ...</span>',
 	cnfmsg : 'Are you sure you want to continue ?',
 	importdiv : '#ui-imports',
+	importroot : 'ui/import/',
+	importext : '.php',
 	tileuiprefix : '#ui-global-',
 	tileuicntr : '.bands',
 	tileuisection : '.tile-content',
+	defaultkey : 'people.person.info',
+	defaulturl : 'run.php',
 	poolexpiry : 150,
 	poolforce : false
 };
