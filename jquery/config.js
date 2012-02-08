@@ -61,6 +61,9 @@ FireSpark.smart.constant = {
 	loadmsg : '<span class="loading">Loading ...</span>',
 	cnfmsg : 'Are you sure you want to continue ?',
 	importdiv : '#ui-imports',
+	tileuiprefix : '#ui-global-',
+	tileuicntr : '.bands',
+	tileuisection : '.tile-content',
 	poolexpiry : 150,
 	poolforce : false
 };
