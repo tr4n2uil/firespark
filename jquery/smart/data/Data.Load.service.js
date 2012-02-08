@@ -9,6 +9,7 @@
  *	@param process boolean [memory] optional default false
  *	@param mime string [memory] optional default 'application/x-www-form-urlencoded'
  *
+ *	@param params array [memory] optional default {}
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
  *	@param stop boolean [memory] optional default false
@@ -37,6 +38,7 @@ FireSpark.smart.service.DataLoad = {
 				request : 'POST', 
 				process : false, 
 				mime : 'application/x-www-form-urlencoded' ,
+				params : {},
 				errorflow : false,
 				stop : false,
 				cache : true,
@@ -83,13 +85,18 @@ FireSpark.smart.service.DataLoad = {
 		$workflow = $memory['workflow'];
 		
 		if($memory['cache']){
-			$workflow.shift({
+			$workflow.unshift({
 				service : FireSpark.core.service.DataRegistry,
 				input : { value : 'data' },
 				key : $key,
 				expiry : $memory['expiry']
 			});
 		}
+		
+		$workflow.unshift({
+			service : FireSpark.core.service.DataPush,
+			output : { result : 'data' }
+		});
 		
 		/**
 		 *	Load AJAX
