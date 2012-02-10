@@ -19,7 +19,7 @@
  *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
-FireSpark.jquery.service.LoadAjax = {
+FireSpark.core.service.LoadAjax = {
 	input : function(){
 		return {
 			required : ['url', 'workflow'],
@@ -37,7 +37,7 @@ FireSpark.jquery.service.LoadAjax = {
 	
 	run : function($memory){
 		
-		FireSpark.jquery.helper.LoadBarrier.start();
+		FireSpark.core.helper.LoadBarrier.start();
 		
 		/**
 		 *	Load data from server using AJAX
@@ -58,7 +58,7 @@ FireSpark.jquery.service.LoadAjax = {
 				 *	Run the workflow
 				**/
 				Snowblozm.Kernel.execute($memory['workflow'], $memory);
-				FireSpark.jquery.helper.LoadBarrier.end();
+				FireSpark.core.helper.LoadBarrier.end();
 			},
 			
 			error : function($request, $status, $error){
@@ -72,7 +72,7 @@ FireSpark.jquery.service.LoadAjax = {
 				if($memory['errorflow']){
 					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
 				}
-				FireSpark.jquery.helper.LoadBarrier.end();
+				FireSpark.core.helper.LoadBarrier.end();
 			}
 		});
 		

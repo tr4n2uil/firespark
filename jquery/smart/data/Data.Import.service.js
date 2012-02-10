@@ -25,7 +25,8 @@ FireSpark.smart.service.DataImport = {
 		FireSpark.core.helper.LoadBarrier.barrier(function(){
 			$flag = false;
 			for(var $i in $imports){
-				if(Snowblozm.Registry.get($imports[$i]) || false){
+				$key = 'FIRESPARK_IMPORT_' + $imports[$i];
+				if(Snowblozm.Registry.get($key) || false){
 				} else {
 					$flag = true;
 					break;
@@ -62,6 +63,7 @@ FireSpark.smart.service.DataImport = {
 						element : FireSpark.smart.constant.importdiv,
 						select : true,
 						action : 'last',
+						animation : 'none',
 						duration : 5
 					},{
 						service : FireSpark.core.service.DataRegistry,

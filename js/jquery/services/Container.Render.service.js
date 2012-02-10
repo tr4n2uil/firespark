@@ -21,7 +21,7 @@
  *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
-FireSpark.jquery.service.ContainerRender = {
+FireSpark.ui.service.ContainerRender = {
 	input : function(){
 		return {
 			optional : { 

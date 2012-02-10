@@ -14,7 +14,7 @@
  *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
-FireSpark.jquery.service.LoadIframe = {
+FireSpark.core.service.LoadIframe = {
 	input : function(){
 		return {
 			required : ['agent', 'workflow'],

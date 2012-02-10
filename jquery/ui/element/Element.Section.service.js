@@ -69,7 +69,7 @@ FireSpark.ui.service.ElementSection = {
 		}
 		
 		$memory['element'] = $element;
-		$memory['valid'] = true;
+		$memory['valid'] = false;
 		return $memory;
 	},
 	

@@ -59,7 +59,7 @@ FireSpark.smart.service.DataLoad = {
 			$memory['agent'] = $memory['agent'] ? $memory['agent'] : $memory['root'];
 			
 			return Snowblozm.Kernel.run({
-				service : FireSpark.jquery.service.LoadIframe,
+				service : FireSpark.core.service.LoadIframe,
 				args : $memory['args']
 			}, $memory);
 		}
@@ -103,7 +103,7 @@ FireSpark.smart.service.DataLoad = {
 		 *	Load AJAX
 		**/
 		return Snowblozm.Kernel.run({
-			service : FireSpark.jquery.service.LoadAjax,
+			service : FireSpark.core.service.LoadAjax,
 			args : $memory['args'],
 			workflow : $workflow
 		}, $memory);
