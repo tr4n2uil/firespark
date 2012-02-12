@@ -38,12 +38,14 @@ FireSpark.ui.service.ContainerRemove = {
 				service : FireSpark.ui.service.ElementContent,
 				element : '.tls-' + $instance,
 				select : true,
-				action : 'remove'
+				action : 'remove',
+				animation : 'none'
 			},{
 				service : FireSpark.ui.service.ElementContent,
 				element : '.tlc-' + $instance,
 				select : true,
-				action : 'remove'
+				action : 'remove',
+				animation : 'none'
 			},{
 				service : FireSpark.smart.workflow.InterfaceTile
 			}], $memory);

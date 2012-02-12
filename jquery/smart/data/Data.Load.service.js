@@ -52,6 +52,15 @@ FireSpark.smart.service.DataLoad = {
 	},
 	
 	run : function($memory){
+		$workflow = $memory['workflow'];
+		
+		$workflow.unshift({
+			service : FireSpark.core.service.DataPush,
+			args : $memory['params'],
+			output : { result : 'data' }
+		});
+		
+		
 		/**
 		 *	Check AJAX
 		**/
@@ -68,6 +77,7 @@ FireSpark.smart.service.DataLoad = {
 			 *	Check pool
 			**/
 			$key = 'FIRESPARK_SI_DATA_URL_' + $memory['url'] + '_DATA_' + $memory['data'] + '_TYPE_' + $memory['type'] + '_REQUEST_' + $memory['request'];
+			//alert($key);
 			$data = Snowblozm.Registry.get($key);
 			
 			if($data){
@@ -77,12 +87,11 @@ FireSpark.smart.service.DataLoad = {
 					/**
 					 *	Run the workflow
 					**/
-					return Snowblozm.Kernel.execute($memory['workflow'], $memory);
+					Snowblozm.Kernel.execute($workflow, $memory);
+					return { valid : $memory['stop']};
 				}
 			}
 		}
-		
-		$workflow = $memory['workflow'];
 		
 		if($memory['cache']){
 			$workflow.unshift({
@@ -92,12 +101,6 @@ FireSpark.smart.service.DataLoad = {
 				expiry : $memory['expiry']
 			});
 		}
-		
-		$workflow.unshift({
-			service : FireSpark.core.service.DataPush,
-			args : $memory['params'],
-			output : { result : 'data' }
-		});
 		
 		/**
 		 *	Load AJAX

@@ -17,7 +17,7 @@ FireSpark.ui.template.Tiles = $.template('\
 				{{else urlhash}}\
 					<a href="${urlhash}" class="navigate tile ${style}">${name}</a>\
 				{{else}}\
-					<a href="!#/view/${ins}/${tile}-${id}" class="navigate tile ${style}">${name}</a>\
+					<a href="!/view/${ins}/${tile}-${id}" class="navigate tile ${style}">${name}</a>\
 				{{/if}}\
 			{{/if}}\
 		</li>\

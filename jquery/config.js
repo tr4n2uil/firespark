@@ -55,6 +55,7 @@ FireSpark.ui.constant = {
  *	@config FireSpark.smart
 **/
 FireSpark.smart.constant = {
+	smarturlstart : '',
 	statusdiv : '#load-status',
 	loaderror : '<span class="error">Error Loading Data</span>',
 	loadstatus : '<span class="state loading">Loading ...</span>',
@@ -63,7 +64,7 @@ FireSpark.smart.constant = {
 	cnfmsg : 'Are you sure you want to continue ?',
 	importdiv : '#ui-imports',
 	importroot : 'ui/import/',
-	importext : '.php',
+	importext : '.json',
 	defaultkey : 'people.person.info',
 	defaulturl : 'run.php',
 	tileuiprefix : '#ui-global-',
