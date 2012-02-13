@@ -15,6 +15,7 @@
  *	@param stop boolean [memory] optional default false
  *
  *	@param force boolean [memory] optional default FireSpark.smart.constant.poolforce
+ *	@param global boolean [memory] optional default false
  *	@param cache boolean [memory] optional default false
  *	@param expiry integer [memory] optional default FireSpark.smart.constant.poolexpiry
  *
@@ -44,6 +45,7 @@ FireSpark.smart.service.DataLoad = {
 				cache : true,
 				expiry : FireSpark.smart.constant.poolexpiry,
 				force : FireSpark.smart.constant.poolforce,
+				global : false,
 				iframe : false,
 				agent : false,
 				root : false
@@ -52,7 +54,7 @@ FireSpark.smart.service.DataLoad = {
 	},
 	
 	run : function($memory){
-		$workflow = $memory['workflow'];
+		var $workflow = $memory['workflow'];
 		
 		$workflow.unshift({
 			service : FireSpark.core.service.DataPush,
@@ -76,9 +78,9 @@ FireSpark.smart.service.DataLoad = {
 			/**
 			 *	Check pool
 			**/
-			$key = 'FIRESPARK_SI_DATA_URL_' + $memory['url'] + '_DATA_' + $memory['data'] + '_TYPE_' + $memory['type'] + '_REQUEST_' + $memory['request'];
+			var $key = 'FIRESPARK_SI_DATA_URL_' + $memory['url'] + '_DATA_' + $memory['data'] + '_TYPE_' + $memory['type'] + '_REQUEST_' + $memory['request'];
 			//alert($key);
-			$data = Snowblozm.Registry.get($key);
+			var $data = Snowblozm.Registry.get($key);
 			
 			if($data){
 				if($data['valid'] || false){
@@ -88,6 +90,14 @@ FireSpark.smart.service.DataLoad = {
 					 *	Run the workflow
 					**/
 					Snowblozm.Kernel.execute($workflow, $memory);
+					return { valid : $memory['stop']};
+				}
+				else if($memory['errorflow']) {
+					
+					/**
+					 *	Run the errorflow
+					**/
+					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
 					return { valid : $memory['stop']};
 				}
 			}
@@ -102,12 +112,36 @@ FireSpark.smart.service.DataLoad = {
 			});
 		}
 		
+		if($memory['global']){
+			$data = Snowblozm.Registry.get(FireSpark.smart.constant.globalkey);
+			
+			if($data){
+				if($data['valid'] || false){
+					$memory['data'] = $data;
+	
+					/**
+					*	Run the workflow
+					**/
+					Snowblozm.Kernel.execute($workflow, $memory);
+					return { valid : $memory['stop']};
+				}
+				else if($memory['errorflow']){
+				
+					/**
+					 *	Run the errorflow
+					**/
+					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
+					return { valid : $memory['stop']};
+				}
+			}
+		}
+		
 		/**
 		 *	Load AJAX
 		**/
 		return Snowblozm.Kernel.run({
 			service : FireSpark.core.service.LoadAjax,
-			args : $memory['args'],
+			args : $memory['args'] || false,
 			workflow : $workflow
 		}, $memory);
 	},

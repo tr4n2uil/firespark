@@ -19,13 +19,15 @@ FireSpark.smart.service.DataImport = {
 		/**
 		 *	Set barrier
 		**/
-		$workflow = $memory['workflow'];
-		$imports = $memory['imports'];
+		var $workflow = $memory['workflow'];
+		var $imports = $memory['imports'];
 		
-		FireSpark.core.helper.LoadBarrier.barrier(function(){
-			$flag = false;
+		FireSpark.core.helper.LoadBarrier.barrier(function($args){
+			var $flag = false;
+			var $imports = $args['imports'];
+			
 			for(var $i in $imports){
-				$key = 'FIRESPARK_IMPORT_' + $imports[$i];
+				var $key = 'FIRESPARK_IMPORT_' + $imports[$i];
 				if(Snowblozm.Registry.get($key) || false){
 				} else {
 					$flag = true;
@@ -38,26 +40,35 @@ FireSpark.smart.service.DataImport = {
 				return { valid : false };
 			}
 			
-			Snowblozm.Kernel.execute($workflow, $memory);
+			Snowblozm.Kernel.execute($args['workflow'], $args['memory']);
+		}, {
+			workflow : $workflow,
+			imports : $imports,
+			memory : $memory
 		});
 		
 		/**
 		 *	Load imports
 		**/
-		$barrier = false;
+		var $barrier = false;
 		
 		for(var $i in $imports){
-			$key = 'FIRESPARK_IMPORT_' + $imports[$i];
+			var $key = 'FIRESPARK_IMPORT_' + $imports[$i];
 			
 			if(Snowblozm.Registry.get($key) || false){
 			} else {
 				$barrier = true;
 				
-				Snowblozm.Kernel.execute([,{
+				Snowblozm.Kernel.execute([{
+					service : FireSpark.core.service.DataRegistry,
+					key : $key,
+					value : true
+				},{
 					service : FireSpark.core.service.LoadAjax,
 					url : $imports[$i],
 					type : 'html',
 					request : 'GET',
+					sync : true,
 					workflow : [{
 						service : FireSpark.ui.service.ElementContent,
 						element : FireSpark.smart.constant.importdiv,
@@ -65,10 +76,11 @@ FireSpark.smart.service.DataImport = {
 						action : 'last',
 						animation : 'none',
 						duration : 5
-					},{
+					}],
+					errorflow : [{
 						service : FireSpark.core.service.DataRegistry,
 						key : $key,
-						value : true
+						value : 0
 					}]
 				}], {});
 			}
@@ -81,7 +93,9 @@ FireSpark.smart.service.DataImport = {
 			FireSpark.smart.helper.dataState(FireSpark.smart.constant.loadstatus);
 			return { valid : false };
 		} else {
-			return Snowblozm.Kernel.execute($workflow, $memory);
+			FireSpark.core.helper.LoadBarrier.end();
+			return { valid : false };
+			//return Snowblozm.Kernel.execute($workflow, $memory);
 		}
 	},
 	

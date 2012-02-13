@@ -8,6 +8,7 @@
  *	@param request string [memory] optional default 'POST'
  *	@param process boolean [memory] optional default false
  *	@param mime string [memory] optional default 'application/x-www-form-urlencoded'
+ *	@param sync boolean [memory] optional default false
  *
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
@@ -30,7 +31,8 @@ FireSpark.core.service.LoadAjax = {
 				process : false, 
 				mime : 'application/x-www-form-urlencoded' ,
 				errorflow : false,
-				stop : false
+				stop : false,
+				sync : false
 			}
 		}
 	},
@@ -38,6 +40,11 @@ FireSpark.core.service.LoadAjax = {
 	run : function($memory){
 		
 		FireSpark.core.helper.LoadBarrier.start();
+		
+		$mem = {};
+		for(var $i in $memory){
+			$mem[$i] = $memory[$i];
+		}
 		
 		/**
 		 *	Load data from server using AJAX
@@ -49,28 +56,29 @@ FireSpark.core.service.LoadAjax = {
 			type : $memory['request'],
 			processData : $memory['process'],
 			contentType : $memory['mime'],
+			async : $memory['sync'] ? false : true,
 			
 			success : function($data, $status, $request){
-				$memory['data'] = $data;
-				//$memory['status'] = $status;
+				$mem['data'] = $data;
+				//$mem['status'] = $status;
 				
 				/**
 				 *	Run the workflow
 				**/
-				Snowblozm.Kernel.execute($memory['workflow'], $memory);
+				Snowblozm.Kernel.execute($memory['workflow'], $mem);
 				FireSpark.core.helper.LoadBarrier.end();
 			},
 			
 			error : function($request, $status, $error){
-				$memory['error'] = $error;
-				//$memory['status'] = $status;
-				$memory['data'] = FireSpark.core.constant.loaderror + '<span class="hidden"> [Error : ' + $error + ']</span>';
+				$mem['error'] = $error;
+				//$mem['status'] = $status;
+				$mem['data'] = FireSpark.core.constant.loaderror + '<span class="hidden"> [Error : ' + $error + ']</span>';
 				
 				/**
 				 *	Run the errorflow if any
 				**/
 				if($memory['errorflow']){
-					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
+					Snowblozm.Kernel.execute($memory['errorflow'], $mem);
 				}
 				FireSpark.core.helper.LoadBarrier.end();
 			}
