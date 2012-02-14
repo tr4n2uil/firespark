@@ -16,7 +16,7 @@
  *
  *	@param force boolean [memory] optional default FireSpark.smart.constant.poolforce
  *	@param global boolean [memory] optional default false
- *	@param cache boolean [memory] optional default false
+ *	@param nocache boolean [memory] optional default false
  *	@param expiry integer [memory] optional default FireSpark.smart.constant.poolexpiry
  *
  *	@param iframe string [memory] optional default false
@@ -42,7 +42,7 @@ FireSpark.smart.service.DataLoad = {
 				params : [],
 				errorflow : false,
 				stop : false,
-				cache : true,
+				nocache : false,
 				expiry : FireSpark.smart.constant.poolexpiry,
 				force : FireSpark.smart.constant.poolforce,
 				global : false,
@@ -107,7 +107,7 @@ FireSpark.smart.service.DataLoad = {
 			}
 		}
 		
-		if($memory['cache']){
+		if($memory['nocache'] === false){
 			$workflow.unshift({
 				service : FireSpark.core.service.DataRegistry,
 				input : { value : 'data' },

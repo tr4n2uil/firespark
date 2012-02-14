@@ -70,6 +70,9 @@ FireSpark.core.service.LoadAjax = {
 					FireSpark.core.helper.LoadBarrier.end();
 				} catch($id) {
 					FireSpark.core.helper.LoadBarrier.end();
+					if(console || false){
+						console.log('Exception : ' + $id);
+					}
 				}
 			},
 			
@@ -88,6 +91,9 @@ FireSpark.core.service.LoadAjax = {
 					FireSpark.core.helper.LoadBarrier.end();
 				} catch($id) {
 					FireSpark.core.helper.LoadBarrier.end();
+					if(console || false){
+						console.log('Exception : ' + $id);
+					}
 				}
 			}
 		});

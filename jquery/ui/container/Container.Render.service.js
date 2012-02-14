@@ -92,7 +92,8 @@ FireSpark.ui.service.ContainerRender = {
 		
 		if($memory['bg'] === false){
 			$workflow.push({
-				service : FireSpark.smart.workflow.InterfaceTile
+				service : FireSpark.smart.workflow.InterfaceTile,
+				input : { cntr : 'ins' }
 			});
 		}
 		
