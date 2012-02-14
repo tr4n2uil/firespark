@@ -90,8 +90,12 @@ FireSpark.core.service.LoadAjax = {
 				/**
 				 *	Run the workflow
 				**/
-				Snowblozm.Kernel.execute($memory['workflow'], $mem);
-				FireSpark.core.helper.LoadBarrier.end();
+				try {
+					Snowblozm.Kernel.execute($memory['workflow'], $mem);
+					FireSpark.core.helper.LoadBarrier.end();
+				} catch($id) {
+					FireSpark.core.helper.LoadBarrier.end();
+				}
 			},
 			
 			error : function($request, $status, $error){
@@ -102,10 +106,14 @@ FireSpark.core.service.LoadAjax = {
 				/**
 				 *	Run the errorflow if any
 				**/
-				if($memory['errorflow']){
-					Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+				try {
+					if($memory['errorflow']){
+						Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+					}
+					FireSpark.core.helper.LoadBarrier.end();
+				} catch($id) {
+					FireSpark.core.helper.LoadBarrier.end();
 				}
-				FireSpark.core.helper.LoadBarrier.end();
 			}
 		});
 		
@@ -120,7 +128,7 @@ FireSpark.core.service.LoadAjax = {
 		return [];
 	}
 };
-/** *	@helper LoadBarrier *	@desc Used to load barrier * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.LoadBarrier = {	requests : 0,		barrier_function : [],	barrier_args : [],		start : function(){		this.requests++;	},		end : function(){		this.requests--;				if(this.requests <= 0){			this.requests = 0;						var $bf = this.barrier_function;			if($bf.length){				for(var $i in $bf){					($bf[$i])(this.barrier_args[$i]);				}			}						this.barrier_function = [];			this.barrier_args = [];		}	},		barrier : function($barrier_function, $barrier_args){		this.barrier_function.push($barrier_function);		this.barrier_args.push($barrier_args);	}};/** *	@service LoadBarrier *	@desc Sets barrier workflow * *	@param barrier array [memory] optional default false * *	@return barrier array [memory] default false * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.LoadBarrier = {	input : function(){		return {			optional : { barrier : false }		};	},		run : function($memory){		if($memory['barrier']){			FireSpark.core.helper.LoadBarrier.barrier(function(){				Snowblozm.Kernel.execute($memory['barrier'], $memory);			});		}				$memory['barrier'] = false;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['barrier'];	}};/**
+/** *	@helper LoadBarrier *	@desc Used to load barrier * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.helper.LoadBarrier = {	requests : 0,	lock : false,		barrier_function : [],	barrier_args : [],		start : function(){		this.requests++;	},		end : function(){		this.requests--;				if(this.requests <= 0){			this.requests = 0;						var $bf = this.barrier_function;			if($bf.length){				for(var $i in $bf){					($bf[$i])(this.barrier_args[$i]);				}			}						this.barrier_function = [];			this.barrier_args = [];		}	},		barrier : function($barrier_function, $barrier_args){		this.barrier_function.push($barrier_function);		this.barrier_args.push($barrier_args);	}};/** *	@service LoadBarrier *	@desc Sets barrier workflow * *	@param barrier array [memory] optional default false * *	@return barrier array [memory] default false * *	@author Vibhaj Rajan <vibhaj8@gmail.com> ***/FireSpark.core.service.LoadBarrier = {	input : function(){		return {			optional : { barrier : false }		};	},		run : function($memory){		if($memory['barrier']){			FireSpark.core.helper.LoadBarrier.barrier(function(){				Snowblozm.Kernel.execute($memory['barrier'], $memory);			});		}				$memory['barrier'] = false;		$memory['valid'] = true;		return $memory;	},		output : function(){		return ['barrier'];	}};/**
  *	@service LoadIframe
  *	@desc Uses IFRAME to load data from server
  *

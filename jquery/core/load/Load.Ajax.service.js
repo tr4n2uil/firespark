@@ -65,8 +65,12 @@ FireSpark.core.service.LoadAjax = {
 				/**
 				 *	Run the workflow
 				**/
-				Snowblozm.Kernel.execute($memory['workflow'], $mem);
-				FireSpark.core.helper.LoadBarrier.end();
+				try {
+					Snowblozm.Kernel.execute($memory['workflow'], $mem);
+					FireSpark.core.helper.LoadBarrier.end();
+				} catch($id) {
+					FireSpark.core.helper.LoadBarrier.end();
+				}
 			},
 			
 			error : function($request, $status, $error){
@@ -77,10 +81,14 @@ FireSpark.core.service.LoadAjax = {
 				/**
 				 *	Run the errorflow if any
 				**/
-				if($memory['errorflow']){
-					Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+				try {
+					if($memory['errorflow']){
+						Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+					}
+					FireSpark.core.helper.LoadBarrier.end();
+				} catch($id) {
+					FireSpark.core.helper.LoadBarrier.end();
 				}
-				FireSpark.core.helper.LoadBarrier.end();
 			}
 		});
 		
