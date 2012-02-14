@@ -73,6 +73,7 @@ FireSpark.smart.constant = {
 	tileuisection : '.tile-content',
 	poolexpiry : 150,
 	poolforce : false,
-	config : []
+	config : [],
+	defaultln : '#sync'
 };
 
