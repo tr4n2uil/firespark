@@ -47,7 +47,8 @@ FireSpark.ui.service.ContainerRemove = {
 				action : 'remove',
 				animation : 'none'
 			},{
-				service : FireSpark.smart.workflow.InterfaceTile
+				service : FireSpark.smart.workflow.InterfaceTile,
+				input : { cntr : 'ins' }
 			}], $memory);
 		}
 		

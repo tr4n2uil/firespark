@@ -6,7 +6,7 @@ FireSpark.ui.template.Tiles = $.template('\
 		<span class="tilehead">\
 			${tilehead}\
 			{{if FireSpark.core.helper.dataEquals(close, true)}}\
-				<a class="launch close hover" href="#/close/${key}/${id}/${ins}" title="Close"></a>\
+				<a class="launch close hover" href="#/close/${key}/${id}/${ins}/" title="Close"></a>\
 			{{/if}}\
 		</span>\
 		{{each tiles}}\

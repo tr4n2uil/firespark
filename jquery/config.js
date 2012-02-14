@@ -74,6 +74,7 @@ FireSpark.smart.constant = {
 	poolexpiry : 150,
 	poolforce : false,
 	config : [],
-	defaultln : '#sync'
+	defaultln : '#sync',
+	uicache : true
 };
 

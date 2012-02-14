@@ -27,7 +27,12 @@ FireSpark.core.service.LoadIframe = {
 	
 	run : function($memory){
 		
-		FireSpark.jquery.helper.LoadBarrier.start();
+		FireSpark.core.helper.LoadBarrier.start();
+		
+		$mem = {};
+		for(var $i in $memory){
+			$mem[$i] = $memory[$i];
+		}
 		
 		/**
 		 *	Genarate unique framename
@@ -47,48 +52,79 @@ FireSpark.core.service.LoadIframe = {
 			.insertAfter($memory['agent'])
 			.bind('load', function(){
 				try {
-					var $frame = FireSpark.core.helper.getFrame($framename);
+					var $frame = FireSpark.core.helper.windowFrame($framename);
 					var $data = $frame.document.body.innerHTML;
 					switch($memory['type']){
 						case 'html' :
-							$memory['data'] = $data;
+							$mem['data'] = $data;
 							break;
 						case 'json' :
 						default :
-							$memory['data'] = $.parseJSON($data);
+							$mem['data'] = $.parseJSON($data);
 							break;
 					}
 					
 					/**
 					 *	Run the workflow
 					**/
-					Snowblozm.Kernel.execute($memory['workflow'], $memory);
-					FireSpark.jquery.helper.LoadBarrier.end();
+					try {
+						Snowblozm.Kernel.execute($memory['workflow'], $mem);
+						FireSpark.core.helper.LoadBarrier.end();
+					} catch($id) {
+						FireSpark.core.helper.LoadBarrier.end();
+						if(console || false){
+							console.log('Exception : ' + $id);
+						}
+					}
 				}
 				catch($error){
-					$memory['error'] = $error.description;
-					$memory['result'] = FireSpark.core.constant.loaderror + '<span class="hidden"> [Error :' + $error.description + ']</span>';
+					if(console || false){
+						console.log('Exception : ' + $error);
+					}
+					
+					$mem['error'] = $error.description;
+					$mem['result'] = FireSpark.core.constant.loaderror + '<span class="hidden"> [Error :' + $error.description + ']</span>';
+					$mem['data'] = {
+						valid : false,
+						msg : FireSpark.core.constant.loaderror,
+						code : 500,
+						details : $error.description
+					};
 					
 					/**
 					 *	Run the errorflow if any
 					**/
-					if($memory['errorflow']){
-						Snowblozm.Kernel.execute($memory['errorflow'], $memory);
+					try {
+						if($memory['errorflow']){
+							Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+						}
+						FireSpark.core.helper.LoadBarrier.end();
+					} catch($id) {
+						FireSpark.core.helper.LoadBarrier.end();
+						if(console || false){
+							console.log('Exception : ' + $id);
+						}
 					}
-					FireSpark.jquery.helper.LoadBarrier.end();
 				}
 			})
 			.bind('error', function($error){
-				$memory['error'] = $error;
-				$memory['result'] = FireSpark.core.constant.loaderror;
+				$mem['error'] = $error;
+				$mem['result'] = FireSpark.core.constant.loaderror;
 				
 				/**
 				 *	Run the errorflow if any
 				**/
-				if($memory['errorflow']){
-					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
+				try {
+					if($memory['errorflow']){
+						Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+					}
+					FireSpark.core.helper.LoadBarrier.end();
+				} catch($id) {
+					FireSpark.core.helper.LoadBarrier.end();
+					if(console || false){
+						console.log('Exception : ' + $id);
+					}
 				}
-				FireSpark.jquery.helper.LoadBarrier.end();
 			});
 			
 		/**
