@@ -72,6 +72,7 @@ FireSpark.smart.constant = {
 	tileuicntr : '.bands',
 	tileuisection : '.tile-content',
 	poolexpiry : 150,
-	poolforce : false
+	poolforce : false,
+	config : []
 };
 

@@ -56,6 +56,10 @@ FireSpark.smart.service.DataLoad = {
 	run : function($memory){
 		var $workflow = $memory['workflow'];
 		
+		if($memory['data'] === true) {
+			$memory['data'] = '';
+		}
+		
 		$workflow.unshift({
 			service : FireSpark.core.service.DataPush,
 			args : $memory['params'],

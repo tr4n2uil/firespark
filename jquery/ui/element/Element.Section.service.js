@@ -2,7 +2,7 @@
  *	@service ElementSection
  *	@desc Toggles element with another content and animates it and returns element in memory
  *
- *	@param element string [memory]
+ *	@param element string [memory] optional default parent of content
  *	@param select boolean [memory] optional default false
  *	@param content string [memory] optional default false
  *	@param child string [memory] optional default '.tile-content'
@@ -18,8 +18,8 @@
 FireSpark.ui.service.ElementSection = {
 	input : function(){
 		return {
-			required : ['element'],
 			optional : { 
+				element : false,
 				select : false,
 				content : false,
 				child : '.tile-content',
@@ -31,10 +31,16 @@ FireSpark.ui.service.ElementSection = {
 	},
 	
 	run : function($memory){
-		if($memory['select']){
+		if($memory['select'] && $memory['element']){
 			var $element = $($memory['element']);
 			if(!$element.length){
-				$element = $('#main-container');
+				return { valid : false };
+			}
+		}
+		else if($memory['select'] && $memory['content']){
+			var $element = $($memory['content']).parent();
+			if(!$element.length){
+				return { valid : false };
 			}
 		}
 		else {

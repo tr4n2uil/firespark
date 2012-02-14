@@ -9,6 +9,7 @@
  *	@param bg boolean [memory] optional default false
  *	@param tpl template [memory] optional default '#tpl-def-tls'
  *	@param inl boolean [memory] optional default false
+ *	@param tile string [memory] optional false
  *	@param act string [memory] optional default 'first' ('all', 'first', 'last', 'remove')
  *	@param data object [memory] optional default {}
  *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
@@ -31,6 +32,7 @@ FireSpark.ui.service.ContainerRender = {
 				bg : false,
 				tpl : '#tpl-def-tls',
 				inl : false,
+				tile : false,
 				act : 'first',
 				data : {},
 				anm : 'fadein',
