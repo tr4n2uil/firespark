@@ -16,7 +16,8 @@ FireSpark.core.constant = {
 			helper : FireSpark.core.helper.CheckMatch
 		}
 	},
-	validation_status : 'span'
+	validation_status : 'span',
+	loaderror : '<span class="error">Error Loading Data</span>'
 }
 
 /**
@@ -48,7 +49,8 @@ FireSpark.ui.constant = {
 			}
 		}
 	},
-	maindiv : '#ui-global-0'
+	maindiv : '#ui-global-0',
+	replacesel : '.replace'
 };
 
 /**

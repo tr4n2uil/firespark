@@ -87,9 +87,8 @@ FireSpark.smart.service.DataLoad = {
 			var $data = Snowblozm.Registry.get($key);
 			
 			if($data){
+				$memory['data'] = $data;
 				if($data['valid'] || false){
-					$memory['data'] = $data;
-					
 					/**
 					 *	Run the workflow
 					**/
@@ -97,7 +96,6 @@ FireSpark.smart.service.DataLoad = {
 					return { valid : $memory['stop']};
 				}
 				else if($memory['errorflow']) {
-					
 					/**
 					 *	Run the errorflow
 					**/
@@ -120,9 +118,8 @@ FireSpark.smart.service.DataLoad = {
 			$data = Snowblozm.Registry.get(FireSpark.smart.constant.globalkey);
 			
 			if($data){
+				$memory['data'] = $data;
 				if($data['valid'] || false){
-					$memory['data'] = $data;
-	
 					/**
 					*	Run the workflow
 					**/
@@ -130,7 +127,6 @@ FireSpark.smart.service.DataLoad = {
 					return { valid : $memory['stop']};
 				}
 				else if($memory['errorflow']){
-				
 					/**
 					 *	Run the errorflow
 					**/
