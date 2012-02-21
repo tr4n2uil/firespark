@@ -57,30 +57,28 @@ FireSpark.smart.service.DataImport = {
 			
 			if(Snowblozm.Registry.get($key) || false){
 			} else {
-				$barrier = true;
+				if($barrier === false){
+					$barrier = true;
+					FireSpark.smart.helper.dataState(FireSpark.smart.constant.loadstatus);
+				}
 				
 				Snowblozm.Kernel.execute([{
-					service : FireSpark.core.service.DataRegistry,
-					key : $key,
-					value : true
-				},{
 					service : FireSpark.core.service.LoadAjax,
 					url : $imports[$i],
 					type : 'html',
 					request : 'GET',
 					sync : true,
 					workflow : [{
+						service : FireSpark.core.service.DataRegistry,
+						key : $key,
+						value : true
+					},{
 						service : FireSpark.ui.service.ElementContent,
 						element : FireSpark.smart.constant.importdiv,
 						select : true,
 						action : 'last',
 						animation : 'none',
 						duration : 5
-					}],
-					errorflow : [{
-						service : FireSpark.core.service.DataRegistry,
-						key : $key,
-						value : 0
 					}]
 				}], {});
 			}
@@ -90,7 +88,6 @@ FireSpark.smart.service.DataImport = {
 		 *	Finalize barrier
 		**/
 		if($barrier){
-			FireSpark.smart.helper.dataState(FireSpark.smart.constant.loadstatus);
 			return { valid : false };
 		} else {
 			FireSpark.core.helper.LoadBarrier.end();
