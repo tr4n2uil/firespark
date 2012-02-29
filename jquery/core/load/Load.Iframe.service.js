@@ -27,7 +27,7 @@ FireSpark.core.service.LoadIframe = {
 	
 	run : function($memory){
 		
-		FireSpark.core.helper.LoadBarrier.start();
+		//FireSpark.core.helper.LoadBarrier.start();
 		
 		$mem = {};
 		for(var $i in $memory){
@@ -69,9 +69,9 @@ FireSpark.core.service.LoadIframe = {
 					**/
 					try {
 						Snowblozm.Kernel.execute($memory['workflow'], $mem);
-						FireSpark.core.helper.LoadBarrier.end();
+						//FireSpark.core.helper.LoadBarrier.end();
 					} catch($id) {
-						FireSpark.core.helper.LoadBarrier.end();
+						//FireSpark.core.helper.LoadBarrier.end();
 						if(console || false){
 							console.log('Exception : ' + $id);
 						}
@@ -98,9 +98,9 @@ FireSpark.core.service.LoadIframe = {
 						if($memory['errorflow']){
 							Snowblozm.Kernel.execute($memory['errorflow'], $mem);
 						}
-						FireSpark.core.helper.LoadBarrier.end();
+						//FireSpark.core.helper.LoadBarrier.end();
 					} catch($id) {
-						FireSpark.core.helper.LoadBarrier.end();
+						//FireSpark.core.helper.LoadBarrier.end();
 						if(console || false){
 							console.log('Exception : ' + $id);
 						}
@@ -118,9 +118,9 @@ FireSpark.core.service.LoadIframe = {
 					if($memory['errorflow']){
 						Snowblozm.Kernel.execute($memory['errorflow'], $mem);
 					}
-					FireSpark.core.helper.LoadBarrier.end();
+					//FireSpark.core.helper.LoadBarrier.end();
 				} catch($id) {
-					FireSpark.core.helper.LoadBarrier.end();
+					//FireSpark.core.helper.LoadBarrier.end();
 					if(console || false){
 						console.log('Exception : ' + $id);
 					}

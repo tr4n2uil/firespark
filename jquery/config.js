@@ -60,6 +60,8 @@ FireSpark.smart.constant = {
 	urlstart : '', // '?/'
 	globalkey : 'ui-global-data',
 	statusdiv : '#load-status',
+	statusdelay : 1500,
+	statusduration : 1500,
 	loaderror : '<span class="error">Error Loading Data</span>',
 	loadstatus : '<span class="state loading">Loading ...</span>',
 	loadmsg : '<span class="loading">Loading ...</span>',
