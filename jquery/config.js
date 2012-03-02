@@ -35,6 +35,11 @@ FireSpark.ui.constant = {
 			helper : FireSpark.ui.helper.transformCKEditor,
 			config : {}
 		},
+		wysiwyg : {
+			cls : '.wysiwyg',
+			helper : FireSpark.ui.helper.transformWysiwyg,
+			config : {}
+		},
 		uitabpanel : {
 			cls : '.uitabpanel',
 			helper : FireSpark.ui.helper.transformTabpanel,
@@ -75,6 +80,8 @@ FireSpark.smart.constant = {
 	tileuiprefix : '#ui-global-',
 	tileuicntr : '.bands',
 	tileuisection : '.tile-content',
+	moveup : false,
+	moveduration: 850,
 	poolexpiry : 150,
 	poolforce : false,
 	config : [],
