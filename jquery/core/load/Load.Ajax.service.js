@@ -13,6 +13,7 @@
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
  *	@param stop boolean [memory] optional default false
+ *	@param validity boolean [memory] optional default false
  *
  *	@return data string [memory]
  *	@return error string [memory] optional
@@ -32,6 +33,7 @@ FireSpark.core.service.LoadAjax = {
 				mime : 'application/x-www-form-urlencoded' ,
 				errorflow : false,
 				stop : false,
+				validity : false,
 				sync : false
 			}
 		}
@@ -62,16 +64,34 @@ FireSpark.core.service.LoadAjax = {
 				$mem['data'] = $data;
 				//$mem['status'] = $status;
 				
-				/**
-				 *	Run the workflow
-				**/
-				try {
-					Snowblozm.Kernel.execute($memory['workflow'], $mem);
-					FireSpark.core.helper.LoadBarrier.end();
-				} catch($id) {
-					FireSpark.core.helper.LoadBarrier.end();
-					if(console || false){
-						console.log('Exception : ' + $id);
+				if($mem['validity'] && $mem['data']['valid'] === false){
+					/**
+					 *	Run the errorflow if any
+					**/
+					try {
+						if($memory['errorflow']){
+							Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+						}
+						FireSpark.core.helper.LoadBarrier.end();
+					} catch($id) {
+						FireSpark.core.helper.LoadBarrier.end();
+						if(console || false){
+							console.log('Exception : ' + $id);
+						}
+					}
+				}
+				else {
+					/**
+					 *	Run the workflow
+					**/
+					try {
+						Snowblozm.Kernel.execute($memory['workflow'], $mem);
+						FireSpark.core.helper.LoadBarrier.end();
+					} catch($id) {
+						FireSpark.core.helper.LoadBarrier.end();
+						if(console || false){
+							console.log('Exception : ' + $id);
+						}
 					}
 				}
 			},

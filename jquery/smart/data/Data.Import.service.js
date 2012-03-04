@@ -67,7 +67,7 @@ FireSpark.smart.service.DataImport = {
 					url : $imports[$i],
 					type : 'html',
 					request : 'GET',
-					sync : true,
+					sync : FireSpark.smart.constant.importsync,
 					workflow : [{
 						service : FireSpark.core.service.DataRegistry,
 						key : $key,

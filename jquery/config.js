@@ -75,6 +75,7 @@ FireSpark.smart.constant = {
 	importdiv : '#ui-imports',
 	importroot : 'ui/import/',
 	importext : '.json',
+	importsync : false,
 	defaultkey : 'people.person.info',
 	defaulturl : 'run.php',
 	tileuiprefix : '#ui-global-',

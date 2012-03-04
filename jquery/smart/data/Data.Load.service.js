@@ -13,6 +13,7 @@
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
  *	@param stop boolean [memory] optional default false
+ *	@param validity boolean [memory] optional default false
  *
  *	@param force boolean [memory] optional default FireSpark.smart.constant.poolforce
  *	@param global boolean [memory] optional default false
@@ -42,6 +43,7 @@ FireSpark.smart.service.DataLoad = {
 				params : [],
 				errorflow : false,
 				stop : false,
+				validity : false,
 				nocache : false,
 				expiry : FireSpark.smart.constant.poolexpiry,
 				force : FireSpark.smart.constant.poolforce,
@@ -55,6 +57,8 @@ FireSpark.smart.service.DataLoad = {
 	
 	run : function($memory){
 		var $workflow = $memory['workflow'];
+		var $key = 'FIRESPARK_SI_DATA_URL_' + $memory['url'] + '_DATA_' + $memory['data'] + '_TYPE_' + $memory['type'] + '_REQUEST_' + $memory['request'];
+		//alert($key);
 		
 		if($memory['data'] === true) {
 			$memory['data'] = '';
@@ -82,8 +86,6 @@ FireSpark.smart.service.DataLoad = {
 			/**
 			 *	Check pool
 			**/
-			var $key = 'FIRESPARK_SI_DATA_URL_' + $memory['url'] + '_DATA_' + $memory['data'] + '_TYPE_' + $memory['type'] + '_REQUEST_' + $memory['request'];
-			//alert($key);
 			var $data = Snowblozm.Registry.get($key);
 			
 			if($data){
@@ -115,7 +117,7 @@ FireSpark.smart.service.DataLoad = {
 		}
 		
 		if($memory['global']){
-			$data = Snowblozm.Registry.get(FireSpark.smart.constant.globalkey);
+			var $data = Snowblozm.Registry.get(FireSpark.smart.constant.globalkey);
 			
 			if($data){
 				$memory['data'] = $data;

@@ -7,14 +7,14 @@
  *	@param ins string [memory] optional default '#ui-global-0'
  *	@param root object [memory] optional default false
  *	@param bg boolean [memory] optional default false
- *	@param tpl template [memory] optional default '#tpl-def-tls'
- *	@param inl boolean [memory] optional default false
+ *	@param tpl template [memory] optional default [{ '#tpl-default' : '>.bands' }]
  *	@param tile string [memory] optional false
  *	@param act string [memory] optional default 'first' ('all', 'first', 'last', 'remove')
  *	@param data object [memory] optional default {}
  *	@param anm string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout')
  *	@param dur integer [memory] optional default 1000
  *	@param dly integer [memory] optional default 0
+ *	@param errorflow workflow [memory] optional default { service : FireSpark.ui.workflow.TemplateApply, tpl : 'tpl-default' }
  *
  *	@return element element [memory]
  *
@@ -30,14 +30,14 @@ FireSpark.ui.service.ContainerRender = {
 				ins : '#ui-global-0',
 				root : false,
 				bg : false,
-				tpl : '#tpl-def-tls',
-				inl : false,
+				tpl : [{ '#tpl-default' : '>.bands' }],
 				tile : false,
 				act : 'first',
 				data : {},
 				anm : 'fadein',
 				dur : 1000,
-				dly : 0
+				dly : 0,
+				errorflow : { service : FireSpark.ui.workflow.TemplateApply, tpl : 'tpl-default' }
 			}
 		}
 	},
@@ -45,59 +45,48 @@ FireSpark.ui.service.ContainerRender = {
 	run : function($memory){		
 		var $instance = $memory['key']+'-'+$memory['id'];
 		
-		FireSpark.smart.helper.dataState(FireSpark.smart.constant.initmsg, true);
+		if($memory['data']['valid'] || false){
 		
-		$workflow = [];
-			
-		if($memory['inl']){
-			// Todo
-		}
-		else {
-			$workflow = $workflow.concat([{
+			FireSpark.smart.helper.dataState(FireSpark.smart.constant.initmsg, true);
+			var $workflow = [{
 				service : FireSpark.ui.service.ElementContent,
-				element : '.tls-' + $instance,
+				element : '.' + $instance,
 				select : true,
 				action : 'remove'
-			},{
-				service : FireSpark.ui.workflow.TemplateApply,
-				input : {
-					action : 'act',
-					duration : 'dur'
-				},
-				element : $memory['ins'] + '>.tiles',
-				select : true,
-				template : $memory['tpl'] + '-tls',
-				animation : 'none',
-				delay : 0
-			}]);
+			}];
+			
+			var $tpl = $memory['tpl'];
+			for(var $i in $tpl){
+				$workflow = $workflow.concat([{
+					service : FireSpark.ui.workflow.TemplateApply,
+					input : {
+						action : 'act',
+						duration : 'dur'
+					},
+					element : $memory['ins'] + $tpl[$i]['sel'],
+					select : true,
+					template : $tpl[$i]['tpl'],
+					animation : 'none',
+					delay : 0
+				}]);
+			}
+			
+			if($memory['bg'] === false){
+				$workflow.push({
+					service : FireSpark.smart.workflow.InterfaceTile,
+					input : { cntr : 'ins' }
+				});
+			}
+			
+			return Snowblozm.Kernel.execute($workflow, $memory);
 		}
-		
-		$workflow = $workflow.concat([{
-			service : FireSpark.ui.service.ElementContent,
-			element : '.tlc-' + $instance,
-			select : true,
-			action : 'remove'
-		},{
-			service : FireSpark.ui.workflow.TemplateApply,
-			input : {
-				action : 'act',
-				duration : 'dur'
-			},
-			element : $memory['ins'] + '>.bands',
-			select : true,
-			template : $memory['tpl'] + '-tcs',
-			animation : 'none',
-			delay : 0
-		}]);
-		
-		if($memory['bg'] === false){
-			$workflow.push({
-				service : FireSpark.smart.workflow.InterfaceTile,
-				input : { cntr : 'ins' }
-			});
+		else if($memory['errorflow']) {
+			/**
+			 *	Run the errorflow
+			**/
+			return Snowblozm.Kernel.execute($memory['errorflow'], $memory);
 		}
-		
-		return Snowblozm.Kernel.execute($workflow, $memory);
+		else return { valid : false };
 	},
 	
 	output : function(){
