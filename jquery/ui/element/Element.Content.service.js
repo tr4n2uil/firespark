@@ -8,7 +8,7 @@
  *	@param animation string [memory] optional default 'fadein' ('fadein', 'fadeout', 'slidein', 'slideout', 'none')
  *	@param duration integer [memory] optional default 1000
  *	@param delay integer [memory] optional default 0
- *	@param action string [memory] optional default 'all' ('all', 'first', 'last', 'remove', 'hide', 'show')
+ *	@param action string [memory] optional default 'all' ('all', 'first', 'last', 'remove', 'replace', 'hide', 'show')
  *
  *	@return element element [memory]
  *
@@ -50,17 +50,22 @@ FireSpark.ui.service.ElementContent = {
 		
 		switch($memory['action']){
 			case 'all' :
-				$element.html($memory['data']);
+				$element = $element.html($memory['data']);
 				$element.trigger('load');
 				break;
 			
 			case 'first' :
-				$element.prepend($memory['data']);
+				$element = $element.prepend($memory['data']);
 				$element.trigger('load');
 				break;
 			
 			case 'last' :
-				$element.append($memory['data']);
+				$element = $element.append($memory['data']);
+				$element.trigger('load');
+				break;
+			
+			case 'replace' :
+				$element = $($memory['data']).replaceAll($element);
 				$element.trigger('load');
 				break;
 				

@@ -64,7 +64,7 @@ FireSpark.core.service.LoadAjax = {
 				$mem['data'] = $data;
 				//$mem['status'] = $status;
 				
-				if($mem['validity'] && $mem['data']['valid'] === false){
+				if($mem['validity'] && ( (($mem['data']['valid'] || false) && $mem['data']['valid'] === false) ||  (($mem['data']['message'] || false) && ($mem['data']['message']['valid'] || false) && $mem['data']['message']['valid'] === false) )){
 					/**
 					 *	Run the errorflow if any
 					**/
