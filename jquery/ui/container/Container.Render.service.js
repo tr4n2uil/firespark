@@ -42,11 +42,16 @@ FireSpark.ui.service.ContainerRender = {
 		}
 	},
 	
-	run : function($memory){		
-		var $instance = $memory['key']+'-'+$memory['id'];
-		
+	run : function($memory){				
 		if($memory['data']['valid'] || false){
-		
+			if($memory['data']['message'] || false){
+				if($memory['data']['message']['id'] || false){
+					$memory['id'] = $memory['data']['message']['id'];
+				}
+			}
+			
+			var $instance = $memory['key']+'-'+$memory['id'];
+			
 			FireSpark.smart.helper.dataState(FireSpark.smart.constant.initmsg, true);
 			var $workflow = [{
 				service : FireSpark.ui.service.ElementContent,
