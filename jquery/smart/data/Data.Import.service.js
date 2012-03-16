@@ -40,6 +40,7 @@ FireSpark.smart.service.DataImport = {
 				return { valid : false };
 			}
 			
+			$args['memory']['valid'] = true;
 			Snowblozm.Kernel.execute($args['workflow'], $args['memory']);
 		}, {
 			workflow : $workflow,
@@ -71,7 +72,8 @@ FireSpark.smart.service.DataImport = {
 					workflow : [{
 						service : FireSpark.core.service.DataRegistry,
 						key : $key,
-						value : true
+						value : true,
+						check : true
 					},{
 						service : FireSpark.ui.service.ElementContent,
 						element : FireSpark.smart.constant.importdiv,

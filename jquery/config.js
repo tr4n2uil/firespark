@@ -55,7 +55,7 @@ FireSpark.ui.constant = {
 		}
 	},
 	maindiv : '#ui-global-0',
-	replacesel : '.replace',
+	replacesel : ', .ui-replace',
 	defaulttpl : 'tpl-default'
 };
 

@@ -15,6 +15,8 @@
  *	@param dur integer [memory] optional default 1000
  *	@param dly integer [memory] optional default 0
  *	@param errorflow workflow [memory] optional default { service : FireSpark.ui.workflow.TemplateApply, tpl : 'tpl-default' }
+ *	@param mv boolean [memory] optional default FireSpark.smart.constant.moveup
+ *	@param mvdur integer [memory] optional default FireSpark.smart.constant.moveduration
  *
  *	@return element element [memory]
  *
@@ -37,7 +39,9 @@ FireSpark.ui.service.ContainerRender = {
 				anm : 'fadein',
 				dur : 1000,
 				dly : 0,
-				errorflow : { service : FireSpark.ui.workflow.TemplateApply, tpl : 'tpl-default' }
+				errorflow : { service : FireSpark.ui.workflow.TemplateApply, tpl : 'tpl-default' },
+				mv : FireSpark.smart.constant.moveup,
+				mvdur : FireSpark.smart.constant.moveduration
 			}
 		}
 	},
@@ -55,7 +59,7 @@ FireSpark.ui.service.ContainerRender = {
 			FireSpark.smart.helper.dataState(FireSpark.smart.constant.initmsg, true);
 			var $workflow = [{
 				service : FireSpark.ui.service.ElementContent,
-				element : '.' + $instance,
+				element : '.' + $instance + FireSpark.ui.constant.replacesel,
 				select : true,
 				action : 'remove'
 			}];
