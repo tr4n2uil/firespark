@@ -1,7 +1,7 @@
 /**
  * @initialize FireSpark
 **/
-FireSpark = {
+var FireSpark = {
 	core : {
 		service : {},
 		workflow : {},
@@ -20,6 +20,28 @@ FireSpark = {
 		workflow : {},
 		helper : {},
 		constant : {}
+	}
+};
+
+var FS = {
+	c : {
+		s : FireSpark.core.service,
+		w : FireSpark.core.workflow,
+		h : FireSpark.core.helper,
+		c : FireSpark.core.constant
+	},
+	u : {
+		s : FireSpark.ui.service,
+		w : FireSpark.ui.workflow,
+		h : FireSpark.ui.helper,
+		c : FireSpark.ui.constant,
+		t : FireSpark.ui.template
+	},
+	s : {
+		s : FireSpark.smart.service,
+		w : FireSpark.smart.workflow,
+		h : FireSpark.smart.helper,
+		c : FireSpark.smart.constant
 	}
 };
 

@@ -1,5 +1,5 @@
 /**
- *	@config FireSpark.core
+ *	@config FireSpark.core.constant
 **/
 FireSpark.core.constant = {
 	validations : {
@@ -21,7 +21,7 @@ FireSpark.core.constant = {
 }
 
 /**
- *	@config FireSpark.ui
+ *	@config FireSpark.ui.constant
 **/
 FireSpark.ui.constant = {
 	transforms : {
@@ -60,7 +60,7 @@ FireSpark.ui.constant = {
 };
 
 /**
- *	@config FireSpark.smart
+ *	@config FireSpark.smart.constant
 **/
 FireSpark.smart.constant = {
 	urlstart : '', // '?/'
