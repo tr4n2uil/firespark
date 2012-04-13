@@ -12,6 +12,8 @@
  *
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
+ *	@param function startfn Start Function [memory] optional default false
+ *	@param function endfn End Function [memory] optional default false
  *	@param stop boolean [memory] optional default false
  *	@param validity boolean [memory] optional default false
  *

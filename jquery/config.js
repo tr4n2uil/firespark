@@ -88,6 +88,7 @@ FireSpark.smart.constant = {
 	poolforce : false,
 	config : [],
 	defaultln : '#sync',
-	uicache : true
+	uicache : true,
+	dtclass : '.datatable'
 };
 
