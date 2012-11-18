@@ -6,6 +6,7 @@
  *	@param select boolean [memory] optional default false
  *	@param content string [memory] optional default false
  *	@param child string [memory] optional default '.tile-content'
+ *	@param none boolean [memory] optional default false
  *	@param animation string [memory] optional default 'fadein' ('fadein', 'slidein')
  *	@param duration integer [memory] optional default 1000
  *	@param delay integer [memory] optional default 0
@@ -23,7 +24,8 @@ FireSpark.ui.service.ElementSection = {
 				select : false,
 				content : false,
 				child : '.tile-content',
-				animation : 'fadein',
+				none : false,
+				animation : false,
 				duration : 500,
 				delay : 0
 			}
@@ -47,31 +49,40 @@ FireSpark.ui.service.ElementSection = {
 			$element = $memory['element'];
 		}
 		
+		//$element.show();
 		$element.children($memory['child']).hide();
 		
-		if($memory['content']){
-			$element = $element.children($memory['content']);
-		}
-		else {
-			$element = $element.children($memory['child']).eq(0);
-		}
-		
-		var $animation = $memory['animation'];
-		var $duration = $memory['duration'];
-		
-		$element.trigger('load');
-		$element.delay($memory['delay']);
-		
-		switch($animation){
-			case 'fadein' :
-				$element.fadeIn($duration);
-				break;
-			case 'slidein' :
-				$element.slideDown($duration);
-				break;
-			default :
-				$element.html('Animation type not supported').fadeIn($duration);
-				break;
+		if(!$memory['none']){
+			if($memory['content']){
+				$element = $element.children($memory['content']);
+			}
+			else {
+				$element = $element.children($memory['child']).eq(0);
+			}
+			
+			var $animation = $memory['animation'];
+			var $duration = $memory['duration'];
+			
+			$element.trigger('load');
+	
+			if( $animation ){
+				$element.delay($memory['delay']);
+				
+				switch($animation){
+					case 'fadein' :
+						$element.fadeIn($duration);
+						break;
+					case 'slidein' :
+						$element.slideDown($duration);
+						break;
+					default :
+						$element.html('Animation type not supported').fadeIn($duration);
+						break;
+				}
+			}
+			else {
+				$element.show();
+			}
 		}
 		
 		$memory['element'] = $element;

@@ -17,7 +17,8 @@ FireSpark.core.constant = {
 		}
 	},
 	validation_status : 'span',
-	loaderror : '<span class="error">Error Loading Data</span>'
+	loaderror : '<span class="error">Error Loading Data</span>',
+	iframeroot : '#ui-imports'
 }
 
 /**
@@ -66,11 +67,13 @@ FireSpark.smart.constant = {
 	urlstart : '', // '?/'
 	globalkey : 'ui-global-data',
 	statusdiv : '#load-status',
+	hststatusdiv : '#ui-page',
 	statusdelay : 1500,
 	statusduration : 1500,
 	loaderror : '<span class="error">Error Loading Data</span>',
 	loadstatus : '<span class="state loading">Loading ...</span>',
 	loadmsg : '<span class="loading">Loading ...</span>',
+	hststatus : '<div class="loader"></div>',
 	initmsg : '<span class="state">Initializing ...</span>',
 	cnfmsg : 'Are you sure you want to continue ?',
 	importdiv : '#ui-imports',
@@ -89,6 +92,10 @@ FireSpark.smart.constant = {
 	config : [],
 	defaultln : '#sync',
 	uicache : true,
-	dtclass : '.datatable'
+	dtclass : '.datatable',
+	readflow : function(){ return false; },
+	datatype : 'json',
+	datareq : 'POST',
+	readvld : true
 };
 

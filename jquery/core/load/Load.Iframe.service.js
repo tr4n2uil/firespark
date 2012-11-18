@@ -29,7 +29,7 @@ FireSpark.core.service.LoadIframe = {
 		
 		//FireSpark.core.helper.LoadBarrier.start();
 		
-		$mem = {};
+		var $mem = {};
 		for(var $i in $memory){
 			$mem[$i] = $memory[$i];
 		}
@@ -49,7 +49,7 @@ FireSpark.core.service.LoadIframe = {
 		 *	Create IFRAME and define callbacks
 		**/
 		var $iframe = $('<iframe id="' + $framename + '" name="'+ $framename + '" style="width:0;height:0;border:0px solid #fff;"></iframe>')
-			.insertAfter($memory['agent'])
+			.insertAfter(FireSpark.core.constant.iframeroot || $memory['agent'])
 			.bind('load', function(){
 				try {
 					var $frame = FireSpark.core.helper.windowFrame($framename);
@@ -60,6 +60,11 @@ FireSpark.core.service.LoadIframe = {
 							break;
 						case 'json' :
 						default :
+							try {
+								$data = $($data).html();
+							}catch($id) { 
+								if(console || false){ console.log('Exception : ' + $id); }
+							}
 							$mem['data'] = $.parseJSON($data);
 							break;
 					}

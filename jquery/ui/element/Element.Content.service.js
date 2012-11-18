@@ -41,8 +41,13 @@ FireSpark.ui.service.ElementContent = {
 			$element = $memory['element'];
 		}
 		
+		var $data = $memory['data'];
 		var $animation = $memory['animation'];
 		var $duration = $memory['duration'];
+		
+		if($.isPlainObject($data) && $memory['action'] != 'remove' && $data['html'] || false){
+			$data = $("<div/>").html($data['html']).text();
+		}
 		
 		if($animation == 'fadein' || $animation == 'slidein'){
 			$element.hide();
@@ -50,23 +55,24 @@ FireSpark.ui.service.ElementContent = {
 		
 		switch($memory['action']){
 			case 'all' :
-				$element = $element.html($memory['data']);
+				$element = $element.html($data);
 				$element.trigger('load');
 				break;
 			
 			case 'first' :
-				$element = $element.prepend($memory['data']);
+				$element = $element.prepend($data);
 				$element.trigger('load');
 				break;
 			
 			case 'last' :
-				$element = $element.append($memory['data']);
+				$element = $element.append($data);
 				$element.trigger('load');
 				break;
 			
 			case 'replace' :
-				$element = $($memory['data']).replaceAll($element);
+				$element = $($data).replaceAll($element);
 				$element.trigger('load');
+				//$element.children().trigger('load');
 				break;
 				
 			case 'remove' :
