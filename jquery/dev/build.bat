@@ -6,7 +6,7 @@ del jquery-firespark.js
 
 echo Building init ...
 cd ..
-type ..\..\..\services\snowblozm\js\Snowblozm.class.js >> dev\jquery-firespark.js
+type ..\..\..\services\snowblozm\js\snowblozm.js >> dev\jquery-firespark.js
 type init.js >> dev\jquery-firespark.js
 
 echo Building core ...

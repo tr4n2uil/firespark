@@ -9,6 +9,7 @@
  *	@param process boolean [memory] optional default false
  *	@param mime string [memory] optional default 'application/x-www-form-urlencoded'
  *	@param sync boolean [memory] optional default false
+ *	@param barrier boolean [memory] optional default false
  *
  *	@param workflow Workflow [memory]
  *	@param errorflow	Workflow [memory] optional default false
@@ -36,14 +37,17 @@ FireSpark.core.service.LoadAjax = {
 				errorflow : false,
 				stop : false,
 				validity : false,
-				sync : false
+				sync : false,
+				barrier : false
 			}
 		}
 	},
 	
 	run : function($memory){
 		
-		FireSpark.core.helper.LoadBarrier.start();
+		if( $memory[ 'barrier' ] ){
+			FireSpark.core.helper.LoadBarrier.start();
+		}
 		
 		var $mem = {};
 		for(var $i in $memory){
@@ -74,9 +78,13 @@ FireSpark.core.service.LoadAjax = {
 						if($memory['errorflow']){
 							Snowblozm.Kernel.execute($memory['errorflow'], $mem);
 						}
-						FireSpark.core.helper.LoadBarrier.end();
+						if( $memory[ 'barrier' ] ){
+							FireSpark.core.helper.LoadBarrier.end();
+						}
 					} catch($id) {
-						FireSpark.core.helper.LoadBarrier.end();
+						if( $memory[ 'barrier' ] ){
+							FireSpark.core.helper.LoadBarrier.end();
+						}
 						if(console || false){
 							console.log('Exception : ' + $id);
 						}
@@ -88,9 +96,13 @@ FireSpark.core.service.LoadAjax = {
 					**/
 					try {
 						Snowblozm.Kernel.execute($memory['workflow'], $mem);
-						FireSpark.core.helper.LoadBarrier.end();
+						if( $memory[ 'barrier' ] ){
+							FireSpark.core.helper.LoadBarrier.end();
+						}
 					} catch($id) {
-						FireSpark.core.helper.LoadBarrier.end();
+						if( $memory[ 'barrier' ] ){
+							FireSpark.core.helper.LoadBarrier.end();
+						}
 						if(console || false){
 							console.log('Exception : ' + $id);
 						}
@@ -110,9 +122,13 @@ FireSpark.core.service.LoadAjax = {
 					if($memory['errorflow']){
 						Snowblozm.Kernel.execute($memory['errorflow'], $mem);
 					}
-					FireSpark.core.helper.LoadBarrier.end();
+					if( $memory[ 'barrier' ] ){
+						FireSpark.core.helper.LoadBarrier.end();
+					}
 				} catch($id) {
-					FireSpark.core.helper.LoadBarrier.end();
+					if( $memory[ 'barrier' ] ){
+						FireSpark.core.helper.LoadBarrier.end();
+					}
 					if(console || false){
 						console.log('Exception : ' + $id);
 					}

@@ -96,6 +96,7 @@ FireSpark.smart.constant = {
 	readflow : function(){ return false; },
 	datatype : 'json',
 	datareq : 'POST',
-	readvld : true
+	readvld : true,
+	nobarrier : true
 };
 

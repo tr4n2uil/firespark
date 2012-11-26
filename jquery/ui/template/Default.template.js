@@ -6,4 +6,4 @@ FireSpark.ui.template.Default = $.template('\
 	<span class="hidden">${details}</span>\
 ');
 
-Snowblozm.Registry.save('tpl-default', FireSpark.ui.template.Default);
+'tpl-default'.save( FireSpark.ui.template.Default );

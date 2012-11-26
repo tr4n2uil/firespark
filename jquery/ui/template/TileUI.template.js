@@ -25,7 +25,7 @@ FireSpark.ui.template.Tiles = $.template('\
 	</ul>\
 ');
 
-Snowblozm.Registry.save('tpl-tiles', FireSpark.ui.template.Tiles);
+'tpl-tiles'.save( FireSpark.ui.template.Tiles );
 
 /**
  *	@template Bands
@@ -39,7 +39,7 @@ FireSpark.ui.template.Bands = $.template('\
 	{{/each}}\
 ');
 
-Snowblozm.Registry.save('tpl-bands', FireSpark.ui.template.Bands);
+'tpl-bands'.save( FireSpark.ui.template.Bands );
 
 /**
  *	@template Container
@@ -49,4 +49,4 @@ FireSpark.ui.template.Container = $.template('\
 	{{if inline}}<div class="bands"></div>{{/if}}\
 ');
 
-Snowblozm.Registry.save('tpl-container', FireSpark.ui.template.Container);
+'tpl-container'.save( FireSpark.ui.template.Container );
