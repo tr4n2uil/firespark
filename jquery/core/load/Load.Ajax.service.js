@@ -76,7 +76,7 @@ FireSpark.core.service.LoadAjax = {
 					**/
 					try {
 						if($memory['errorflow']){
-							Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+							$memory['errorflow'].execute($mem);
 						}
 						if( $memory[ 'barrier' ] ){
 							FireSpark.core.helper.LoadBarrier.end();
@@ -95,7 +95,7 @@ FireSpark.core.service.LoadAjax = {
 					 *	Run the workflow
 					**/
 					try {
-						Snowblozm.Kernel.execute($memory['workflow'], $mem);
+						$memory['workflow'].execute($mem);
 						if( $memory[ 'barrier' ] ){
 							FireSpark.core.helper.LoadBarrier.end();
 						}
@@ -120,7 +120,7 @@ FireSpark.core.service.LoadAjax = {
 				**/
 				try {
 					if($memory['errorflow']){
-						Snowblozm.Kernel.execute($memory['errorflow'], $mem);
+						$memory['errorflow'].execute($mem);
 					}
 					if( $memory[ 'barrier' ] ){
 						FireSpark.core.helper.LoadBarrier.end();

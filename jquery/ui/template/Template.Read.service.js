@@ -18,12 +18,12 @@ FireSpark.ui.service.TemplateRead = {
 	
 	run : function($memory){
 		$tpl = $memory['template'];
-		$template = Snowblozm.Registry.get($tpl);
+		$template = $tpl.get();
 		
 		if(!$template && $tpl.charAt(0) == '#'){
 			$template = $.template($tpl);
 			if($template){
-				Snowblozm.Registry.save($tpl, $template);
+				$tpl.save($template);
 			}
 		}
 	

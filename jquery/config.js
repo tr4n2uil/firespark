@@ -41,6 +41,11 @@ FireSpark.ui.constant = {
 			helper : FireSpark.ui.helper.transformWysiwyg,
 			config : {}
 		},
+		top : {
+			cls : '.top',
+			helper : FireSpark.ui.helper.transformTop,
+			config : { sel: 'body,html' }
+		},
 		uitabpanel : {
 			cls : '.uitabpanel',
 			helper : FireSpark.ui.helper.transformTabpanel,

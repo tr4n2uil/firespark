@@ -87,13 +87,13 @@ FireSpark.ui.service.ContainerRender = {
 				});
 			}
 			
-			return Snowblozm.Kernel.execute($workflow, $memory);
+			return $workflow.execute($memory);
 		}
 		else if($memory['errorflow']) {
 			/**
 			 *	Run the errorflow
 			**/
-			return Snowblozm.Kernel.execute($memory['errorflow'], $memory);
+			return $memory['errorflow'].execute($memory);
 		}
 		else return { valid : false };
 	},

@@ -77,16 +77,16 @@ FireSpark.smart.service.DataLoad = {
 		if($memory['iframe']){
 			$memory['agent'] = $memory['agent'] ? $memory['agent'] : $memory['root'];
 			
-			return Snowblozm.Kernel.run({
+			return {
 				service : FireSpark.core.service.LoadIframe,
 				args : $memory['args']
-			}, $memory);
+			}.run($memory);
 		}
 		else if($memory['force'] === false){
 			/**
 			 *	Check pool
 			**/
-			var $data = Snowblozm.Registry.get($key);
+			var $data = $key.get();
 			
 			if($data){
 				$memory['data'] = $data;
@@ -94,14 +94,14 @@ FireSpark.smart.service.DataLoad = {
 					/**
 					 *	Run the workflow
 					**/
-					Snowblozm.Kernel.execute($workflow, $memory);
+					$workflow.execute($memory);
 					return { valid : $memory['stop']};
 				}
 				else if($memory['errorflow']) {
 					/**
 					 *	Run the errorflow
 					**/
-					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
+					$memory['errorflow'].execute($memory);
 					return { valid : $memory['stop']};
 				}
 			}
@@ -117,7 +117,7 @@ FireSpark.smart.service.DataLoad = {
 		}
 		
 		if($memory['global']){
-			var $data = Snowblozm.Registry.get(FireSpark.smart.constant.globalkey);
+			var $data = FireSpark.smart.constant.globalkey.get();
 			
 			if($data){
 				$memory['data'] = $data;
@@ -125,14 +125,14 @@ FireSpark.smart.service.DataLoad = {
 					/**
 					*	Run the workflow
 					**/
-					Snowblozm.Kernel.execute($workflow, $memory);
+					$workflow.execute($memory);
 					return { valid : $memory['stop']};
 				}
 				else if($memory['errorflow']){
 					/**
 					 *	Run the errorflow
 					**/
-					Snowblozm.Kernel.execute($memory['errorflow'], $memory);
+					$memory['errorflow'].execute($memory);
 					return { valid : $memory['stop']};
 				}
 			}
@@ -141,11 +141,11 @@ FireSpark.smart.service.DataLoad = {
 		/**
 		 *	Load AJAX
 		**/
-		return Snowblozm.Kernel.run({
+		return {
 			service : FireSpark.core.service.LoadAjax,
 			args : $memory['args'] || false,
 			workflow : $workflow
-		}, $memory);
+		}.run($memory);
 	},
 	
 	output : function(){

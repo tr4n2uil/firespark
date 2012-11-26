@@ -49,7 +49,6 @@ FireSpark.ui.service.ElementSection = {
 			$element = $memory['element'];
 		}
 		
-		//$element.show();
 		$element.children($memory['child']).hide();
 		
 		if(!$memory['none']){

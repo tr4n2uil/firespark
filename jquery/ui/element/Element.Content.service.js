@@ -72,7 +72,6 @@ FireSpark.ui.service.ElementContent = {
 			case 'replace' :
 				$element = $($data).replaceAll($element);
 				$element.trigger('load');
-				//$element.children().trigger('load');
 				break;
 				
 			case 'remove' :
