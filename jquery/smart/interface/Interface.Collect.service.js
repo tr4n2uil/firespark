@@ -68,7 +68,7 @@ FireSpark.smart.service.InterfaceCollect = {
 			
 			var $result = $message['navigator'].launch($message);
 			FireSpark.smart.service.InterfaceUrl.idle = true;
-			return $result;
+			return $result || false;
 		});
 		
 		$memory['valid'] = true;

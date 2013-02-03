@@ -1,8 +1,12 @@
 /**
- *	@type iObject
- *	@desc intelliObject: universal message object, workflow array and navigator string container
+ *	@module snowblozm	
+ *
+ *	@type iObject, iArray, iString, iRegistry
+ *	@desc universal message object, workflow array, navigator string and reference registry container
  *
  *	@extend Object, Array and String
+ *
+ *	@author Vibhaj Rajan <vibhaj8@gmail.com>
  *
 **/
 ( function( window, undefined ){
@@ -195,13 +199,13 @@
 					break;
 				
 				default :
-					navigator = this
-					navigator = navigator.replace(/_/g, '#');
-					navigator = navigator.replace(/\./g, '=');
+					$navigator = this
+					$navigator = $navigator.replace(/_/g, '#');
+					$navigator = $navigator.replace(/\./g, '=');
 					/**
 					 *	Parse navigator
 					 **/
-					var req = navigator.split(':');
+					var req = $navigator.split(':');
 					var index = req[0];
 					
 					/**
@@ -226,15 +230,6 @@
 			return memory[ 'valid' ];
 		}
 	} );
-	
-} )( window );/**
- *	@type iRegistry
- *	@desc intelliRegistry: universal reference container
- *
- *	@extend String
- *
-**/
-( function( window, undefined ){
 	
 	var registry = {};
 	
@@ -264,29 +259,8 @@
 			registry[ this ] = 0;
 		}
 	} );
-
-} )( window );/**
- *	@method inherit
- *	@desc manages classical inheritance over prototypical inheritance in javascript
- *
-**/
-Function.prototype.inherit = function( $parent ){ 
-	//Normal Inheritance 
-	if ( $parent.constructor == Function ){ 
-		this.prototype = new $parent;
-		this.prototype.constructor = this;
-		this.prototype.parent = $parent.prototype;
-	}
-	//Pure Virtual Inheritance 
-	else{ 
-		this.prototype = $parent;
-		this.prototype.constructor = this;
-		this.prototype.parent = $parent;
-	} 
 	
-	return this;
-}
-/**
+} )( window );/**
  * @initialize FireSpark
 **/
 var FireSpark = {
@@ -2799,7 +2773,7 @@ FireSpark.smart.service.InterfaceCollect = {
 			
 			var $result = $message['navigator'].launch($message);
 			FireSpark.smart.service.InterfaceUrl.idle = true;
-			return $result;
+			return $result || false;
 		});
 		
 		$memory['valid'] = true;
