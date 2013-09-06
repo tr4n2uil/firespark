@@ -1,0 +1,274 @@
+( function( window, $ ){
+
+	// helper to get frame by name
+	window.get_frame = function( $name ){
+		for( var i = window.frames.length -1; i >= 0; i-- ){
+			var $frame = window.frames[ i ];
+			if( $frame.name || false ){
+				if( $frame.name == $name ){
+					return $frame;
+				}
+			}
+		}
+		return false;
+	}
+
+	// helper to add html into dom
+	window.put_data = function( $data, $where, $how ){
+		$el = $( $where );
+		//$el.hide();
+
+		switch( $how ){
+			case 'all' :
+				$el = $el.html( $data );
+				$el.trigger( 'load' );
+				break;
+			
+			case 'first' :
+				$el = $el.prepend( $data );
+				$el.trigger( 'load' );
+				break;
+			
+			case 'last' :
+				$el = $el.append( $data );
+				$el.trigger( 'load' );
+				break;
+			
+			case 'replace' :
+				$el = $( $data ).replaceAll( $el );
+				$el.trigger( 'load' );
+				break;
+				
+			case 'remove' :
+				$el.remove();
+				break;
+				
+			default :
+				break;
+		}
+	}
+
+	// show single tile from among group
+	window.show_tile = function( $tile, $group, $cls, $ret ){
+		if( $cls ){
+			$( $group + ' ' + $cls ).hide();
+		}
+		else {
+			$( $group ).children().hide();
+		}
+		$( $tile ).fadeIn( 150 );
+		
+		return $ret;
+	}
+
+	window.iframe_load = function(){
+		var $form = $( this );
+		var $where = $( this ).attr( 'data-where' ) || false;
+		var $how = $( this ).attr( 'data-how' ) || 'all';
+		var $cf = $( this ).attr( 'data-confirm' ) || false;
+		var $gather = $( this ).attr( 'data-gather' ) || false;
+
+		var $tile = $( this ).attr( 'data-tile' ) || false;
+		var $group = $( this ).attr( 'data-group' ) || false;
+
+		if( $cf && !confirm( $cf ) ){
+			return false;
+		}
+
+		if( $gather ){
+			$form.children( 'input[type=hidden]' ).remove();
+			$( $gather ).each( function(){
+				if( this.name && !this.disabled && ( this.checked || /select|textarea/i.test( this.nodeName ) || /text|hidden|password/i.test( this.type ) ) ){
+					$( '<input type="hidden">' ).attr( 'name', this.name ).attr( 'value', $(this).val() ).appendTo( $form );
+				}
+			} );
+		}
+
+		if( !$where ){
+			return true;
+		}
+
+		/**
+		 *	Genarate unique framename
+		**/
+		var $d= new Date();
+		var $framename = 'firespark_iframe_' + $d.getTime();
+
+		/**
+		 *	Set target attribute to framename in form
+		**/
+		$form.attr( 'target', $framename );
+
+		/**
+		 *	Create IFRAME and define callbacks
+		**/
+		var $iframe = $( '<iframe id="' + $framename + '" name="'+ $framename + '" style="width:0;height:0;border:0px solid #fff;"></iframe>' )
+			.insertAfter( $( this ) )
+			.bind( 'load', function(){
+				try {
+					var $frame = window.get_frame( $framename);
+					if( !$frame ) return false;
+
+					var $data = $frame.document.body.innerHTML;
+
+					$data = $( $data ).html();
+					$data = $.parseJSON( $data );
+					
+					/**
+					 *	Invoke Renderer
+					**/
+					$data = $( "<div/>" ).html( $data[ 'html' ] ).text();
+					window.put_data( $data, $where, $how );
+
+					// reset form
+					$form.trigger( 'reset' );
+
+					if( $tile && $group ){
+						return window.show_tile( $tile, $group );
+					}
+				}
+				catch( $error ){
+					if( console ){
+						console.log( $error );
+					}
+					$( '#error-header' ).html( '<div>An error occurred. Report us at <a href="mailto:learn@orbitnote.com" style="color: black; text-decoration: underline;">learn@orbitnote.com</a></div>' )
+					.slideDown( 500 ).delay( 5000 ).slideUp( 500 );
+					// Show Error
+					//alert( $error );
+				}
+			})
+			.bind('error', function($error){
+				if( console ){
+					console.log( $error );
+				}
+				$( '#error-header' ).html( '<div>An error occurred. Report us at <a href="mailto:learn@orbitnote.com" style="color: black; text-decoration: underline;">learn@orbitnote.com</a></div>' )
+				.slideDown( 500 ).delay( 5000 ).slideUp( 500 );
+				// Show Error
+				//alert( $error );
+
+			});
+			
+		/**
+		 *	Remove IFRAME after timeout (150 seconds)
+		**/
+		window.setTimeout(function(){
+			$iframe.remove();
+		}, 150000);
+		
+		/**
+		 *	@return true 
+		 *	to continue default browser event with target on iframe
+		**/
+		return true;
+	}
+
+	window.scroll_trigger = function( callback ){
+		jQuery( document ).ready( function(){
+			jQuery( document ).unbind( 'scroll' );
+			var processing = false;
+			
+			if( callback ){
+				jQuery( document ).bind( 'scroll', function( e ){
+					if ( processing || false )
+						return false;
+
+					if ( $( window ).scrollTop() >= $( document ).height() - $( window ).height() - 500 ){
+						processing = true;
+						callback();
+					}
+				} );	
+			}
+		} );
+	}
+
+	window.showtile = function(){
+		var $tile = $( this ).attr( 'data-tile' ) || false;
+		var $group = $( this ).attr( 'data-group' ) || false;
+		var $cls = $( this ).attr( 'data-cls' ) || false;
+		var $ret = $( this ).attr( 'data-return' ) || false;
+
+		if( $tile && $group ){
+			return window.show_tile( $tile, $group, $cls, $ret );
+		}
+		
+		return true;
+	}
+
+	window.activate = function(){
+		var $element = $( this ).attr( 'data-element' ) || false;
+
+		if( $( $element ).hasClass( 'no-display' ) ){
+			$( $element ).removeClass( 'no-display' );
+		}
+		
+		return true;
+	}
+
+	window.init_sortable = function(){
+		if( !$( this ).hasClass( 'sortable-done' ) ){
+			$( this ).addClass( 'sortable-done' );
+			var $save = $( this ).attr( 'data-save' ) || false;
+
+			$( this ).sortable( {
+				update: function( event, ui ) {
+					if( $( $save ).hasClass( 'no-display' ) ){
+						$( $save ).removeClass( 'no-display' );
+					}
+				}
+			} );	
+		}
+		
+		return true;
+	}
+
+	window.pick_datetime = function(){
+		if( !$( this ).hasClass( 'datetime-done' ) ){
+			$( this ).datetimepicker( { 
+				dateFormat: "yy-mm-dd", 
+				timeFormat: 'hh:mm:ss' 
+			} ).addClass( 'datetime-done' );
+		}
+	}
+
+	window.pick_date = function(){
+		if( !$( this ).hasClass( 'datepick-done' ) ){
+			$( this ).datepicker( { 
+				dateFormat: "yy-mm-dd" 
+			} ).addClass( 'datepick-done' );
+		}
+	}
+
+	window.auto_grow = function(){
+		while( $( this ).get( 0 ).scrollHeight > $( this ).get( 0 ).clientHeight ){
+			var $rows = Number( $( this ).attr( 'rows' ) );
+			$( this ).attr( 'rows', $rows + 1 );
+		}	
+		return true;
+	}
+
+
+	// bind to submit events of forms
+	$( window.document ).on( 'submit', 'form.quickload', window.iframe_load );
+
+	// bind to click events of anchors
+	$( window.document ).on( 'click', 'a.quickload', window.iframe_load );
+
+	// bind to click events of links
+	$( window.document ).on( 'click', '.showtile', window.showtile );
+
+	// bind to change event of activators
+	$( window.document ).on( 'change', '.activator', window.activate );
+
+	// bind to hover event of sortables
+	$( window.document ).on( 'hover', '.sortable', window.init_sortable );
+
+	// bind to focus event of input
+	$( window.document ).on( 'focus', 'input.datetime', window.pick_datetime );
+	$( window.document ).on( 'focus', 'input.date', window.pick_date );
+
+	// bind to change, focus events of autogrow
+	$( window.document ).on( 'input', '.autogrow', window.auto_grow );
+	$( window.document ).on( 'focus', '.autogrow', window.auto_grow );
+
+} )( window, jQuery );
+	
