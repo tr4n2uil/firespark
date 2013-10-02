@@ -61,73 +61,94 @@
 		return $ret;
 	}
 
+	// load using iframe
 	window.iframe_load = function(){
-		var $form = $( this );
-		var $where = $( this ).attr( 'data-where' ) || false;
-		var $how = $( this ).attr( 'data-how' ) || 'all';
-		var $cf = $( this ).attr( 'data-confirm' ) || false;
-		var $gather = $( this ).attr( 'data-gather' ) || false;
+		if( !$( this ).hasClass( 'quickload-processing' ) ){
+			$( this ).addClass( 'quickload-processing' );
 
-		var $tile = $( this ).attr( 'data-tile' ) || false;
-		var $group = $( this ).attr( 'data-group' ) || false;
+			var $form = $( this );
+			var $where = $( this ).attr( 'data-where' ) || false;
+			var $how = $( this ).attr( 'data-how' ) || 'all';
+			var $cf = $( this ).attr( 'data-confirm' ) || false;
+			var $gather = $( this ).attr( 'data-gather' ) || false;
+			var $leave = $( this ).attr( 'data-leave' ) || false;
 
-		if( $cf && !confirm( $cf ) ){
-			return false;
-		}
+			var $tile = $( this ).attr( 'data-tile' ) || false;
+			var $group = $( this ).attr( 'data-group' ) || false;
 
-		if( $gather ){
-			$form.children( 'input[type=hidden]' ).remove();
-			$( $gather ).each( function(){
-				if( this.name && !this.disabled && ( this.checked || /select|textarea/i.test( this.nodeName ) || /text|hidden|password/i.test( this.type ) ) ){
-					$( '<input type="hidden">' ).attr( 'name', this.name ).attr( 'value', $(this).val() ).appendTo( $form );
-				}
-			} );
-		}
+			if( $cf && !confirm( $cf ) ){
+				return false;
+			}
 
-		if( !$where ){
-			return true;
-		}
-
-		/**
-		 *	Genarate unique framename
-		**/
-		var $d= new Date();
-		var $framename = 'firespark_iframe_' + $d.getTime();
-
-		/**
-		 *	Set target attribute to framename in form
-		**/
-		$form.attr( 'target', $framename );
-
-		/**
-		 *	Create IFRAME and define callbacks
-		**/
-		var $iframe = $( '<iframe id="' + $framename + '" name="'+ $framename + '" style="width:0;height:0;border:0px solid #fff;"></iframe>' )
-			.insertAfter( $( this ) )
-			.bind( 'load', function(){
-				try {
-					var $frame = window.get_frame( $framename);
-					if( !$frame ) return false;
-
-					var $data = $frame.document.body.innerHTML;
-
-					$data = $( $data ).html();
-					$data = $.parseJSON( $data );
-					
-					/**
-					 *	Invoke Renderer
-					**/
-					$data = $( "<div/>" ).html( $data[ 'html' ] ).text();
-					window.put_data( $data, $where, $how );
-
-					// reset form
-					$form.trigger( 'reset' );
-
-					if( $tile && $group ){
-						return window.show_tile( $tile, $group );
+			if( $gather ){
+				$form.children( 'input[type=hidden]' ).remove();
+				$( $gather ).each( function(){
+					if( this.name && !this.disabled && ( this.checked || /select|textarea/i.test( this.nodeName ) || /text|hidden|password/i.test( this.type ) ) ){
+						$( '<input type="hidden">' ).attr( 'name', this.name ).attr( 'value', $(this).val() ).appendTo( $form );
 					}
-				}
-				catch( $error ){
+				} );
+			}
+
+			if( !$where ){
+				return true;
+			}
+
+			/**
+			 *	Genarate unique framename
+			**/
+			var $d= new Date();
+			var $framename = 'firespark_iframe_' + $d.getTime();
+
+			/**
+			 *	Set target attribute to framename in form
+			**/
+			$form.attr( 'target', $framename );
+
+			/**
+			 *	Create IFRAME and define callbacks
+			**/
+			var $iframe = $( '<iframe id="' + $framename + '" name="'+ $framename + '" style="width:0;height:0;border:0px solid #fff;"></iframe>' )
+				.insertAfter( $( this ) )
+				.bind( 'load', function(){
+					$form.removeClass( 'quickload-processing' );
+
+					try {
+						var $frame = window.get_frame( $framename);
+						if( !$frame ) return false;
+
+						var $data = $frame.document.body.innerHTML;
+
+						$data = $( $data ).html();
+						$data = $.parseJSON( $data );
+						
+						/**
+						 *	Invoke Renderer
+						**/
+						$data = $( "<div/>" ).html( $data[ 'html' ] ).text();
+						window.put_data( $data, $where, $how );
+
+						// reset form
+						if( !$leave ){
+							$form.trigger( 'reset' );	
+						}
+
+						if( $tile && $group ){
+							return window.show_tile( $tile, $group );
+						}
+					}
+					catch( $error ){
+						if( console ){
+							console.log( $error );
+						}
+						$( '#error-header' ).html( '<div>An error occurred. Report us at <a href="mailto:learn@orbitnote.com" style="color: black; text-decoration: underline;">learn@orbitnote.com</a></div>' )
+						.slideDown( 500 ).delay( 5000 ).slideUp( 500 );
+						// Show Error
+						//alert( $error );
+					}
+				})
+				.bind('error', function($error){
+					$form.removeClass( 'quickload-processing' );
+
 					if( console ){
 						console.log( $error );
 					}
@@ -135,33 +156,28 @@
 					.slideDown( 500 ).delay( 5000 ).slideUp( 500 );
 					// Show Error
 					//alert( $error );
-				}
-			})
-			.bind('error', function($error){
-				if( console ){
-					console.log( $error );
-				}
-				$( '#error-header' ).html( '<div>An error occurred. Report us at <a href="mailto:learn@orbitnote.com" style="color: black; text-decoration: underline;">learn@orbitnote.com</a></div>' )
-				.slideDown( 500 ).delay( 5000 ).slideUp( 500 );
-				// Show Error
-				//alert( $error );
 
-			});
+				});
+				
+			/**
+			 *	Remove IFRAME after timeout (150 seconds)
+			**/
+			window.setTimeout(function(){
+				$iframe.remove();
+			}, 150000);
 			
-		/**
-		 *	Remove IFRAME after timeout (150 seconds)
-		**/
-		window.setTimeout(function(){
-			$iframe.remove();
-		}, 150000);
-		
-		/**
-		 *	@return true 
-		 *	to continue default browser event with target on iframe
-		**/
-		return true;
+			/**
+			 *	@return true 
+			 *	to continue default browser event with target on iframe
+			**/
+			return true;
+		}
+		else {
+			return false;
+		}
 	}
 
+	// trigger scroll handler
 	window.scroll_trigger = function( callback ){
 		jQuery( document ).ready( function(){
 			jQuery( document ).unbind( 'scroll' );
@@ -181,6 +197,7 @@
 		} );
 	}
 
+	// show tile from group
 	window.showtile = function(){
 		var $tile = $( this ).attr( 'data-tile' ) || false;
 		var $group = $( this ).attr( 'data-group' ) || false;
@@ -194,6 +211,7 @@
 		return true;
 	}
 
+	// activate html element
 	window.activate = function(){
 		var $element = $( this ).attr( 'data-element' ) || false;
 
@@ -204,6 +222,7 @@
 		return true;
 	}
 
+	// init sortable
 	window.init_sortable = function(){
 		if( !$( this ).hasClass( 'sortable-done' ) ){
 			$( this ).addClass( 'sortable-done' );
@@ -221,6 +240,7 @@
 		return true;
 	}
 
+	// datetime picker
 	window.pick_datetime = function(){
 		if( !$( this ).hasClass( 'datetime-done' ) ){
 			$( this ).datetimepicker( { 
@@ -230,6 +250,7 @@
 		}
 	}
 
+	// date picker
 	window.pick_date = function(){
 		if( !$( this ).hasClass( 'datepick-done' ) ){
 			$( this ).datepicker( { 
@@ -238,12 +259,23 @@
 		}
 	}
 
+	// textarea autogrow
 	window.auto_grow = function(){
 		while( $( this ).get( 0 ).scrollHeight > $( this ).get( 0 ).clientHeight ){
 			var $rows = Number( $( this ).attr( 'rows' ) );
 			$( this ).attr( 'rows', $rows + 1 );
 		}	
 		return true;
+	}
+
+	// textarea wysiwyg
+	window.init_wysiwyg = function(){
+		if( !$( this ).hasClass( 'no-display' ) ){
+			$( this ).addClass( 'no-display' ).hide();
+			var $target = $( '<div>' );
+			$( this ).after( $target );
+			window.wysiwyg_editor( $target, $( this ) );	
+		}
 	}
 
 
@@ -270,5 +302,7 @@
 	$( window.document ).on( 'input', '.autogrow', window.auto_grow );
 	$( window.document ).on( 'focus', '.autogrow', window.auto_grow );
 
+	// bind to focus events of wysiwyg
+	$( window.document ).on( 'focus', '.wysiwyg', window.init_wysiwyg );
+
 } )( window, jQuery );
-	
