@@ -1,7 +1,15 @@
-ui-firespark
-jQuery UI Engine
+firespark
+	jQuery Smart UI Engine
 
-IOSpace Open Source
+Vibhaj Rajan <vibhaj8@gmail.com>
+	2013 iospace opensource
 
-Developers
-	Vibhaj Rajan <vibhaj8@gmail.com>
+
+Licensed under The MIT License 
+	http://www.opensource.org/licenses/mit-license.php
+
+REQUIREMENTS
+	-jquery
+	-sortable (optional)
+	-datetimepicker (optional)
+	-wysiwyg editor (optional)

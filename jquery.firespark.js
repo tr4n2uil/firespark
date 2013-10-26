@@ -278,31 +278,25 @@
 		}
 	}
 
+	window.bind_events = function( events ){
+		for( var $i in events ){
+			$e = events[ $i ];
+			$( window.document ).on( $e[ 0 ], $e[ 1 ], $e[ 2 ] );
+		}
+	}
 
-	// bind to submit events of forms
-	$( window.document ).on( 'submit', 'form.quickload', window.iframe_load );
-
-	// bind to click events of anchors
-	$( window.document ).on( 'click', 'a.quickload', window.iframe_load );
-
-	// bind to click events of links
-	$( window.document ).on( 'click', '.showtile', window.showtile );
-
-	// bind to change event of activators
-	$( window.document ).on( 'change', '.activator', window.activate );
-
-	// bind to hover event of sortables
-	$( window.document ).on( 'hover', '.sortable', window.init_sortable );
-
-	// bind to focus event of input
-	$( window.document ).on( 'focus', 'input.datetime', window.pick_datetime );
-	$( window.document ).on( 'focus', 'input.date', window.pick_date );
-
-	// bind to change, focus events of autogrow
-	$( window.document ).on( 'input', '.autogrow', window.auto_grow );
-	$( window.document ).on( 'focus', '.autogrow', window.auto_grow );
-
-	// bind to focus events of wysiwyg
-	$( window.document ).on( 'focus', '.wysiwyg', window.init_wysiwyg );
+	// bind events
+	window.bind_events( [
+		[ 'submit', 'form.quickload', window.iframe_load ],
+		[ 'click', 'a.quickload', window.iframe_load ],
+		[ 'click', '.showtile', window.showtile ],
+		[ 'change', '.activator', window.activate ],
+		[ 'hover', '.sortable', window.init_sortable ],
+		[ 'focus', 'input.datetime', window.pick_datetime ],
+		[ 'focus', 'input.date', window.pick_date ],
+		[ 'input', '.autogrow', window.auto_grow ],
+		[ 'focus', '.autogrow', window.auto_grow ],
+		[ 'focus', '.wysiwyg', window.init_wysiwyg ],
+	] );
 
 } )( window, jQuery );
