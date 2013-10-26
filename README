@@ -13,3 +13,8 @@ REQUIREMENTS
 	-sortable (optional)
 	-datetimepicker (optional)
 	-wysiwyg editor (optional)
+
+HISTORY	
+	Google Summer of Code 2011
+	DSpace RESTClient
+	https://wiki.duraspace.org/display/GSOC/DSpace+ClientUI+built+on+RESTful+API+-+GSoC+2011
