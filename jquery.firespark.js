@@ -72,13 +72,19 @@
 	}
 
 	// load using iframe
-	window.iframe_load = function(){
+	window.iframe_load = function( success, error ){
 		if( !$( this ).hasClass( 'quickload-processing' ) ){
 			$( this ).addClass( 'quickload-processing' );
 
 			var $form = $( this );
+			var that = $form;
 			var $where = $( this ).attr( 'data-where' ) || false;
 			var $how = $( this ).attr( 'data-how' ) || 'all';
+
+			var progress = $( $( this ).attr( 'data-progress' ) ) || where;
+			var load_success = $( this ).attr( 'data-success' ) || success || window.load_success;
+			var load_fail = $( this ).attr( 'data-fail' ) || error || window.load_fail;
+
 			var $cf = $( this ).attr( 'data-confirm' ) || false;
 			var $gather = $( this ).attr( 'data-gather' ) || false;
 			var $leave = $( this ).attr( 'data-leave' ) || false;
@@ -135,7 +141,7 @@
 						 *	Invoke Renderer
 						**/
 						$data = $( "<div/>" ).html( $data[ 'html' ] ).text();
-						window.put_data( $data, $where, $how );
+						load_success( { 'html': $data[ 'html' ] }, that, 200, {} );
 
 						// reset form
 						if( !$leave ){
@@ -147,9 +153,8 @@
 						}
 					}
 					catch( $error ){
-						if( console ){
-							console.log( $error );
-						}
+						load_fail( $error, that, 500, {} );
+
 						$( '#error-header' ).html( '<div>An error occurred. Report us at <a href="mailto:learn@orbitnote.com" style="color: black; text-decoration: underline;">learn@orbitnote.com</a></div>' )
 						.slideDown( 500 ).delay( 5000 ).slideUp( 500 );
 						// Show Error
@@ -159,9 +164,8 @@
 				.bind('error', function($error){
 					$form.removeClass( 'quickload-processing' );
 
-					if( console ){
-						console.log( $error );
-					}
+					load_fail( $error, that, 500, {} );
+
 					$( '#error-header' ).html( '<div>An error occurred. Report us at <a href="mailto:learn@orbitnote.com" style="color: black; text-decoration: underline;">learn@orbitnote.com</a></div>' )
 					.slideDown( 500 ).delay( 5000 ).slideUp( 500 );
 					// Show Error
@@ -184,6 +188,171 @@
 		}
 		else {
 			return false;
+		}
+	}
+
+	// ajax setup
+	window.ajax_setup = function(){
+		( function addXhrProgressEvent( $ ){
+		    var originalXhr = $.ajaxSettings.xhr;
+		    $.ajaxSetup({
+		        progress: function() { console.log("standard progress callback"); },
+		        progressUpload: function() { console.log("standard upload progress callback"); },
+		        xhr: function() {
+		            var req = originalXhr(), that = this;
+		            if( req ){
+		                if( typeof req.addEventListener == "function" ){
+		                    req.addEventListener( "progress", function( e ){
+		                        that.progress( e );
+		                    }, false );
+		                }
+		            }
+
+		            if( req.upload || false ){
+		                if( typeof req.upload.addEventListener == "function" ){
+		                    req.upload.addEventListener( "progress", function( e ){
+		                        that.progressUpload( e );
+		                    }, false );
+		                }
+		            }
+
+		            return req;
+		        }
+		    });
+		})( jQuery );
+	}
+
+	// load ajax
+	window.ajax_load = function( success, error ){
+		if( !$( this ).hasClass( 'ajaxload-processing' ) ){
+			$( this ).addClass( 'ajaxload-processing' );
+
+			var that = $( this );
+			var where = $( $( this ).attr( 'data-where' ) ) || false;
+			var how = $( this ).attr( 'data-how' ) || 'all';
+
+			var progress = $( $( this ).attr( 'data-progress' ) || where );
+			var load_success = $( this ).attr( 'data-success' ) || success || window.load_success;
+			var load_fail = $( this ).attr( 'data-fail' ) || error || window.load_fail;
+
+			var $cf = $( this ).attr( 'data-confirm' ) || false;
+			var $gather = $( this ).attr( 'data-gather' ) || false;
+			var $leave = $( this ).attr( 'data-leave' ) || false;
+
+			var $tile = $( this ).attr( 'data-tile' ) || false;
+			var $group = $( this ).attr( 'data-group' ) || false;
+
+			if( $cf && !confirm( $cf ) ){
+				return false;
+			}
+
+			if( $gather ){
+				$form.children( 'input[type=hidden]' ).remove();
+				$( $gather ).each( function(){
+					if( this.name && !this.disabled && ( this.checked || /select|textarea/i.test( this.nodeName ) || /text|hidden|password/i.test( this.type ) ) ){
+						$( '<input type="hidden">' ).attr( 'name', this.name ).attr( 'value', $(this).val() ).appendTo( $form );
+					}
+				} );
+			}
+
+			if( !where ){
+				return false;
+			}
+
+			var url = '';
+			url = $( this ).attr( 'action' ) || $( this ).attr( 'href' ) || $( this ).attr( 'data-url' );
+		
+			var request = 'GET';
+			try {
+				request = $( this ).attr( 'method' ) || $( this ).attr( 'data-method' );
+				request = request.toUpperCase();
+			} 
+			catch( e ){ request = 'GET'; }
+
+			var ctype = 'application/x-www-form-urlencoded';
+			ctype = $( this ).attr( 'enctype' ) || 'application/x-www-form-urlencoded';
+
+			var data = $( this ).serialize();
+			if( request == 'POST' && ctype == 'multipart/form-data' ){
+				var formdata = new FormData();
+				var $params = data.split( '&' );
+
+				for(var $i=0, $len=$params.length; $i<$len; $i++){
+					var $prm = ($params[$i]).split('=');
+					formdata.append( $prm[0], unescape($prm[1]) );
+				}
+
+				that.find( 'input[type=file]' ).each( function(){
+					var name = $( this ).attr( 'name' );
+
+					$.each( this.files, function( idx, file ){
+						formdata.append( name, file );
+					} );
+				} );
+
+				data = formdata;
+  				ctype = false;
+			}
+
+			$.ajax({
+				url: url,
+				data: data,
+				type: request,
+				contentType: ctype,
+				processData: false,
+				dataType: 'json',
+				progressUpload: function( e ) {
+					if( e.lengthComputable ){
+						var len = parseInt( (e.loaded / e.total * 99), 10);
+						//console.log( "Loaded " + len + "%" );
+						progress.html( '<div class="progress progress-striped active" style="width: 50%; position: relative; margin: 0.5em auto;">\
+							<div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="' + len + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + len + '%;">\
+								<span class="sr-only">' + len + '% Complete</span>\
+							</div><div class="percent">' + len + '%</div></div>' );
+					}
+					else {
+						console.log( "Length not computable." );
+					}
+				},
+				success: function( data, status, request ){
+					that.removeClass( 'ajaxload-processing' );
+
+					load_success( data, that, status, request );
+
+					if( !$leave ){
+						that.trigger( 'reset' );	
+					}
+
+					if( $tile && $group ){
+						return window.show_tile( $tile, $group );
+					}
+
+				},
+				error: function( request, status, error ){
+					that.removeClass( 'ajaxload-processing' );
+
+					load_fail( error, that, status, request );
+				}
+			});
+		}
+
+		return false;
+	}
+
+	// load success handler
+	window.load_success = function( data, that, status, request ){
+		if( data.html || false ){
+			window.put_data( data.html, where, how );
+		}
+		else {
+			window.put_data( data, where, how );
+		}
+	}
+
+	// load fail handler
+	window.load_fail = function( error, that, status, request ){
+		if( console ){ 
+			console.log( error ); 
 		}
 	}
 
@@ -276,16 +445,6 @@
 			$( this ).attr( 'rows', $rows + 1 );
 		}	
 		return true;
-	}
-
-	// textarea wysiwyg
-	window.init_wysiwyg = function(){
-		if( !$( this ).hasClass( 'no-display' ) ){
-			$( this ).addClass( 'no-display' ).hide();
-			var $target = $( '<div>' );
-			$( this ).after( $target );
-			window.wysiwyg_editor( $target, $( this ) );	
-		}
 	}
 
 	// bind events 
@@ -516,6 +675,31 @@
 		return false;
 	}
 
+	// selection menus
+	window.select_menu = '\
+		<a href="#" class="execcmd" data-cmd="bold" data-args="true" title="Bold (ctrl+b)">B</a>\
+		<a href="#" class="execcmd" data-cmd="italic" data-args="true" title="Italic (ctrl+i)">I</a>\
+		<a href="#" class="execcmd" data-cmd="underline" data-args="true" title="Underline (ctrl+u)">U</a>\
+		<a href="#" class="execcmd" data-cmd="formatblock" data-args="article" title="Heading">H</a>\
+		<a href="#" class="execcmd" data-cmd="formatblock" data-args="blockquote" title="Blockquote">&ldquo;</a>\
+		<a href="#" class="execcmd" data-cmd="formatblock" data-args="section" title="Align Center">C</a>\
+	';
+	window.click_menu = '\
+		<span id="main-tooltip-menu">\
+			<a href="#" class="execcmd" data-cmd="insertunorderedlist" data-args="true" title="Bulletted List"><span style="top: -1px;" class="glyphicon glyphicon-list"></span></a>\
+			<a href="#" class="initlink" data-group="#tooltip-menu" data-tile="#link-form" title="Embed/Insert Link"><span style="top: -1px;" class="glyphicon glyphicon-link"></span></a>\
+			<span style="position: relative; display: inline-block;" title="Insert Picture"><a href="#" title="Insert Picture" onclick="$( \'#main-tooltip-menu input[type=file]\' ).click(); return false;"><span style="top: -1px;" class="glyphicon glyphicon-picture"></span></a>\
+				<input type="file" class="insertimage" title="Insert Picture" style="position: absolute; top: 0; left: 0; padding: 0; width: 100%; height: 100%; display: none;" /></span>\
+		</span>\
+		<span id="link-form" class="no-display">\
+			<form id="embed-form" class="embedlink" action="http://noembed.com/embed/" data-how="replace" method="get">\
+				<input type="text" name="url" size="25" class="autosubmit" data-target="#embed-form" style="padding: 0.16em 0.36em;" />\
+				<a href="#" class="showtile" data-group="#tooltip-menu" data-tile="#main-tooltip-menu" style="font-size: 2em; padding: 0.08em 0 0 0.36em; vertical-align: text-top;">&times;</a>\
+				<input type="hidden" name="maxwidth" value="100%"/>\
+			</form>\
+		</span>\
+	';
+
 	// editor selection menu
 	window.selection_menu = (function(){
 		range = '';
@@ -613,14 +797,7 @@
 						range = st[ 0 ].toString();
 						//console.log( 'Selected: ' + st[ 0 ] );
 
-						var html = $( '\
-							<a href="#" class="execcmd" data-cmd="bold" data-args="true" title="Bold (ctrl+b)">B</a>\
-							<a href="#" class="execcmd" data-cmd="italic" data-args="true" title="Italic (ctrl+i)">I</a>\
-							<a href="#" class="execcmd" data-cmd="underline" data-args="true" title="Underline (ctrl+u)">U</a>\
-							<a href="#" class="execcmd" data-cmd="formatblock" data-args="article" title="Heading">H</a>\
-							<a href="#" class="execcmd" data-cmd="formatblock" data-args="blockquote" title="Blockquote">&ldquo;</a>\
-							<a href="#" class="execcmd" data-cmd="formatblock" data-args="section" title="Align Center">C</a>\
-						' );
+						var html = $( window.select_menu );
 
 				        coords = getCoords( st[ 0 ], st[ 1 ] );
 						tooltip_show( this, html, coords );
@@ -630,17 +807,7 @@
 					else if( e.type == 'mouseup' ){
 						var that = this;
 
-						var html = $( '\
-							<span id="main-tooltip-menu">\
-								<a href="#" class="execcmd" data-cmd="insertunorderedlist" data-args="true" title="Bulletted List"><span style="top: -1px;" class="glyphicon glyphicon-list"></span></a>\
-								<a href="#" class="initlink" data-group="#tooltip-menu" data-tile="#link-form" title="Embed/Insert Link"><span style="top: -1px;" class="glyphicon glyphicon-link"></span></a>\
-								<span style="position: relative; display: inline-block;" title="Insert Picture"><a href="#" title="Insert Picture"><span style="top: -1px;" class="glyphicon glyphicon-picture"></span></a>\
-									<input type="file" class="insertimage" title="Insert Picture" style="position: absolute; top: 0; left: 0; padding: 0; width: 100%; height: 100%; opacity: 0;" /></span>\
-							</span>\
-							<span id="link-form" class="no-display">\
-								<form id="embed-form" class="embedlink"><input type="text" name="url" size="25" style="padding: 0.16em 0.36em;" /><a href="#" class="showtile" data-group="#tooltip-menu" data-tile="#main-tooltip-menu" style="font-size: 2em; padding: 0.08em 0 0 0.36em; vertical-align: text-top;">&times;</a></form>\
-							</span>\
-						' );
+						var html = $( window.click_menu );
 
 						coords = [ e.pageX, e.pageY ];
 						tooltip_show( this, html, coords );
@@ -650,32 +817,10 @@
 						$( '#tooltip-menu .initlink' ).on( 'click', function(){
 							var rid = new Date().getTime() + "_" + Math.random().toString().substr( 2 );
 							document.execCommand( 'inserthtml', 0, '<span id="' + rid + '"></span>' );
-							$( '#link-form' ).attr( 'data-target', '#' + rid );
+							$( '#link-form>form' ).attr( 'data-where', '#' + rid );
 							var rt = showtile.apply( this );
 							$( '#link-form' ).find( 'input[name=url]' ).focus();
 							return rt;
-						} );
-
-						$( '#link-form' ).on( 'submit', function(){
-							var url = $( this ).find( 'input[name=url]' ).val();
-							var el = $( $( this ).attr( 'data-target' ) );
-
-							$.getJSON( "http://noembed.com/embed", { url: url, maxwidth: "100%" })
-								.done( function( data ){
-									if( data.html || false ){
-										$( data.html ).replaceAll( el );
-									}
-									else {
-										$( '<a href="' + url + '" target="_blank">' + url + '</a>' ).replaceAll( el );
-									}
-									$( '#tooltip-menu' ).hide();
-								})
-								.fail( function( e ){
-									$( '<a href="' + url + '" target="_blank">' + url + '</a>' ).replaceAll( el );
-									$( '#tooltip-menu' ).hide();
-								} );
-
-							return false;
 						} );
 					}
 				}
@@ -688,6 +833,29 @@
 		}
 	})();
 
+	// embed links
+	window.embed_link = function(){
+		var where = $( $( this ).attr( 'data-where' ) );
+		var how = $( this ).attr( 'data-how' ) || 'replace';
+
+		return ajax_load.apply( this, [
+			function( data, that ){
+				if( data.html || false ){
+					window.put_data( data.html, where, how );
+				}
+				else {
+					var url = that.find( 'input[name=url]' ).val();
+					window.put_data( '<a href="' + url + '" target="_blank">' + url + '</a>', where, how );
+				}
+				$( '#tooltip-menu' ).hide();
+			}, 
+			function( e, that ){
+				var url = that.find( 'input[name=url]' ).val();
+				window.put_data( '<a href="' + url + '" target="_blank">' + url + '</a>', where, how );
+				$( '#tooltip-menu' ).hide();
+			}
+		]);
+	}
 
 	// read file as image uri
 	window.read_image = function( input, callback ){
@@ -709,10 +877,14 @@
 	// insert image handler
 	window.insert_image = function(){
 		window.read_image( this, function( e ){
-			document.execCommand( 'inserthtml', 0, '<a href="' + e.target.result + '" target="_blank"><img src="' + e.target.result + '" class="image" /></a>' );
+			document.execCommand( 'inserthtml', 0, '<div contenteditable="false"><a href="' + e.target.result + '" target="_blank" contenteditable="false"><img src="' + e.target.result + '" class="image" /></a></div><div><br/></div>' );
 		} );
 	}
 
+	// auto submit handler
+	window.auto_submit = function(){
+		$( $( this ).attr( 'data-target' ) ).submit();
+	}
 
 	// call bind events
 	window.bind_events( [
@@ -725,10 +897,11 @@
 		[ 'focus', 'input.date', window.pick_date ],
 		[ 'input', '.autogrow', window.auto_grow ],
 		[ 'focus', '.autogrow', window.auto_grow ],
-		[ 'focus', '.wysiwyg', window.init_wysiwyg ],
 		[ 'click', '.fancybox', window.open_fancybox ],
 		[ 'click', '.execcmd', window.exec_command ],
-		[ 'change', '.insertimage', window.insert_image ],
+		[ 'change', 'input.insertimage', window.insert_image ],
+		[ 'change', 'input.autosubmit', window.auto_submit ],
+		[ 'submit', 'form.embedlink', window.embed_link ],
 	] );
 
 } )( window, jQuery );
