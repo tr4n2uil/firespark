@@ -13,6 +13,7 @@ REQUIREMENTS
 	-sortable (optional)
 	-datetimepicker (optional)
 	-wysiwyg editor (optional)
+	-fancybox (optional)
 
 HISTORY	
 	Google Summer of Code 2011

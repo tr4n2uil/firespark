@@ -1,3 +1,13 @@
+/**
+ *	jQuery Firespark script file
+ *
+ *	Vibhaj Rajan <vibhaj8@gmail.com>
+ *
+ *	Licensed under MIT License 
+ *	http://www.opensource.org/licenses/mit-license.php
+ *
+**/
+
 ( function( window, $ ){
 
 	// helper to get frame by name
@@ -278,6 +288,7 @@
 		}
 	}
 
+	// bind events 
 	window.bind_events = function( events ){
 		for( var $i in events ){
 			$e = events[ $i ];
@@ -285,7 +296,425 @@
 		}
 	}
 
-	// bind events
+	// get viewport
+	window.get_viewport = function(){
+		var viewPortWidth;
+		var viewPortHeight;
+
+		// the more standards compliant browsers (mozilla/netscape/opera/IE7) use window.innerWidth and window.innerHeight
+		if( typeof window.innerWidth != 'undefined' ){
+			viewPortWidth = window.innerWidth,
+			viewPortHeight = window.innerHeight
+		}
+
+		// IE6 in standards compliant mode (i.e. with a valid doctype as the first line in the document)
+		else if( typeof document.documentElement != 'undefined'
+			&& typeof document.documentElement.clientWidth !=
+			'undefined' && document.documentElement.clientWidth != 0 ){
+			viewPortWidth = document.documentElement.clientWidth,
+			viewPortHeight = document.documentElement.clientHeight
+		}
+
+		// older versions of IE
+		else {
+			viewPortWidth = document.getElementsByTagName('body')[0].clientWidth,
+			viewPortHeight = document.getElementsByTagName('body')[0].clientHeight
+		}
+		
+		return [ viewPortWidth, viewPortHeight ];
+	}
+
+	// fix placeholder
+	window.fix_placeholder = function(){
+		//fix html5 placeholder attribute for ie7 & ie8
+        if( $.browser.msie && $.browser.version.substr(0, 1) < 9 ){ // ie7&ie8
+            $( 'input[placeholder], textarea[placeholder]' ).each( function (){
+                var input = $( this );
+
+                $( input ).val( input.attr( 'placeholder' ) );
+
+                $( input ).focus( function (){
+                    if( input.val() == input.attr( 'placeholder' ) ){
+                        input.val( '' );
+                    }
+                } );
+
+                $( input ).blur( function (){
+                    if( input.val() == '' || input.val() == input.attr( 'placeholder' ) ){
+                        input.val( input.attr( 'placeholder' ) );
+                    }
+                } );
+            } );
+        }
+	}
+
+	// update viewport resize
+	window.update_viewport = function(){
+		var viewport = get_viewport();
+		var width = viewport[ 0 ];
+		var height = viewport[ 1 ];
+
+		if( height < width ){
+			var check = height / 3 * 4;
+			if( check < width && check > 320 ){
+				width = check;
+			}
+			else {
+				width = height;
+			}
+
+			$( '.body' ).width( width );
+		}
+
+		var size = '14px';
+		if( width >= 1080 ){
+			size = '18px';
+		}
+		else if( width >= 720 ){
+			size = '16px';
+		}
+		else if( width >= 480 ){
+			size = '14px';
+		}
+		else if( width >= 400 ){
+			size = '13px';
+		}
+		else {
+			size = '12px';
+		}
+
+		var stylesheet = document.styleSheets[ document.styleSheets.length - 1 ],
+			selector = "body, input", rule = "{ font-size: "+ size +"}";
+
+		if( stylesheet.insertRule ){
+			stylesheet.insertRule( selector + rule, stylesheet.cssRules.length );
+		} 
+		else if( stylesheet.addRule ){
+			stylesheet.addRule( selector, rule, -1 );
+		}
+
+		//$( 'body' ).css( 'font-size', size );
+		//$( 'input' ).css( 'font-size', size );
+
+		if( document.body.scrollHeight <= viewport[ 1 ] ){
+			$( 'fixed-bottom' ).addClass( 'fixed-bottom-done' );
+		}
+	}
+
+	// open fancybox
+	window.open_fancybox = function(){
+		var $html = $( $( this ).attr( 'data-target' ) ).html();
+		$.fancybox( $html ); 
+	}
+
+	// exec content editable commands
+	window.exec_command = (function(){
+		var map = { 
+			'formatblock': {
+				'': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'output': [ 'output', 1 ], 'blockquote': [ 'blockquote', 1 ] },
+				'div': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'output': [ 'output', 1 ], 'blockquote': [ 'blockquote', 1 ] },
+				'section': { 'section': [ 'div', 0 ], 'article': [ 'output', 1 ], 'output': [ 'output', 1 ], 'blockquote': [ 'blockquote', 0 ] },
+				'article': { 'section': [ 'output', 1 ], 'article': [ 'div', 0 ], 'output': [ 'output', 1 ], 'blockquote': [ 'blockquote', 0 ] },
+				'output': { 'section': [ 'article', 0 ], 'article': [ 'section', 0 ], 'output': [ 'div', 0 ], 'blockquote': [ 'blockquote', 0 ] },
+				'blockquote': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'output': [ 'output', 1 ], 'blockquote': [ 'div', 0 ] },
+			},
+		};
+
+		var def = {
+			'': { 'true': [ 'true', 1 ] },
+			'true': { 'true': [ 'false', 0 ] },
+			'false': { 'true': [ 'true', 1 ] },
+		}
+
+		return function( e ){
+			e.preventDefault();
+
+			var cmd = $( this ).attr( 'data-cmd' );
+			var args = $( this ).attr( 'data-args' );
+
+			var m = map[ cmd ] || def;
+			var val = document.queryCommandValue( cmd );
+			t = m[ val ][ args ];
+			args = t[ 0 ];
+
+			if( t[ 1 ] ){
+				$( this ).attr( 'data-done', "true" );
+			}
+			else {
+				$( this ).removeAttr( 'data-done' );
+			}
+
+			document.execCommand( cmd, 0, args );
+		}
+	})();
+
+	// init query command state
+	window.init_command = (function(){
+		var map = { 
+			'formatblock': {
+				'': { 'section': 0, 'article': 0, 'output': 0, 'blockquote': 0 },
+				'div': { 'section': 0, 'article': 0, 'output': 0, 'blockquote': 0 },
+				'section': { 'section': 1, 'article': 0, 'output': 0, 'blockquote': 0 },
+				'article': { 'section': 0, 'article': 1, 'output': 0, 'blockquote': 0 },
+				'output': { 'section': 1, 'article': 1, 'output': 0, 'blockquote': 0 },
+				'blockquote': { 'section': 0, 'article': 0, 'output': 0, 'blockquote': 1 },
+			},
+		};
+
+		var def = {
+			'': { 'true': 0 },
+			'true': { 'true': 1 },
+			'false': { 'true': 0 },
+		}
+
+		return function(){
+			var cmd = $( this ).attr( 'data-cmd' );
+			var args = $( this ).attr( 'data-args' );
+
+			var m = map[ cmd ] || def;
+			var val = document.queryCommandValue( cmd );
+		
+			if( m[ val ][ args ] ){
+				$( this ).attr( 'data-done', "true" );
+			}
+			else {
+				$( this ).removeAttr( 'data-done' );
+			}
+		}
+	})();
+
+	// tooltip init
+	window.tooltip_init = function(){
+		$('#tooltip-menu').on( 'mouseenter', function(){ 
+			$( this ).attr( 'data-rmtooltip', '2' ); 
+		} )
+		.on( 'mouseleave', function(){ 
+			$( this ).attr( 'data-rmtooltip', '1' ); 
+		} );
+	}
+
+	// show tooltip
+	window.tooltip_show = function( el, html, coords ){
+		//$('#tooltip-menu').fadeOut( 500 ).delay( 15000, function(){ $( this ).remove() } );
+		//$('#tooltip-menu').hide( 0 );
+
+		$('#tooltip-menu')
+			.html( html )
+			.css( { top: coords[ 1 ] + 5, left: coords[ 0 ] + 5 } )
+			.attr( 'data-rmtooltip', '1' )
+			.appendTo( el ).show();
+	}
+
+	// hide tooltip
+	window.tooltip_hide = function(){
+		if( $( '#tooltip-menu' ).attr( 'data-rmtooltip' ) == '1' ){
+			$( '#tooltip-menu' ).attr( 'data-rmtooltip', '0' );
+			$( '#tooltip-menu' ).hide();
+			$( $( '#link-form' ).attr( 'data-target' ) ).remove();
+			return true;
+		}
+		return false;
+	}
+
+	// editor selection menu
+	window.selection_menu = (function(){
+		range = '';
+
+		getSelected = function(){
+			var t = '';
+			var bw = false;
+
+			if( window.getSelection ){
+				t = window.getSelection();
+				bw = true;
+			}
+			else if( document.getSelection ){
+				t = document.getSelection();
+				bw = true;
+			}
+			else if( document.selection ){
+				t = document.selection.createRange().text;
+			}
+
+			return [ t, bw ];
+		}
+
+		getCoords = function( t, bw ){
+			var coords = [ 0, 0 ];
+			var mchar = "\ufeff";
+			var mentity = "&#xfeff;";
+			var mel = false;
+
+			if( bw ){
+				if( t.getRangeAt ) {
+					range = t.getRangeAt( 0 ).cloneRange();
+				} 
+				else {
+					// Older WebKit doesn't have getRangeAt
+					range.setStart( t.anchorNode, t.anchorOffset );
+					range.setEnd( t.focusNode, t.focusOffset );
+
+					// Handle the case when the selection was selected backwards (from the end to the start in the document)
+					if( range.collapsed !== t.isCollapsed ){
+						range.setStart( t.focusNode, t.focusOffset );
+						range.setEnd( t.anchorNode, t.anchorOffset );
+					}
+				}
+
+				range.collapse(false);
+
+				// Create the marker element containing a single invisible character using DOM methods and insert it
+				mel = document.createElement("span");
+				mel.id = 'tmp-marker';
+				mel.appendChild( document.createTextNode( mchar ) );
+				range.insertNode( mel );
+			}
+			else {
+				// Clone the TextRange and collapse
+	            range = document.selection.createRange().duplicate();
+	            range.collapse( false );
+
+	            // Create the marker element containing a single invisible character by creating literal HTML and insert it
+	            range.pasteHTML( '<span id="tmp-marker" style="position: relative;">' + mentity + '</span>');
+	            mel = document.getElementById( 'tmp-marker' );
+			}
+
+			if( mel ){
+				// Find markerEl position http://www.quirksmode.org/js/findpos.html
+				var obj = mel;
+				var left = 0;
+				var top = 0;
+
+				do {
+					left += obj.offsetLeft;
+					top += obj.offsetTop;
+				} while ( obj = obj.offsetParent );
+
+	            coords[ 0 ] = left;
+	            coords[ 1 ] = top;
+	            mel.parentNode.removeChild( mel );
+	        }
+
+	        return coords;		
+		}
+
+		on_unselect = function( e ){
+			if( tooltip_hide() ){
+				range = '';
+			}
+		}
+
+		on_select = function( e ){
+			if( $( '#tooltip-menu' ).attr( 'data-rmtooltip' ) != '2' ){
+				if( e.type == 'mouseup' || ( e.type == 'keyup' && e.which != 16 && e.which != 17 ) ){
+					var st = getSelected();
+
+					if( st[ 0 ].toString() != ''  && range != st[ 0 ].toString() ){
+						range = st[ 0 ].toString();
+						//console.log( 'Selected: ' + st[ 0 ] );
+
+						var html = $( '\
+							<a href="#" class="execcmd" data-cmd="bold" data-args="true" title="Bold (ctrl+b)">B</a>\
+							<a href="#" class="execcmd" data-cmd="italic" data-args="true" title="Italic (ctrl+i)">I</a>\
+							<a href="#" class="execcmd" data-cmd="underline" data-args="true" title="Underline (ctrl+u)">U</a>\
+							<a href="#" class="execcmd" data-cmd="formatblock" data-args="article" title="Heading">H</a>\
+							<a href="#" class="execcmd" data-cmd="formatblock" data-args="blockquote" title="Blockquote">&ldquo;</a>\
+							<a href="#" class="execcmd" data-cmd="formatblock" data-args="section" title="Align Center">C</a>\
+						' );
+
+				        coords = getCoords( st[ 0 ], st[ 1 ] );
+						tooltip_show( this, html, coords );
+
+						$( '#tooltip-menu' ).find( '.execcmd' ).each( init_command );
+					}
+					else if( e.type == 'mouseup' ){
+						var that = this;
+
+						var html = $( '\
+							<span id="main-tooltip-menu">\
+								<a href="#" class="execcmd" data-cmd="insertunorderedlist" data-args="true" title="Bulletted List"><span style="top: -1px;" class="glyphicon glyphicon-list"></span></a>\
+								<a href="#" class="initlink" data-group="#tooltip-menu" data-tile="#link-form" title="Embed/Insert Link"><span style="top: -1px;" class="glyphicon glyphicon-link"></span></a>\
+								<span style="position: relative; display: inline-block;" title="Insert Picture"><a href="#" title="Insert Picture"><span style="top: -1px;" class="glyphicon glyphicon-picture"></span></a>\
+									<input type="file" class="insertimage" title="Insert Picture" style="position: absolute; top: 0; left: 0; padding: 0; width: 100%; height: 100%; opacity: 0;" /></span>\
+							</span>\
+							<span id="link-form" class="no-display">\
+								<form id="embed-form" class="embedlink"><input type="text" name="url" size="25" style="padding: 0.16em 0.36em;" /><a href="#" class="showtile" data-group="#tooltip-menu" data-tile="#main-tooltip-menu" style="font-size: 2em; padding: 0.08em 0 0 0.36em; vertical-align: text-top;">&times;</a></form>\
+							</span>\
+						' );
+
+						coords = [ e.pageX, e.pageY ];
+						tooltip_show( this, html, coords );
+
+						$( '#tooltip-menu' ).find( '.execcmd' ).each( init_command );
+
+						$( '#tooltip-menu .initlink' ).on( 'click', function(){
+							var rid = new Date().getTime() + "_" + Math.random().toString().substr( 2 );
+							document.execCommand( 'inserthtml', 0, '<span id="' + rid + '"></span>' );
+							$( '#link-form' ).attr( 'data-target', '#' + rid );
+							var rt = showtile.apply( this );
+							$( '#link-form' ).find( 'input[name=url]' ).focus();
+							return rt;
+						} );
+
+						$( '#link-form' ).on( 'submit', function(){
+							var url = $( this ).find( 'input[name=url]' ).val();
+							var el = $( $( this ).attr( 'data-target' ) );
+
+							$.getJSON( "http://noembed.com/embed", { url: url, maxwidth: "100%" })
+								.done( function( data ){
+									if( data.html || false ){
+										$( data.html ).replaceAll( el );
+									}
+									else {
+										$( '<a href="' + url + '" target="_blank">' + url + '</a>' ).replaceAll( el );
+									}
+									$( '#tooltip-menu' ).hide();
+								})
+								.fail( function( e ){
+									$( '<a href="' + url + '" target="_blank">' + url + '</a>' ).replaceAll( el );
+									$( '#tooltip-menu' ).hide();
+								} );
+
+							return false;
+						} );
+					}
+				}
+			}
+		}
+
+		return function( el ){
+			el.on( 'mouseup keyup', on_select )
+			.on( 'mousedown keydown mouseleave', on_unselect );
+		}
+	})();
+
+
+	// read file as image uri
+	window.read_image = function( input, callback ){
+		if ( input.files ) {
+			$.each( input.files, function( idx, file ){
+				if ( /^image\//.test( file.type ) ){
+					var FR= new FileReader();
+					FR.onload = callback;
+					FR.readAsDataURL( file );	
+				}
+				else {
+					console.log( 'Unsupported File Type' );
+				}
+			} )
+		}
+	}
+
+
+	// insert image handler
+	window.insert_image = function(){
+		window.read_image( this, function( e ){
+			document.execCommand( 'inserthtml', 0, '<a href="' + e.target.result + '" target="_blank"><img src="' + e.target.result + '" class="image" /></a>' );
+		} );
+	}
+
+
+	// call bind events
 	window.bind_events( [
 		[ 'submit', 'form.quickload', window.iframe_load ],
 		[ 'click', 'a.quickload', window.iframe_load ],
@@ -297,6 +726,9 @@
 		[ 'input', '.autogrow', window.auto_grow ],
 		[ 'focus', '.autogrow', window.auto_grow ],
 		[ 'focus', '.wysiwyg', window.init_wysiwyg ],
+		[ 'click', '.fancybox', window.open_fancybox ],
+		[ 'click', '.execcmd', window.exec_command ],
+		[ 'change', '.insertimage', window.insert_image ],
 	] );
 
 } )( window, jQuery );
