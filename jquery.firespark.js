@@ -97,10 +97,15 @@
 			}
 
 			if( $gather ){
-				$form.children( 'input[type=hidden]' ).remove();
+				$form.children( 'input.gather' ).remove();
 				$( $gather ).each( function(){
 					if( this.name && !this.disabled && ( this.checked || /select|textarea/i.test( this.nodeName ) || /text|hidden|password/i.test( this.type ) ) ){
-						$( '<input type="hidden">' ).attr( 'name', this.name ).attr( 'value', $(this).val() ).appendTo( $form );
+						$( '<input type="hidden" class="gather">' ).attr( 'name', this.name ).attr( 'value', $(this).val() ).appendTo( that );
+					}
+					else if( $( this ).attr( 'data-name' ) && !this.disabled && $( this ).attr( 'contenteditable' ) ){
+						$val = $( this ).html();
+						//$val = $val && $val.replace(/(<br>|\s|<div><br><\/div>|&nbsp;)*$/, '');
+						$( '<input type="hidden" class="gather">' ).attr( 'name', $( this ).attr( 'data-name' ) ).attr( 'value', $val ).appendTo( that );
 					}
 				} );
 			}
@@ -247,10 +252,15 @@
 			}
 
 			if( $gather ){
-				$form.children( 'input[type=hidden]' ).remove();
+				$form.children( 'input.gather' ).remove();
 				$( $gather ).each( function(){
 					if( this.name && !this.disabled && ( this.checked || /select|textarea/i.test( this.nodeName ) || /text|hidden|password/i.test( this.type ) ) ){
-						$( '<input type="hidden">' ).attr( 'name', this.name ).attr( 'value', $(this).val() ).appendTo( $form );
+						$( '<input type="hidden" class="gather">' ).attr( 'name', this.name ).attr( 'value', $(this).val() ).appendTo( that );
+					}
+					else if( $( this ).attr( 'data-name' ) && !this.disabled && $( this ).attr( 'contenteditable' ) ){
+						$val = $( this ).html();
+						//$val = $val && $val.replace(/(<br>|\s|<div><br><\/div>|&nbsp;)*$/, '');
+						$( '<input type="hidden" class="gather">' ).attr( 'name', $( this ).attr( 'data-name' ) ).attr( 'value', $val ).appendTo( that );
 					}
 				} );
 			}
@@ -486,25 +496,54 @@
 	// fix placeholder
 	window.fix_placeholder = function(){
 		//fix html5 placeholder attribute for ie7 & ie8
-        if( $.browser.msie && $.browser.version.substr(0, 1) < 9 ){ // ie7&ie8
-            $( 'input[placeholder], textarea[placeholder]' ).each( function (){
-                var input = $( this );
+		if( $.browser.msie && $.browser.version.substr(0, 1) < 9 ){ // ie7&ie8
+			$( 'input[placeholder], textarea[placeholder]' ).each( function (){
+				var input = $( this );
 
-                $( input ).val( input.attr( 'placeholder' ) );
+				$( input ).val( input.attr( 'placeholder' ) );
 
-                $( input ).focus( function (){
-                    if( input.val() == input.attr( 'placeholder' ) ){
-                        input.val( '' );
-                    }
-                } );
+				$( input ).focus( function (){
+					if( input.val() == input.attr( 'placeholder' ) ){
+						input.val( '' );
+					}
+				} );
 
-                $( input ).blur( function (){
-                    if( input.val() == '' || input.val() == input.attr( 'placeholder' ) ){
-                        input.val( input.attr( 'placeholder' ) );
-                    }
-                } );
-            } );
-        }
+				$( input ).blur( function (){
+					if( input.val() == '' || input.val() == input.attr( 'placeholder' ) ){
+						input.val( input.attr( 'placeholder' ) );
+					}
+				} );
+			} );
+		}
+
+		// fix placeholder for contenteditable
+		$( '[contenteditable=true]' ).each( function (){
+			var that = $( this );
+
+			that.on( 'focus activate', function (){
+				if( !that.hasClass( 'focussed' ) && that.hasClass( 'placeholder' ) ){
+					that.empty();
+					that.removeClass( 'placeholder' );
+
+					if( document.createRange && window.getSelection ){
+						var range = document.createRange();
+						range.selectNodeContents( this );
+						var sel = window.getSelection();
+						sel.removeAllRanges();
+						sel.addRange( range );
+					}
+				}
+			} );
+
+			that.on( 'blur', function (){
+				if( !that.hasClass( 'focussed' ) && that.html().replace(/(<br>|\s|<div><br><\/div>|<div><\/div>|&nbsp;|<span[^>]*><\/span>)*$/, '') == '' ){
+					that.html( that.attr( 'placeholder' ) );
+					that.addClass( 'placeholder' );
+				}
+			} );
+
+			that.blur();
+		} );
 	}
 
 	// update viewport resize
@@ -514,12 +553,35 @@
 		var height = viewport[ 1 ];
 
 		if( height < width ){
-			var check = height / 3 * 4;
+			var check = height / 9 * 16;
 			if( check < width && check > 320 ){
 				width = check;
 			}
 			else {
-				width = height;
+				var check = height / 3 * 4;
+				if( check < width && check > 320 ){
+					width = check;
+				}
+				else {
+					width = height;
+				}
+			}
+
+			$( '.body' ).width( width );
+		}
+		else {
+			var check = height / 4 * 3;
+			if( check < width && check > 320 ){
+				width = check;
+			}
+			else {
+				var check = height / 16 * 9;
+				if( check < width && check > 320 ){
+					width = check;
+				}
+				else {
+					width = width;	
+				}
 			}
 
 			$( '.body' ).width( width );
@@ -570,12 +632,13 @@
 	window.exec_command = (function(){
 		var map = { 
 			'formatblock': {
-				'': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'output': [ 'output', 1 ], 'blockquote': [ 'blockquote', 1 ] },
-				'div': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'output': [ 'output', 1 ], 'blockquote': [ 'blockquote', 1 ] },
-				'section': { 'section': [ 'div', 0 ], 'article': [ 'output', 1 ], 'output': [ 'output', 1 ], 'blockquote': [ 'blockquote', 0 ] },
-				'article': { 'section': [ 'output', 1 ], 'article': [ 'div', 0 ], 'output': [ 'output', 1 ], 'blockquote': [ 'blockquote', 0 ] },
-				'output': { 'section': [ 'article', 0 ], 'article': [ 'section', 0 ], 'output': [ 'div', 0 ], 'blockquote': [ 'blockquote', 0 ] },
-				'blockquote': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'output': [ 'output', 1 ], 'blockquote': [ 'div', 0 ] },
+				'': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'header': [ 'header', 1 ], 'aside': [ 'aside', 1 ], 'footer': [ 'footer', 1 ] },
+				'div': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'header': [ 'header', 1 ], 'aside': [ 'aside', 1 ], 'footer': [ 'footer', 1 ] },
+				'section': { 'section': [ 'div', 0 ], 'article': [ 'header', 1 ], 'header': [ 'header', 1 ], 'aside': [ 'aside', 0 ], 'footer': [ 'footer', 0 ] },
+				'article': { 'section': [ 'header', 1 ], 'article': [ 'div', 0 ], 'header': [ 'header', 1 ], 'aside': [ 'aside', 0 ], 'footer': [ 'footer', 0 ] },
+				'header': { 'section': [ 'article', 0 ], 'article': [ 'section', 0 ], 'header': [ 'div', 0 ], 'aside': [ 'aside', 0 ], 'footer': [ 'footer', 0 ] },
+				'aside': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'header': [ 'header', 1 ], 'aside': [ 'div', 0 ], 'footer': [ 'footer', 1 ] },
+				'footer': { 'section': [ 'section', 1 ], 'article': [ 'article', 1 ], 'header': [ 'header', 1 ], 'aside': [ 'aside', 1 ], 'footer': [ 'div', 0 ] },
 			},
 		};
 
@@ -611,12 +674,13 @@
 	window.init_command = (function(){
 		var map = { 
 			'formatblock': {
-				'': { 'section': 0, 'article': 0, 'output': 0, 'blockquote': 0 },
-				'div': { 'section': 0, 'article': 0, 'output': 0, 'blockquote': 0 },
-				'section': { 'section': 1, 'article': 0, 'output': 0, 'blockquote': 0 },
-				'article': { 'section': 0, 'article': 1, 'output': 0, 'blockquote': 0 },
-				'output': { 'section': 1, 'article': 1, 'output': 0, 'blockquote': 0 },
-				'blockquote': { 'section': 0, 'article': 0, 'output': 0, 'blockquote': 1 },
+				'': { 'section': 0, 'article': 0, 'header': 0, 'aside': 0, 'footer': 0 },
+				'div': { 'section': 0, 'article': 0, 'header': 0, 'aside': 0, 'footer': 0 },
+				'section': { 'section': 1, 'article': 0, 'header': 0, 'aside': 0, 'footer': 0 },
+				'article': { 'section': 0, 'article': 1, 'header': 0, 'aside': 0, 'footer': 0 },
+				'header': { 'section': 1, 'article': 1, 'header': 0, 'aside': 0, 'footer': 0 },
+				'footer': { 'section': 0, 'article': 0, 'header': 0, 'aside': 0, 'footer': 1 },
+				'aside': { 'section': 0, 'article': 0, 'header': 0, 'aside': 1, 'footer': 0 },
 			},
 		};
 
@@ -644,6 +708,8 @@
 
 	// tooltip init
 	window.tooltip_init = function(){
+		$( 'body' ).append( '<div id="tooltip-menu" class="tooltip-menu" data-rmtooltip="0"></div>' );
+
 		$('#tooltip-menu').on( 'mouseenter', function(){ 
 			$( this ).attr( 'data-rmtooltip', '2' ); 
 		} )
@@ -681,10 +747,32 @@
 		<a href="#" class="execcmd" data-cmd="italic" data-args="true" title="Italic (ctrl+i)">I</a>\
 		<a href="#" class="execcmd" data-cmd="underline" data-args="true" title="Underline (ctrl+u)">U</a>\
 		<a href="#" class="execcmd" data-cmd="formatblock" data-args="article" title="Heading">H</a>\
-		<a href="#" class="execcmd" data-cmd="formatblock" data-args="blockquote" title="Blockquote">&ldquo;</a>\
+		<a href="#" class="execcmd" data-cmd="formatblock" data-args="footer" title="Subheading">S</a>\
+		<a href="#" class="execcmd" data-cmd="formatblock" data-args="aside" title="Blockquote">&ldquo;</a>\
 		<a href="#" class="execcmd" data-cmd="formatblock" data-args="section" title="Align Center">C</a>\
 	';
 	window.click_menu = '\
+		<span id="main-tooltip-menu">\
+			<a href="#" class="execcmd" data-cmd="insertunorderedlist" data-args="true" title="Bulletted List"><span style="top: -1px;" class="glyphicon glyphicon-list"></span></a>\
+			<a href="#" class="initlink" data-group="#tooltip-menu" data-tile="#link-form" title="Embed/Insert Link"><span style="top: -1px;" class="glyphicon glyphicon-link"></span></a>\
+			<span style="position: relative; display: inline-block;" title="Insert Picture">\
+				<form id="embed-image-form" class="embedlink" action="embed/" data-how="replace" method="post" style="display: inline-block;" enctype="multipart/form-data">\
+					<a href="#" title="Insert Picture" class="initimage"><span style="top: -1px;" class="glyphicon glyphicon-picture"></span></a>\
+					<input type="file" name="file" class="autosubmit" data-target="#embed-image-form" title="Insert Picture" style="position: absolute; top: 0; left: 0; padding: 0; width: 100%; height: 100%; display: none;" />\
+				</form>\
+			</span>\
+		</span>\
+		<span id="link-form" class="no-display">\
+			<form id="embed-form" class="embedlink" action="http://noembed.com/embed/" data-how="replace" method="get">\
+				<input type="text" name="url" size="25" class="autosubmit" data-target="#embed-form" style="padding: 0.16em 0.36em;" />\
+				<a href="#" class="showtile" data-group="#tooltip-menu" data-tile="#main-tooltip-menu" style="font-size: 2em; padding: 0.08em 0 0 0.36em; vertical-align: text-top;">&times;</a>\
+				<input type="hidden" name="maxwidth" value="100%"/>\
+			</form>\
+		</span>\
+	';
+
+	// client side base64 encode image
+	/*window.click_menu = '\
 		<span id="main-tooltip-menu">\
 			<a href="#" class="execcmd" data-cmd="insertunorderedlist" data-args="true" title="Bulletted List"><span style="top: -1px;" class="glyphicon glyphicon-list"></span></a>\
 			<a href="#" class="initlink" data-group="#tooltip-menu" data-tile="#link-form" title="Embed/Insert Link"><span style="top: -1px;" class="glyphicon glyphicon-link"></span></a>\
@@ -698,11 +786,12 @@
 				<input type="hidden" name="maxwidth" value="100%"/>\
 			</form>\
 		</span>\
-	';
+	';*/
 
 	// editor selection menu
 	window.selection_menu = (function(){
-		range = '';
+		var range = '';
+		var tab = 9, shift = 16, ctrl = 17;
 
 		getSelected = function(){
 			var t = '';
@@ -786,11 +875,31 @@
 			if( tooltip_hide() ){
 				range = '';
 			}
+
+			if( $( '#tooltip-menu' ).attr( 'data-rmtooltip' ) != '2' && $( this ).children( '[contenteditable]' ).hasClass( 'focussed' ) ){
+				$( this ).children( '[contenteditable]' ).removeClass( 'focussed' );
+			}
+
+			if( e.type == 'keydown' ){
+				if( e.which == tab ){
+					if( e.shiftKey ){
+						document.execCommand( 'outdent', 0, '' );
+					}
+					else {
+						document.execCommand( 'indent', 0, '' );
+					}
+					return false;
+				}
+			}
 		}
 
 		on_select = function( e ){
 			if( $( '#tooltip-menu' ).attr( 'data-rmtooltip' ) != '2' ){
-				if( e.type == 'mouseup' || ( e.type == 'keyup' && e.which != 16 && e.which != 17 ) ){
+				if( !$( this ).children( '[contenteditable]' ).hasClass( 'focussed' ) ){
+					$( this ).children( '[contenteditable]' ).addClass( 'focussed' );
+				}
+
+				if( e.type == 'mouseup' || ( e.type == 'keyup' && e.which != shift && e.which != ctrl ) ){
 					var st = getSelected();
 
 					if( st[ 0 ].toString() != ''  && range != st[ 0 ].toString() ){
@@ -821,6 +930,15 @@
 							var rt = showtile.apply( this );
 							$( '#link-form' ).find( 'input[name=url]' ).focus();
 							return rt;
+						} );
+
+						$( '#tooltip-menu .initimage' ).on( 'click', function(){
+							var rid = new Date().getTime() + "_" + Math.random().toString().substr( 2 );
+							document.execCommand( 'inserthtml', 0, '<span id="' + rid + '"></span>' );
+							$( '#embed-image-form' ).attr( 'data-where', '#' + rid );
+
+							$( '#embed-image-form input[type=file]' ).click();
+							return false;
 						} );
 					}
 				}
@@ -862,7 +980,7 @@
 		if ( input.files ) {
 			$.each( input.files, function( idx, file ){
 				if ( /^image\//.test( file.type ) ){
-					var FR= new FileReader();
+					var FR = new FileReader();
 					FR.onload = callback;
 					FR.readAsDataURL( file );	
 				}
